@@ -1,0 +1,45 @@
+---
+all:
+  children:
+    prod:
+      hosts:
+        debian-observium.feuerwehr.weingarten.local:
+        debian-nginx.feuerwehr.weingarten.local:
+        debian-docker.feuerwehr.weingarten.local:
+    staging:
+      children:
+        firebirdsrv:
+          hosts:
+            debian-firebird.feuerwehr.weingarten.local:
+        matrixsrv:
+          hosts:
+            debian-matrix.feuerwehr.weingarten.local:
+        wireguard:
+          hosts:
+            debian-firebird.feuerwehr.weingarten.local:
+    windows:
+      hosts:
+        # eddard.feuerwehr.weingarten.local:
+        tywin.feuerwehr.weingarten.local:
+        cersei.feuerwehr.weingarten.local:
+        # brandon.feuerwehr.weingarten.local:
+        jaime.feuerwehr.weingarten.local:
+        tyrion.feuerwehr.weingarten.local:
+        # arya.feuerwehr.weingarten.local:
+        # robb.feuerwehr.weingarten.local:
+        # sansa.feuerwehr.weingarten.local:
+        catelyn.feuerwehr.weingarten.local:
+      vars:
+        ansible_user: administrator@feuerwehr
+        ansible_password: !vault |
+                  $ANSIBLE_VAULT;1.1;AES256
+                  35656661653861653263633737613132363332356534656231613766303232333463306662626433
+                  3532393530643534326136336361653930653133376130650a316337323539326431616264613534
+                  30363266626337643163376636306661396165373333393562316562323238393361346633333135
+                  3733323963326234650a633536636131323635633462636663306332333233343334343535643831
+                  3538
+        ansible_connection: winrm
+        ansible_port: 5985
+        ansible_winrm_transport: ntlm
+        # ansible_winrm_message_enncryption: always
+        ansible_winrm_server_cert_validation: ignore
