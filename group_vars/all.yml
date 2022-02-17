@@ -1,0 +1,28 @@
+---
+# Users that should be available on all target nodes
+local_user:
+  - ffweingarten
+
+# Packages that should be available on all target nodes
+generic_packages:
+  - atop
+  - dmidecode
+  - dstat
+  - genisoimage
+  - git
+  - htop
+  - iftop
+  - iotop
+  - ncdu
+  - nmap
+  - net-tools
+  - pv
+  - rsync
+  - screen
+  - strace
+  - syslinux
+  - tree
+  - unzip
+  - vim
+  - wget
+  - zsh

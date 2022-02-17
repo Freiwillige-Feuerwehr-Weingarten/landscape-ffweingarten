@@ -1,0 +1,5 @@
+---
+- name: Install common debian packages
+  apt:
+    pkg: "{{ generic_packages }}"
+    state: present

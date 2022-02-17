@@ -1,0 +1,76 @@
+---
+# This will install Firebird
+#
+
+- name: Install Firebird Server 3.0
+  apt:
+    name: firebird3.0-server
+    state: present
+
+- name: Enable Remote DB access
+  ansible.builtin.lineinfile:
+    path: /etc/firebird/3.0/firebird.conf
+    search_string: 'RemoteBindAddress = localhost'
+    line: RemoteBindAddress =
+
+- name: Create DB directory
+  ansible.builtin.file:
+    path: /opt/draeger
+    state: directory
+    mode: '0755'
+    owner: firebird
+    group: firebird
+
+- name: Enable Remote DB access
+  ansible.builtin.lineinfile:
+    path: /etc/firebird/3.0/SYSDBA.password
+    regexp: '^ISC_PASSWORD="(.*)"'
+    line: ISC_PASSWORD="{{ sysdba_password }}"
+
+- name: Start Firebird 3.0 Service
+  ansible.builtin.service:
+   name: firebird3.0
+   state: started
+   enabled: yes
+
+- name: Copy database backup
+  ansible.builtin.copy:
+    src: files/draeger.fbb
+    dest: /tmp/draeger.fbb
+    owner: root
+    group: root
+    mode: 500
+
+- name: Restore Database
+  shell: "/usr/bin/gbak -REP -o -v /tmp/draeger.fbb /opt/draeger/DRAEGERWARE.FDB"
+
+- name: Restore Database Ownership
+  ansible.builtin.file:
+    path: /opt/draeger/DRAEGERWARE.FDB
+    owner: firebird
+    group: firebird
+
+- name: Remove DB backup
+  file:
+    path : /tmp/draeger.fbb
+    state: absent
+
+- name: Create Draegerware database alias
+  lineinfile:
+   dest: /etc/firebird/3.0/databases.conf
+   line: "draegerware = /opt/draeger/DRAEGERWARE.FDB"
+   state: present
+  notify:
+   - restart firebird
+
+#- name: setup firebird.conf
+#  template:
+#     backup: yes
+#     dest: /etc/firebird/firebird.conf
+#     group: firebird
+#     owner: firebird
+#     mode: 0644
+#     src: firebird.conf.j2
+
+# Set SYSDBA password
+- include: sysdba-pass.yml

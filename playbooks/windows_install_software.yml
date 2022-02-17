@@ -1,0 +1,18 @@
+---
+# Playbook install software on windows systems
+
+- hosts: windows
+  tasks:
+    - name: Install multiple software packages
+      chocolatey.chocolatey.win_chocolatey:
+        name: '{{ item }}'
+        state: present
+      loop:
+        - procexp
+        
+    - name: Gather facts
+      chocolatey.chocolatey.win_chocolatey_facts:
+
+    - name: Display the packages
+      debug:
+        var: ansible_chocolatey.packages

@@ -1,0 +1,19 @@
+---
+# This will setup SYSDBA password
+#
+
+- name: Copy SQL script
+  copy:
+    src: files/sysdba.sql
+    dest: /tmp/sysdba.sql
+    owner: root
+    group: root
+    mode: 500
+
+- name: Create user FLORIX and grant him permissions on DRAEGERWARE
+  shell: "/usr/bin/isql-fb -m -m2 -user SYSDBA -i /tmp/sysdba.sql -o /tmp/sysdba.log /opt/draeger/DRAEGERWARE.FDB"
+
+- name: remove sql script
+  file:
+    path : /tmp/sysdba.sql
+    state: absent

@@ -1,0 +1,4 @@
+---
+# Main playbook for common configuration
+- include: upgrade.yml
+- include: install.yml
