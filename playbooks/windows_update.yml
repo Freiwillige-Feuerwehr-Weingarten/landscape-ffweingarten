@@ -3,7 +3,7 @@
 
 - hosts: windows
   tasks:
-    - name: Search-only, return list of found updates (if any), log to c:\ansible_windows_update.txt
+    - name: Install and return list of found updates (if any), log to c:\ansible_windows_update.txt
       ansible.windows.win_updates:
         category_names:
           - SecurityUpdates
@@ -12,10 +12,12 @@
           - Updates
           - Application
           - Definition Updates
-        state: searched
+        state: installed
+        # state: searched
+        reboot: yes
         log_path: c:\ansible_windows_update.txt
       register: win_updates_list
 
     - name: debug output
       debug:
-        msg: "Available Updates: {{ win_updates_list.found_update_count }}, list: {{ win_updates_list.updates }}"
+        msg: "Installed Updates: {{ win_updates_list.found_update_count }}, list: {{ win_updates_list.updates }}"
