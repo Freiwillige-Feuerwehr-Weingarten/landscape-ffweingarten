@@ -6,10 +6,24 @@
     - name: Install multiple software packages
       chocolatey.chocolatey.win_chocolatey:
         name: '{{ item }}'
-        state: present
+        state: latest
       loop:
         - procexp
-        
+        - putty.portable
+        - winscp.install
+        - vlc.portable
+        - winrar
+        - atom.install
+        - adobereader
+        - atlassian-companion
+        - cutepdf
+
+    - name: Uninstall multiple software packages
+      win_chocolatey:
+        name:
+        - putty
+        state: absent
+
     - name: Gather facts
       chocolatey.chocolatey.win_chocolatey_facts:
 
