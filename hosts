@@ -6,6 +6,11 @@ all:
         debian-observium.feuerwehr.weingarten.local:
         debian-nginx.feuerwehr.weingarten.local:
         debian-docker.feuerwehr.weingarten.local:
+        vpn01.feuerwehr.weingarten.local:
+      children:
+        vpnsrv:
+          hosts:
+            vpn01.feuerwehr.weingarten.local:
     staging:
       children:
         firebirdsrv:
@@ -19,14 +24,14 @@ all:
             debian-firebird.feuerwehr.weingarten.local:
     windows:
       hosts:
-        # eddard.feuerwehr.weingarten.local:
+        eddard.feuerwehr.weingarten.local:
         tywin.feuerwehr.weingarten.local:
         cersei.feuerwehr.weingarten.local:
-        # brandon.feuerwehr.weingarten.local:
+        brandon.feuerwehr.weingarten.local:
         jaime.feuerwehr.weingarten.local:
         tyrion.feuerwehr.weingarten.local:
-        # arya.feuerwehr.weingarten.local:
-        # robb.feuerwehr.weingarten.local:
+        arya.feuerwehr.weingarten.local:
+        robb.feuerwehr.weingarten.local:
         # sansa.feuerwehr.weingarten.local:
         catelyn.feuerwehr.weingarten.local:
       vars:

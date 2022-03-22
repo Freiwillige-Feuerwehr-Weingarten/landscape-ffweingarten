@@ -1,4 +1,5 @@
 ---
 roles:
-- name: alvistack.confluence
-- name: mprahl.rainloop
+  - name: alvistack.confluence
+collections:
+  - name: devsec.hardening

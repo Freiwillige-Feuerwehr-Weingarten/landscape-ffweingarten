@@ -1,7 +1,7 @@
 ---
 - name: Install wireguard packages
   apt:
-    name: wireguard
+    name: wireguard, iptables
     state: present
     update_cache: yes
 

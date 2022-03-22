@@ -1,6 +1,6 @@
 ---
 - name: Setup wireguard server
-  hosts: wireguard
+  hosts: vpnsrv
   remote_user: ffweingarten
   become: true
   become_user: root
@@ -15,4 +15,10 @@
           6162353233623461633761353238613932376131646263366338
     server_pubkey: FtZTtzS4Gta27xaTfNiZRivMRRSc4exPqrok3zclSn8=
   roles:
-    - wireguard
+    - role: devsec.hardening.ssh_hardening
+      sftp_enabled: true
+    - role: devsec.hardening.os_hardening
+      vars:
+        sysctl_overwrite:
+          net.ipv4.ip_forward: 1
+    - role: wireguard
