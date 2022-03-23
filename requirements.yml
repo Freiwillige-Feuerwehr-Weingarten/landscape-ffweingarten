@@ -3,3 +3,7 @@ roles:
   - name: alvistack.confluence
 collections:
   - name: devsec.hardening
+  - name: community.windows
+  - name: chocolatey.chocolatey
+  - name: matrix
+    source: https://github.com/spantaleev/matrix-docker-ansible-deploy
