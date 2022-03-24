@@ -12,6 +12,7 @@
 
 - name: Create user FLORIX and grant him permissions on DRAEGERWARE
   shell: "/usr/bin/isql-fb -m -m2 -user SYSDBA -i /tmp/sysdba.sql -o /tmp/sysdba.log /opt/draeger/DRAEGERWARE.FDB"
+  ignore_errors: true
 
 - name: remove sql script
   file:
