@@ -16,6 +16,7 @@ generic_packages:
   - ncdu
   - nmap
   - net-tools
+  - nfs-common
   - pv
   - rsync
   - screen
@@ -26,3 +27,4 @@ generic_packages:
   - vim
   - wget
   - zsh
+
