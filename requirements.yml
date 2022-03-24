@@ -1,6 +1,7 @@
 ---
 roles:
   - name: alvistack.confluence
+  - name: geerlingguy.ntp
 collections:
   - name: devsec.hardening
   - name: community.windows
