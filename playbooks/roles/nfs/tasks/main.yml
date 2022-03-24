@@ -1,0 +1,22 @@
+---
+- name: Install nfs debian package
+  apt:
+    pkg: nfs-common
+    state: present
+  when: ansible_os_family == 'Debian'
+
+- name: Check if the mountain exists
+  ansible.builtin.file:
+    path: "{{ mountpoint }}"
+    state: directory
+    mode: "{{ permissions }}"
+    owner: root
+    group: root
+
+- name: mount nfs share
+  ansible.posix.mount:
+    src: "{{ nfs_src }}"
+    path: "{{ mountpoint }}"
+    fstype: nfs
+    opts: "{{ options }}"
+    state: mounted
