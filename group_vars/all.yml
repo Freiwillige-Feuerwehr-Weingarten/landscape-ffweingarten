@@ -5,6 +5,7 @@ local_user:
 
 # Packages that should be available on all target nodes
 generic_packages:
+  - anacron
   - atop
   - dmidecode
   - dstat
