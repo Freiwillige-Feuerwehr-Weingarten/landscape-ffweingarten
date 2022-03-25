@@ -16,9 +16,12 @@
           6434363037363565640a626133633265666432656565383634336238636231303338616536623366
           6166
   roles:
+   - role: geerlingguy.ntp
+     vars:
+        ntp_timezone: Europe/Berlin
    - role: nfs
      vars:
-        permissions: "755"
+        permissions: "644"
         nfs_src: stark.feuerwehr.weingarten.local:/Firebird_Backup
         options: vers=4,rw,rsize=8192,wsize=8192,timeo=14,intr
    - role: firebird
