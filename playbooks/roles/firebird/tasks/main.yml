@@ -2,9 +2,9 @@
 # This will install Firebird
 #
 
-- name: Install Firebird Server 3.0
+- name: Install Firebird Server 3.0 and anacron
   apt:
-    name: firebird3.0-server
+    name: firebird3.0-server, anacron
     state: present
 
 - name: Enable Remote DB access
@@ -32,14 +32,6 @@
    name: firebird3.0
    state: started
    enabled: yes
-
-- name: Copy database backup
-  ansible.builtin.copy:
-    src: files/draeger.fbb
-    dest: /tmp/draeger.fbb
-    owner: root
-    group: root
-    mode: 500
 
 - name: Get files in DB Backup folder
   find:
@@ -90,3 +82,9 @@
 
 # Set SYSDBA password
 - include: sysdba-pass.yml
+
+- name: Copy backup script
+  ansible.builtin.copy:
+    src: files/firebirdbackup
+    dest: /etc/cron.daily/
+    mode: 0755
