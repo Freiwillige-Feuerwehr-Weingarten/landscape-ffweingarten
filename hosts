@@ -5,9 +5,9 @@ all:
       hosts:
         debian-observium.feuerwehr.weingarten.local:
         debian-nginx.feuerwehr.weingarten.local:
-        debian-docker.feuerwehr.weingarten.local:
         vpn01.feuerwehr.weingarten.local:
         db01.feuerwehr.weingarten.local:
+        web01.feuerwehr.weingarten.local:
       children:
         vpnsrv:
           hosts:
@@ -15,6 +15,9 @@ all:
         dbsrv:
           hosts:
             db01.feuerwehr.weingarten.local:
+        websrv:
+          hosts:
+            web01.feuerwehr.weingarten.local:
     staging:
       children:
         firebirdsrv:
