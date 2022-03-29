@@ -1,7 +1,7 @@
 ---
 # Playbook example for Firebird
 
-- hosts: firebirdsrv
+- hosts: dbsrv
   remote_user: ffweingarten
   become: true
   become_user: root
@@ -16,6 +16,9 @@
           6434363037363565640a626133633265666432656565383634336238636231303338616536623366
           6166
   roles:
+   - role: devsec.hardening.ssh_hardening
+     sftp_enabled: true
+   - role: devsec.hardening.os_hardening
    - role: geerlingguy.ntp
      vars:
         ntp_timezone: Europe/Berlin
