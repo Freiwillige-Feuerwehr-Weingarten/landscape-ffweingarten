@@ -2,9 +2,9 @@
 roles:
   - name: alvistack.confluence
   - name: geerlingguy.ntp
+  - name: geerlingguy.apache
+  - name: geerlingguy.php
 collections:
   - name: devsec.hardening
   - name: community.windows
   - name: chocolatey.chocolatey
-  - name: matrix
-    source: https://github.com/spantaleev/matrix-docker-ansible-deploy
