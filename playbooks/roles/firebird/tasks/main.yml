@@ -21,11 +21,35 @@
     owner: firebird
     group: firebird
 
-- name: Enable Remote DB access
+- name: Set ISC_PASSWORD
   ansible.builtin.lineinfile:
     path: /etc/firebird/3.0/SYSDBA.password
     regexp: '^ISC_PASSWORD="(.*)"'
     line: ISC_PASSWORD="{{ sysdba_password }}"
+
+- name: Set AuthServer
+  ansible.builtin.lineinfile:
+    path: /etc/firebird/3.0/firebird.conf
+    regexp: '^AuthServer ="(.*)"'
+    line: AuthServer = Srp, Win_Sspi, Legacy_Auth
+
+- name: Set AuthClient
+  ansible.builtin.lineinfile:
+    path: /etc/firebird/3.0/firebird.conf
+    regexp: '^AuthClient ="(.*)"'
+    line: AuthClient = Srp, Srp256, Win_Sspi, Legacy_Auth
+
+- name: Disable Wirecrypt
+  ansible.builtin.lineinfile:
+    path: /etc/firebird/3.0/firebird.conf
+    regexp: '^WireCrypt ="(.*)"'
+    line: WireCrypt = Disabled
+
+- name: Set UserManager
+  ansible.builtin.lineinfile:
+    path: /etc/firebird/3.0/firebird.conf
+    regexp: '^UserManager ="(.*)"'
+    line: UserManager = Legacy_UserManager
 
 - name: Start Firebird 3.0 Service
   ansible.builtin.service:
@@ -58,18 +82,12 @@
     owner: firebird
     group: firebird
 
-- name: Remove DB backup
-  file:
-    path : /tmp/draeger.fbb
-    state: absent
-
 - name: Create Draegerware database alias
   lineinfile:
    dest: /etc/firebird/3.0/databases.conf
    line: "draegerware = /opt/draeger/DRAEGERWARE.FDB"
    state: present
-  notify:
-   - restart firebird
+  notify: restart firebird
 
 #- name: setup firebird.conf
 #  template:
