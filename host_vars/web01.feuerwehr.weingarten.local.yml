@@ -1,0 +1,21 @@
+---
+mariadb_use_official_repo: false
+
+# Databases
+mariadb_databases: []
+#   - name: rainloop
+#     collation: utf8_general_ci
+#     encoding: utf8
+#     replicate: false
+#     state: import
+#     target: "{{ db_backup.ansible_facts.latest_file.path }}"
+
+# Users
+mariadb_users:
+   - name: rainloop
+     host: localhost
+     password: rainloop
+     # priv: "*.*:USAGE/rainloop.*:ALL"
+     priv:
+        '*.*': 'ALL,GRANT'
+     state: present
