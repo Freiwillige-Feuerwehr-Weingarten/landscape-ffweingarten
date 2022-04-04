@@ -1,0 +1,57 @@
+---
+- hosts: websrv
+  remote_user: ffweingarten
+  become: true
+  # become_user: root
+  gather_facts: true
+  vars:
+    mountpoint: "/mnt/web_backup"
+  roles:
+   #- role: devsec.hardening.ssh_hardening
+   #  sftp_enabled: true
+   #- role: devsec.hardening.os_hardening
+   #- role: geerlingguy.ntp
+   #  vars:
+   #     ntp_timezone: Europe/Berlin
+   #- role: nfs
+   #  vars:
+   #     permissions: "644"
+   #     nfs_src: stark.feuerwehr.weingarten.local:/Web_Backup
+   #     options: vers=4,rw,rsize=8192,wsize=8192,timeo=14,intr
+  # - role: geerlingguy.apache
+  #   vars:
+  #    apache_create_vhosts: true
+  #    apache_vhosts:
+  #      - servername: "test1.ff-weingarten.de"
+  #        documentroot: "/var/www/vhosts/hydrant.ff-weingarten.de" 
+  #        serveradmin: "admin@ff-weingarten.de"
+  #      - servername: "test2.ff-weingarten.de"
+  #        documentroot: "/var/www/vhosts/rainloop.ff-weingarten.de"
+  #        serveradmin: "admin@ff-weingarten.de"
+  #        options: +Indexes +FollowSymLinks +ExecCGI
+  # - role: geerlingguy.php
+  #   vars_file:
+  #    - roles/php/vars/main.yml
+  # - role: geerlingguy.mysql
+  #   pre_tasks:
+  #    - name: Override veriables for MariaDB
+  #      set_fact:
+  #        mysql_socket: /var/run/mysqld/mysqld.sock
+  #      when: ansible_os_family == "Debian"
+  #   vars:
+  #    mysql_packages:
+  #      - mariadb-client
+  #      - mariadb-server
+  #      - python3-pymysql
+  #    mysql_root_password: "root"
+  #    mysql_users:
+  #      - name: rainloop
+  #      - login_unix_socket: /var/run/mysqld/mysqld.sock
+  #    host: "%"
+  #    password: rainloop
+  #    priv: "rainloop.*:ALL"
+     #vars_file:
+     # - roles/mysql/vars/main.yml
+   #- role: webserver
+   - role: fauust.mariadb
+   - role: webserver

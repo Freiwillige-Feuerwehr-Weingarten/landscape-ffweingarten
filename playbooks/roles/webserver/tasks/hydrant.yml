@@ -1,0 +1,20 @@
+---
+- name: Create web folder for hydrant
+  ansible.builtin.file:
+    path: "{{ hydrant_install_path }}"
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: '0755'
+
+- name: Copy static html files for hydrant
+  ansible.builtin.shell:
+    cmd: cp -a {{ hydrant_backup_path + '*' }} {{ hydrant_install_path }}
+
+- name: Change ownership for hydrant
+  ansible.builtin.file:
+    path: "{{ hydrant_install_path }}"
+    owner: www-data
+    group: www-data
+    recurse: yes
+  notify: restart apache

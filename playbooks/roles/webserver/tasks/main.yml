@@ -1,0 +1,10 @@
+---
+- name: Install libapache-mod-php
+  apt:
+    pkg: libapache2-mod-php
+    state: present
+
+- include: hydrant.yml
+- include: rainloop.yml
+
+## post_max_filesize to 100M

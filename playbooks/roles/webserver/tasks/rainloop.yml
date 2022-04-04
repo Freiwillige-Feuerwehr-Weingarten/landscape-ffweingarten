@@ -1,0 +1,69 @@
+---
+- name: Check if rainloop is installed
+  ansible.builtin.stat:
+    path: "{{ rainloop_install_path + 'index.php' }}"
+  register: rainloop_installed
+
+- name: Create web folder for rainloop
+  ansible.builtin.file:
+    path: "{{ rainloop_install_path }}"
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: '0755'
+  when: not rainloop_installed.stat.exists
+
+- name: install rainloop
+  ansible.builtin.command:
+    chdir: "{{ rainloop_install_path }}"
+    cmd: bash -c "curl -s http://repository.rainloop.net/installer.php | php"
+  when: not rainloop_installed.stat.exists
+  notify: restart apache
+
+- name: Fix file permissions in rainloop installation
+  file:
+    path: "{{ rainloop_install_path }}"
+    owner: www-data
+    group: www-data
+    mode: 0644
+    recurse: yes
+
+- name: Fix directory permissions in rainloop installation
+  file:
+    path: "{{ rainloop_install_path }}"
+    owner: www-data
+    group: www-data
+    mode: 0755
+    state: directory
+    recurse: yes
+
+- name: Get files in DB Backup folder
+  find:
+    paths: "{{ mountpoint }}"
+    recurse: yes
+    patterns: "*.sql"
+  register: found_files
+
+- name: Get latest file
+  set_fact:
+    latest_file: "{{ found_files.files | sort(attribute='mtime',reverse=true) | first }}"
+  register: db_backup
+  
+- name: debug output
+  debug:
+    msg: "Using DB backup: {{ db_backup.ansible_facts.latest_file.path }}"
+
+- name: Restore rainloop database
+  community.mysql.mysql_db:
+    check_implicit_admin: yes
+    name: "{{ rainloop_db }}"
+    login_user: "{{ rainloop_user }}"
+    login_password: "{{ rainloop_password }}"
+    state: import
+    target: "{{ db_backup.ansible_facts.latest_file.path }}"
+
+- name: Copy backup script
+  ansible.builtin.copy:
+    src: files/rainloop_db_backup
+    dest: /etc/cron.daily/
+    mode: 0755
