@@ -17,19 +17,21 @@
         permissions: "644"
         nfs_src: stark.feuerwehr.weingarten.local:/Web_Backup
         options: vers=4,rw,rsize=8192,wsize=8192,timeo=14,intr
+   - role: geerlingguy.php
    - role: geerlingguy.apache
      vars:
       apache_create_vhosts: true
       apache_vhosts:
-        - servername: "test1.ff-weingarten.de"
+        - servername: "hydrant.ff-weingarten.de"
           documentroot: "/var/www/vhosts/hydrant.ff-weingarten.de" 
           serveradmin: "admin@ff-weingarten.de"
-        - servername: "test2.ff-weingarten.de"
+        - servername: "rainloop.ff-weingarten.de"
           documentroot: "/var/www/vhosts/rainloop.ff-weingarten.de"
           serveradmin: "admin@ff-weingarten.de"
           options: +Indexes +FollowSymLinks +ExecCGI
-   - role: geerlingguy.php
-     vars_file:
-      - roles/php/vars/main.yml
+          extra_parameters: |
+              <Directory /var/www/vhosts/rainloop.ff-weingarten.de/data>
+                Require all denied
+              </Directory>
    - role: fauust.mariadb
    - role: webserver
