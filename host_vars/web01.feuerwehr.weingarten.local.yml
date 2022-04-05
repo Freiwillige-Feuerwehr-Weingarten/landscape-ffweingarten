@@ -29,3 +29,24 @@ mariadb_users:
         '*.*': 'ALL,GRANT'
      state: present
 
+# PHP Stuff
+php_memory_limit: "128M"
+php_max_execution_time: "90"
+php_upload_max_filesize: "256M"
+php_packages:
+  - php
+  - php-cli
+  - php-curl
+  - php-common
+  - php-dev
+  - php-gd
+  - php-mbstring
+  - php-pdo
+  - php-xml
+  - php-sqlite3
+  - php-mysql
+  - php-fpm
+  - php-xml
+  - php-json
+  - php-pdo
+
