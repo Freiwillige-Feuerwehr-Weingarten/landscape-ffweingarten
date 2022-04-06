@@ -8,6 +8,8 @@ all:
         vpn01.feuerwehr.weingarten.local:
         db01.feuerwehr.weingarten.local:
         web01.feuerwehr.weingarten.local:
+        intra01.feuerwehr.weingarten.local:
+        meet01.feuerwehr.weingarten.local:
       children:
         vpnsrv:
           hosts:
@@ -18,6 +20,12 @@ all:
         websrv:
           hosts:
             web01.feuerwehr.weingarten.local:
+        intrasrv:
+          hosts:
+            intra01.feuerwehr.weingarten.local:
+        meetsrv:
+          hosts:
+            meet01.feuerwehr.weingarten.local:
     staging:
       children:
         firebirdsrv:

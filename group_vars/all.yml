@@ -7,15 +7,18 @@ local_user:
 generic_packages:
   - anacron
   - atop
+  - bmon
   - curl
   - dmidecode
   - dstat
   - genisoimage
   - git
+  - gpg
   - htop
   - iftop
   - iotop
   - ncdu
+  - nload
   - nmap
   - net-tools
   - nfs-common
