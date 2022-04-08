@@ -1,0 +1,22 @@
+---
+confluence_home_dir: "/var/atlassian/application-data/confluence/"
+confluence_installation_dir: "/opt/atlassian/confluence/"
+
+confluence_installer_file: "/tmp/atlassian-confluence-7.17.1-x64.bin"
+confluence_installer_url: "http://product-downloads.atlassian.com/software/confluence/downloads/atlassian-confluence-7.17.1-x64.bin"
+confluence_installer_checksum: "1c5703f7958d0b607a03d5ab22860acb"
+confluence_variable_file: "/tmp/response.varfile"
+
+confluence_postgres_jdbc_url: "http://jdbc.postgresql.org/download/postgresql-42.3.3.jar"
+confluence_postgres_jdbs_checksum: "bef0b2e1c6edcd8647c24bed31e1a4ac"
+
+confluence_db_name: "confluence"
+confluence_db_username: "confluence"
+confluence_db_password: !vault |
+          $ANSIBLE_VAULT;1.1;AES256
+          36333533613632376465343063663362326263623338323338653536643235623337383237343066
+          6239343336316535613931396334363861333934353138340a336662313366346563393862336461
+          39353132363462383537396437353361643237653330643639613931613739313835643066323363
+          3461366537653965360a306237636531653165306561633230356364613337373662333762623730
+          34313661316438616130636431396334653063363166333362663030613131353333
+confluence_db_temp_location: "/tmp/confluence.sql"
