@@ -77,3 +77,9 @@
   ansible.builtin.service:
     name: confluence
     state: started
+
+- name: Copy backup script
+  ansible.builtin.copy:
+    src: files/confluence
+    dest: /etc/cron.daily/
+    mode: 0755

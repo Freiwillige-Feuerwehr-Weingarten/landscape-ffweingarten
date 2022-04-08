@@ -1,0 +1,25 @@
+#!/bin/bash
+ 
+PG_DUMP=$(command -v pg_dump)
+SUDO=$(command -v sudo)
+TAR=$(command -v tar)
+CP=$(command -v cp)
+FIND=$(command -v find)
+BACKUP_USER="postgres"
+DB="confluence"
+ 
+BASEDIR="/mnt/confluence_backup/"
+BACKUP_NAME="${BASEDIR}$(date +%Y)/intra01-confluence-$(date +%F).sql"
+BACKUP_ATTACHMENT_NAME="${BASEDIR}$(date +%Y)/intra01-confluence-attachments-$(date +%F).tgz"
+BACKUP_CONFIGURATION_FILE="${BASEDIR}$(date +%Y)/intra01-confluence-configuration-$(date +%F).cfg.xml"
+ATTACHMENT_PATH="/var/atlassian/application-data/confluence/attachments/"
+CONFIGURATION_FILE="/var/atlassian/application-data/confluence/confluence.cfg.xml"
+ 
+if [ ! -d "${BASEDIR}$(date +%Y)" ]; then
+        mkdir "${BASEDIR}$(date +%Y)"
+fi
+ 
+${SUDO} -u ${BACKUP_USER} "${PG_DUMP}" "${DB}" > "${BACKUP_NAME}"
+${TAR} -czf "${BACKUP_ATTACHMENT_NAME}" "${ATTACHMENT_PATH}"
+${CP} "${CONFIGURATION_FILE}" "${BACKUP_CONFIGURATION_FILE}"
+${FIND} ${BASEDIR}* -mtime +60 -exec rm {} \; || true
