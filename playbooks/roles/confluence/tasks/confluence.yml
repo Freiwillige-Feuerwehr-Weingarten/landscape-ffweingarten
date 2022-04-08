@@ -1,0 +1,79 @@
+---
+- name: Download Confluence installer
+  get_url:
+    url: "{{ confluence_installer_url }}"
+    dest: "{{ confluence_installer_file }}"
+    mode: 0755
+    checksum: "md5:{{ confluence_installer_checksum }}"
+
+- name: Copy installation variables
+  ansible.builtin.copy:
+    src: files/response.varfile
+    dest: "{{ confluence_variable_file }}"
+    mode: 0644
+
+- name: Install Confluence unattended
+  ansible.builtin.shell: "/bin/sh {{ confluence_installer_file }} -q -varfile {{ confluence_variable_file }}"
+  args:
+    chdir: /tmp
+    creates: /tmp/confluence-install.log
+
+- name: Copy server.xml
+  ansible.builtin.copy:
+    src: files/server.xml
+    dest: "{{ confluence_installation_dir + 'conf/server.xml' }}"
+    mode: 0644
+
+# copy .xml file
+# confluence.cfg.xml
+
+# copy .tar.gz
+- name: Get files in attachment Backup folder
+  find:
+    paths: "{{ mountpoint }}"
+    recurse: yes
+    patterns: "*.tgz"
+  register: found_files
+
+- name: Get latest file
+  set_fact:
+    latest_file: "{{ found_files.files | sort(attribute='mtime',reverse=true) | first }}"
+  register: attachment_backup
+  
+- name: debug output
+  debug:
+    msg: "Using DB backup: {{ attachment_backup.ansible_facts.latest_file.path }}"
+
+# extract tgz
+- name: Extract attachment folder into /tmp
+  ansible.builtin.unarchive:
+    remote_src: yes
+    src: "{{ attachment_backup.ansible_facts.latest_file.path }}"
+    dest: /tmp/
+    mode: "0700"
+
+# move files into place
+- name: Move attachment folder to final location
+  ansible.builtin.shell: "mv -fv /tmp/var/atlassian/application-data/confluence/attachments {{ confluence_home_dir }}"
+
+# fix rights
+- name: Sanitize file ownership for attachments
+  ansible.builtin.file:
+    path: "{{ confluence_home_dir }}"
+    state: directory
+    recurse: yes
+    owner: confluence
+    group: confluence
+
+# install postgresql jdbc
+- name: Download postgresql jdbc
+  ansible.builtin.get_url:  
+    url: "{{ confluence_postgres_jdbc_url }}"
+    dest: "{{ confluence_installation_dir + 'confluence/WEB-INF/lib' }}"
+    mode: '0644'
+    checksum: "md5:{{ confluence_postgres_jdbs_checksum }}"
+
+- name: Start Confluence
+  ansible.builtin.service:
+    name: confluence
+    state: started
