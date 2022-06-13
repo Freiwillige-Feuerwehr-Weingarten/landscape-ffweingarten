@@ -43,6 +43,7 @@
   vars:
     ansible_ssh_pipelining: true
 
+# need to create for role confluenceuser
 - name: Restore Confluence database
   community.postgresql.postgresql_db:
     state: restore
