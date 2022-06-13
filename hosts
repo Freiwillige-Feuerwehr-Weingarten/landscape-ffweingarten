@@ -6,6 +6,7 @@ all:
         debian-observium.feuerwehr.weingarten.local:
         debian-nginx.feuerwehr.weingarten.local:
         vpn01.feuerwehr.weingarten.local:
+        vpn02.feuerwehr.weingarten.local:
         db01.feuerwehr.weingarten.local:
         web01.feuerwehr.weingarten.local:
         intra01.feuerwehr.weingarten.local:
@@ -14,6 +15,7 @@ all:
         vpnsrv:
           hosts:
             vpn01.feuerwehr.weingarten.local:
+            vpn02.feuerwehr.weingarten.local:
         dbsrv:
           hosts:
             db01.feuerwehr.weingarten.local:
