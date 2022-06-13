@@ -11,7 +11,7 @@ confluence_postgres_jdbc_url: "http://jdbc.postgresql.org/download/postgresql-42
 confluence_postgres_jdbs_checksum: "bef0b2e1c6edcd8647c24bed31e1a4ac"
 
 confluence_db_name: "confluence"
-confluence_db_username: "confluence"
+confluence_db_username: "confluenceuser"
 confluence_db_password: !vault |
           $ANSIBLE_VAULT;1.1;AES256
           36333533613632376465343063663362326263623338323338653536643235623337383237343066
