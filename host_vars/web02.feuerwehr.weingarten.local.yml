@@ -1,0 +1,52 @@
+---
+mariadb_use_official_repo: false
+
+# Databases
+mariadb_databases: []
+
+#rainloop config
+rainloop_user: rainloop
+rainloop_password: !vault |
+          $ANSIBLE_VAULT;1.1;AES256
+          33643535343534386663316630366431333464653464656564353564356537356134633965666366
+          6339663739656334646463656635393336656563666665320a356463616232613661636263343433
+          64363736393066366434333535623938326463326433376237663935336461343238633237373266
+          3639663333353136360a633763326663346534376662383465663261353265653766313036393233
+          62643466366533313462666430363038303236346433353730333130616538386664
+rainloop_db: rainloop
+rainloop_install_path: /var/www/vhosts/rainloop.ff-weingarten.de/
+
+#hydrant config
+hydrant_install_path: /var/www/vhosts/hydrant.ff-weingarten.de/
+hydrant_backup_path: /mnt/web_backup/Hydrant/
+
+# Users
+mariadb_users:
+   - name: "{{ rainloop_user }}"
+     host: localhost
+     password: "{{ rainloop_password }}"
+     priv:
+        '*.*': 'ALL,GRANT'
+     state: present
+
+# PHP Stuff
+php_memory_limit: "128M"
+php_max_execution_time: "90"
+php_upload_max_filesize: "256M"
+php_packages:
+  - php
+  - php-cli
+  - php-curl
+  - php-common
+  - php-dev
+  - php-gd
+  - php-mbstring
+  - php-pdo
+  - php-xml
+  - php-sqlite3
+  - php-mysql
+  - php-fpm
+  - php-xml
+  - php-json
+  - php-pdo
+
