@@ -1,6 +1,6 @@
 #!/bin/bash
   
-MARIADB-DUMP=$(command -v mariadb-dump)
+MARIADB_DUMP=$(command -v mariadb-dump)
 FIND=$(command -v find)
 USER_NAME="root"
 DATABASE="rainloop"
@@ -12,5 +12,5 @@ if [ ! -d "${BASEDIR}$(date +%Y)" ]; then
         mkdir "${BASEDIR}$(date +%Y)"
 fi
 
-(${MARIADB-DUMP} -u ${USER_NAME} --password="" ${DATABASE}) > "${BACKUP_NAME}"
+(${MARIADB_DUMP} -u ${USER_NAME} --password="" ${DATABASE}) > "${BACKUP_NAME}"
 ${FIND} ${BASEDIR}* -mtime +120 -exec rm {} \; || true
