@@ -16,6 +16,7 @@ generic_packages:
   - gpg
   - htop
   - iftop
+  - ifupdown
   - iotop
   - ncdu
   - nload
@@ -23,6 +24,8 @@ generic_packages:
   - net-tools
   - nfs-common
   - pv
+  - qemu-guest-agent
+  - resolvconf
   - rsync
   - screen
   - strace
