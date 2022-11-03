@@ -28,6 +28,7 @@ generic_packages:
   - resolvconf
   - rsync
   - screen
+  - shellcheck
   - strace
   - syslinux
   - tree
