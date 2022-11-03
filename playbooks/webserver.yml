@@ -1,10 +1,11 @@
 ---
+#- hosts: websrv
 - hosts: websrv
   remote_user: ffweingarten
   become: true
   gather_facts: true
   vars:
-    mountpoint: "/mnt/web_backup"
+    mountpoint: "/mnt/backup"
   roles:
    - role: devsec.hardening.ssh_hardening
      sftp_enabled: true
