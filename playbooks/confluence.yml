@@ -9,5 +9,5 @@
         permissions: "644"
         nfs_src: stark.feuerwehr.weingarten.local:/Confluence_Backup
         options: vers=4,rw,rsize=8192,wsize=8192,timeo=14,intr
-        mountpoint: "/mnt/confluence_backup"
+        mountpoint: "/mnt/backup"
     - role: confluence
