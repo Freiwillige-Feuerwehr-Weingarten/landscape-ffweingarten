@@ -3,18 +3,18 @@ all:
   children:
     prod:
       hosts:
-        debian-observium.feuerwehr.weingarten.local:
-        debian-nginx.feuerwehr.weingarten.local:
-        vpn01.feuerwehr.weingarten.local:
+        rprox.feuerwehr.weingarten.local:
         vpn02.feuerwehr.weingarten.local:
         db01.feuerwehr.weingarten.local:
         web01.feuerwehr.weingarten.local:
         intra01.feuerwehr.weingarten.local:
         meet01.feuerwehr.weingarten.local:
+        monitor01.feuerwehr.weingarten.local:
+        nut01.feuerwehr.weingarten.local:
+        nut02.feuerwehr.weingarten.local:
       children:
         vpnsrv:
           hosts:
-            vpn01.feuerwehr.weingarten.local:
             vpn02.feuerwehr.weingarten.local:
         dbsrv:
           hosts:
@@ -28,17 +28,18 @@ all:
         meetsrv:
           hosts:
             meet01.feuerwehr.weingarten.local:
+        nut:
+          hosts: 
+            nut01.feuerwehr.weingarten.local:
+            nut02.feuerwehr.weingarten.local:
+        #virt:
+        #  hosts:
+        #    pve-node1.feuerwehr.weingarten.local:
+        #    pve-node3.feuerwehr.weingarten.local:
     staging:
-      children:
-        firebirdsrv:
-          hosts:
-            debian-firebird.feuerwehr.weingarten.local:
-        matrixsrv:
-          hosts:
-            debian-matrix.feuerwehr.weingarten.local:
-        wireguard:
-          hosts:
-            debian-firebird.feuerwehr.weingarten.local:
+      hosts:
+        nginx-proxy-manager:
+          ansible_host: 192.168.10.112
     windows:
       hosts:
         eddard.feuerwehr.weingarten.local:
@@ -49,7 +50,7 @@ all:
         tyrion.feuerwehr.weingarten.local:
         arya.feuerwehr.weingarten.local:
         robb.feuerwehr.weingarten.local:
-        # sansa.feuerwehr.weingarten.local:
+        sansa.feuerwehr.weingarten.local:
         catelyn.feuerwehr.weingarten.local:
       vars:
         ansible_user: administrator@feuerwehr
