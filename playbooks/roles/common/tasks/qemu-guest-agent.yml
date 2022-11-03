@@ -1,0 +1,5 @@
+---
+- name: start qemu-guest-agents
+  ansible.builtin.service:
+    name: qemu-guest-agent
+    state: started
