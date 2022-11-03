@@ -7,9 +7,11 @@
     group: www-data
     mode: '0755'
 
-- name: Copy static html files for hydrant
-  ansible.builtin.shell:
-    cmd: cp -a {{ hydrant_backup_path + '*' }} {{ hydrant_install_path }}
+- name: Restore static html files for hydrant
+  ansible.posix.synchronize:
+    src: "{{ hydrant_backup_path }}"
+    dest: "{{ hydrant_install_path }}"
+  delegate_to: "{{ inventory_hostname }}"
 
 - name: Change ownership for hydrant
   ansible.builtin.file:
