@@ -9,6 +9,8 @@
    #  sftp_enabled: true
    # - role: devsec.hardening.os_hardening
     - role: geerlingguy.ntp
+      vars:
+        ntp_timezone: Europe/Berlin
     - role: nfs
       vars:
         permissions: "644"
