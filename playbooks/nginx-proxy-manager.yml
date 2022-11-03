@@ -5,9 +5,11 @@
   gather_facts: true
   remote_user: ffweingarten
   roles:
-   #- role: devsec.hardening.ssh_hardening
-   #  sftp_enabled: true
-   # - role: devsec.hardening.os_hardening
+    - role: devsec.hardening.ssh_hardening
+      sftp_enabled: true
+    - role: devsec.hardening.os_hardening
+      sysctl_overwrite:
+        net.ipv4.ip_forward: 1
     - role: geerlingguy.ntp
       vars:
         ntp_timezone: Europe/Berlin
