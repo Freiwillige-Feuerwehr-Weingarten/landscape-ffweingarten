@@ -15,6 +15,7 @@
     - role: systemli.jitsi_meet
       vars:
         jitsi_meet_server_name: "meet.ff-weingarten.de"
+        jitsi_meet_title: "Jitsi Feuerwehr Weingarten"
         jitsi_meet_nginx_listen_https_enabled: false
         jitsi_meet_behind_nat_enabled: true
         jitsi_meet_nat_public_ip: "meet.ff-weingarten.de"
