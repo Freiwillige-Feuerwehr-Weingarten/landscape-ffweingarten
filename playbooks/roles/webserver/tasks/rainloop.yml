@@ -55,7 +55,6 @@
 
 - name: Restore rainloop database
   community.mysql.mysql_db:
-    # check_implicit_admin: yes
     login_unix_socket: /var/run/mysqld/mysqld.sock
     name: "{{ rainloop_db }}"
     login_user: "{{ rainloop_user }}"
@@ -65,7 +64,7 @@
     target: "{{ db_backup.ansible_facts.latest_file.path }}"
 
 - name: Copy backup script
-  ansible.builtin.copy:
-    src: files/rainloop_db_backup
-    dest: /etc/cron.daily/
+  ansible.builtin.template:
+    src: files/rainloop_db_backup.j2
+    dest: /etc/cron.daily/rainloop_db_backup
     mode: 0755
