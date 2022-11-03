@@ -1,0 +1,22 @@
+---
+- name: Install packages/prerequisites "Debian"
+  apt:
+    name:
+      - curl
+      - python3-pip
+      - apt-transport-https
+      - ca-certificates
+      - software-properties-common
+      - virtualenv
+      - python3-setuptools
+      - rsync
+    state: present
+    cache_valid_time: 3600
+  when: ansible_facts.os_family == "Debian"
+
+- name: install python docker SDK
+  pip:
+    name: docker
+
+- include_tasks: docker.yml
+- include_tasks: proxy.yml

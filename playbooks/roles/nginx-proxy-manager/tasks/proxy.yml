@@ -1,0 +1,72 @@
+---
+- name: Create a network for proxy manager
+  community.docker.docker_network:
+    name: "proxy"
+
+- name: Nginx Proxy Manager DB Deploy
+  community.docker.docker_container:
+    name: "{{ db_container_name }}"
+    image: jc21/mariadb-aria:latest
+    env:
+      MYSQL_ROOT_PASSOWRD: "{{ db_root_password }}"
+      MYSQL_DATABASE: "{{ db_name }}"
+      MYSQL_USER: "{{ db_user }}"
+      MYSQL_PASSWORD: "{{ db_password }}"
+    volumes:
+      - "{{ npm_home }}/mysql:/var/lib/mysql"
+    restart_policy: unless-stopped
+    networks:
+      - name: "proxy"
+    network_mode: "proxy"
+
+- name: Nginx Proxy Manager Deploy
+  community.docker.docker_container:
+    name: nginx_proxy
+    image: jc21/nginx-proxy-manager:latest
+    ports:
+      - "80:80"
+      - "81:81"
+      - "443:443"
+    volumes:
+      - "{{ npm_home }}/data:/data"
+      - "{{ npm_home }}/letsencrypt:/etc/letsencrypt"
+    restart_policy: unless-stopped
+    networks:
+      - name: "proxy"
+    network_mode: "proxy"
+    env:
+      DB_MYSQL_HOST: "{{ db_container_name }}"
+      DB_MYSQL_PORT: "3306"
+      DB_MYSQL_USER: "{{ db_user }}"
+      DB_MYSQL_PASSWORD: "{{ db_password }}"
+      DB_MYSQL_NAME: "{{ db_name }}"
+
+- name: Getting a list of directories in the backup folder
+  find:
+    paths: "{{ mountpoint }}"
+    file_type: directory
+  register: found_files
+
+- name: Getting newest backup directory
+  set_fact:
+    latest_file: "{{ found_files.files | sort(attribute='mtime',reverse=true) | first }}"
+  register: db_backup
+  
+- name: debug output
+  debug:
+    msg: "Using DB backup: {{ db_backup.ansible_facts.latest_file.path }}"
+
+- name: Restore backup letsencrypt
+  ansible.posix.synchronize:
+    src: "{{ db_backup.ansible_facts.latest_file.path }}/letsencrypt"
+    dest: "{{ npm_home }}/letsencrypt"
+  delegate_to: "{{ inventory_hostname }}"
+
+- name: Restore backup data
+  ansible.posix.synchronize:
+    src: "{{ db_backup.ansible_facts.latest_file.path }}/data"
+    dest: "{{ npm_home }}/data"
+  delegate_to: "{{ inventory_hostname }}"
+
+- name: Restore Database
+  ansible.builtin.shell: docker exec -i {{ db_container_name }} mysql --user={{ db_user }} --password={{ db_password }} {{ db_name }} -h 127.0.0.1 < {{ db_backup.ansible_facts.latest_file.path }}/npm-export.sql

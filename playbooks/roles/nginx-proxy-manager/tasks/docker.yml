@@ -1,0 +1,51 @@
+---
+
+- name: if Docker is already installed?.
+  command: which docker
+  failed_when: false
+  changed_when: false
+  check_mode: false
+  register: docker_present
+
+- name: Add Docker GPG apt Key
+  apt_key:
+    url: https://download.docker.com/linux/debian/gpg
+    state: present
+
+- name: Add Docker Repository
+  apt_repository:
+    repo: deb https://download.docker.com/linux/debian bullseye stable
+    state: present
+
+- name: Update apt and install docker-ce
+  apt:
+    name: docker-ce
+    state: latest
+    update_cache: true
+
+- name: Start docker
+  service:
+    name: docker
+    state: started
+    enabled: true
+
+- name: Create group docker
+  group:
+    name: docker
+    state: present
+
+- name: adding existing user '{{ ansible_user }}' to group docker
+  user:
+    name: '{{ ansible_user }}'
+    groups: docker
+    append: yes
+
+- name: Reset connection
+  meta: reset_connection
+
+- name: Copy backup script
+  ansible.builtin.template:
+    src: files/nginx_proxy_backup.j2
+    dest: /etc/cron.daily/nginx_proxy_backup
+    mode: 0755
+

@@ -1,0 +1,37 @@
+---
+- hosts: nginx-proxy-manager
+  become: true
+  become_user: root
+  gather_facts: true
+  remote_user: ffweingarten
+  roles:
+   #- role: devsec.hardening.ssh_hardening
+   #  sftp_enabled: true
+   # - role: devsec.hardening.os_hardening
+    - role: geerlingguy.ntp
+    - role: nfs
+      vars:
+        permissions: "644"
+        nfs_src: stark.feuerwehr.weingarten.local:/Nginx_Proxy_Backup
+        options: vers=4,rw,rsize=8192,wsize=8192,timeo=14,intr,user
+        mountpoint: "/mnt/backup"
+    - role: nginx-proxy-manager
+      vars:
+        npm_home: "/srv/npm"
+        db_password: !vault |
+          $ANSIBLE_VAULT;1.1;AES256
+          35353666346332393963613237313865393565313138656565343537303737326661623638393634
+          3938336230333839383936333030383361623937336464650a316336376565333466333966333931
+          30376662643632393436613233653630633662373336353838373132666237653566653337376564
+          6362366539383532370a633230663236366430633630626466393437663635396134663866316239
+          3534
+        db_root_password:: !vault |
+          $ANSIBLE_VAULT;1.1;AES256
+          34373366623863643664663664613638643939616331383834366231313837303139383330663134
+          3937326264393537386437323432393239363366396235370a653061626538336138643166343832
+          32656532623135363062663065333830663761633838376663343862386138316530616561623532
+          3965373835316132330a373534643262336238303033333233646130373561323336663030373530
+          62613238653438383035623262366637663838643933343933363265313664316435
+        db_name: "nginx"
+        db_user: "nginxuser"
+        db_container_name: "nginx_db"

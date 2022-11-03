@@ -1,0 +1,24 @@
+#!/bin/bash
+  
+CP=$(command -v cp)
+MKDIR=$(command -v mkdir)
+DOCKER=$(command -v docker)
+
+BASEDIR="{{ mountpoint }}"
+BACKUPDIR="${BASEDIR}/$(date +%F)"
+NPM_HOME="{{ npm_home }}"
+CONTAINER_NAME="{{ db_container_name }}"
+DB_USER="{{ db_user }}"
+DB_PASSWORD="{{ db_password }}"
+DB_NAME="{{ db_name }}"
+
+if [ ! -d "${BACKUPDIR}" ]; then
+        (${MKDIR} -p "${BACKUPDIR}")
+        (${MKDIR} "${BACKUPDIR}/data")
+        (${MKDIR} "${BACKUPDIR}/letsencrypt")
+fi
+
+${CP} "${NPM_HOME}/data/."        "${BACKUPDIR}/data/."        --recursive
+${CP} "${NPM_HOME}/letsencrypt/." "${BACKUPDIR}/letsencrypt/." --recursive
+(${DOCKER} exec -it ${CONTAINER_NAME} mysqldump --user=${DB_USER} --password=${DB_PASSWORD} ${DB_NAME} -h 127.0.0.1) > "${BACKUPDIR}/npm-export.sql"
+${FIND} ${BASEDIR}* -mtime +120 -exec rm {} \; || true
