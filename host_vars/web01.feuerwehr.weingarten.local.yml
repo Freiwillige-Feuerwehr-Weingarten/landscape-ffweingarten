@@ -18,7 +18,7 @@ rainloop_install_path: /var/www/vhosts/rainloop.ff-weingarten.de/
 
 #hydrant config
 hydrant_install_path: /var/www/vhosts/hydrant.ff-weingarten.de/
-hydrant_backup_path: /mnt/web_backup/Hydrant/
+hydrant_backup_path: "{{ mountpoint }}/Hydrant/"
 
 # Users
 mariadb_users:
