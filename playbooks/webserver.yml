@@ -1,5 +1,4 @@
 ---
-#- hosts: websrv
 - hosts: websrv
   remote_user: ffweingarten
   become: true
@@ -27,6 +26,7 @@
           documentroot: "/var/www/vhosts/hydrant.ff-weingarten.de" 
           serveradmin: "admin@ff-weingarten.de"
         - servername: "rainloop.ff-weingarten.de"
+          serveralias: "webmail.ff-weingarten.de"
           documentroot: "/var/www/vhosts/rainloop.ff-weingarten.de"
           serveradmin: "admin@ff-weingarten.de"
           options: +Indexes +FollowSymLinks +ExecCGI
