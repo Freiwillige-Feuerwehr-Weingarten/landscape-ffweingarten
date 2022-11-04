@@ -29,7 +29,7 @@
       - "443:443"
     volumes:
       - "{{ npm_home }}/data:/data"
-      - "{{ npm_home }}/letsencrypt:/etc/letsencrypt"
+      - "{{ npm_home }}/letsencrypt/letsencrypt:/etc/letsencrypt"
     restart_policy: unless-stopped
     networks:
       - name: "proxy"
