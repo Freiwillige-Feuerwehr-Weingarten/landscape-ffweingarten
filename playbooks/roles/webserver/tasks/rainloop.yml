@@ -63,6 +63,14 @@
     state: import
     target: "{{ db_backup.ansible_facts.latest_file.path }}"
 
+- name: Create directory for configuration
+  ansible.builtin.file:
+    path: "{{ rainloop_install_path }}data/_data_/_default_/configs/"
+    state: directory
+    mode: '0755'
+    owner: www-data
+    group: www-data
+
 - name: Restore rainloop configuration
   ansible.builtin.template:
     src: files/application.j2
@@ -70,6 +78,14 @@
     owner: www-data
     group: www-data
     mode: 0644
+
+- name: Create directory for domains
+  ansible.builtin.file:
+    path: "{{ rainloop_install_path }}data/_data_/_default_/domains/"
+    state: directory
+    mode: '0755'
+    owner: www-data
+    group: www-data
 
 - name: Restore rainloop domains
   ansible.builtin.template:
