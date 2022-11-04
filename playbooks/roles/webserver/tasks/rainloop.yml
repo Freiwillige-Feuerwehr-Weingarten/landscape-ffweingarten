@@ -63,6 +63,22 @@
     state: import
     target: "{{ db_backup.ansible_facts.latest_file.path }}"
 
+- name: Restore rainloop configuration
+  ansible.builtin.template:
+    src: files/application.j2
+    dest: "{{ rainloop_install_path }}data/_data_/_default_/configs/application.ini"
+    owner: www-data
+    group: www-data
+    mode: 0644
+
+- name: Restore rainloop domains
+  ansible.builtin.template:
+    src: files/ff-weingarten.de.j2
+    dest: "{{ rainloop_install_path }}data/_data_/_default_/domains/ff-weingarten.de.ini"
+    owner: www-data
+    group: www-data
+    mode: 0644
+
 - name: Copy backup script
   ansible.builtin.template:
     src: files/rainloop_db_backup.j2
