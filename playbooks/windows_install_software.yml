@@ -17,6 +17,7 @@
         - adobereader
         - atlassian-companion
         - cutepdf
+        - teamviewer-qs
 
     - name: Uninstall multiple software packages
       win_chocolatey:
