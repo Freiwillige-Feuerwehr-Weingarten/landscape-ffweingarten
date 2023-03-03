@@ -2,85 +2,10 @@
 # This will install Firebird
 #
 
-- name: Install Firebird Server 3.0 and anacron
-  apt:
-    name: firebird3.0-server, anacron
-    state: present
+- import_tasks: install-firebird.yml
 
-- name: Enable Remote DB access
-  ansible.builtin.lineinfile:
-    path: /etc/firebird/3.0/firebird.conf
-    search_string: 'RemoteBindAddress = localhost'
-    line: RemoteBindAddress =
-
-- name: Create DB directory
-  ansible.builtin.file:
-    path: /opt/draeger
-    state: directory
-    mode: '0755'
-    owner: firebird
-    group: firebird
-
-- name: Set ISC_PASSWORD
-  ansible.builtin.lineinfile:
-    path: /etc/firebird/3.0/SYSDBA.password
-    regexp: '^ISC_PASSWORD="(.*)"'
-    line: ISC_PASSWORD="{{ sysdba_password }}"
-
-- name: Set AuthServer
-  ansible.builtin.lineinfile:
-    path: /etc/firebird/3.0/firebird.conf
-    regexp: '^AuthServer ="(.*)"'
-    line: AuthServer = Srp, Win_Sspi, Legacy_Auth
-
-- name: Set AuthClient
-  ansible.builtin.lineinfile:
-    path: /etc/firebird/3.0/firebird.conf
-    regexp: '^AuthClient ="(.*)"'
-    line: AuthClient = Srp, Srp256, Win_Sspi, Legacy_Auth
-
-- name: Disable Wirecrypt
-  ansible.builtin.lineinfile:
-    path: /etc/firebird/3.0/firebird.conf
-    regexp: '^WireCrypt ="(.*)"'
-    line: WireCrypt = Disabled
-
-- name: Set UserManager
-  ansible.builtin.lineinfile:
-    path: /etc/firebird/3.0/firebird.conf
-    regexp: '^UserManager ="(.*)"'
-    line: UserManager = Legacy_UserManager
-
-- name: Start Firebird 3.0 Service
-  ansible.builtin.service:
-   name: firebird3.0
-   state: started
-   enabled: yes
-
-- name: Get files in DB Backup folder
-  find:
-    paths: "{{ mountpoint }}"
-    recurse: yes
-    patterns: "*.fbb"
-  register: found_files
-
-- name: Get latest file
-  set_fact:
-    latest_file: "{{ found_files.files | sort(attribute='mtime',reverse=true) | first }}"
-  register: db_backup
-  
-- name: debug output
-  debug:
-    msg: "Using DB backup: {{ db_backup.ansible_facts.latest_file.path }}"
-
-- name: Restore Database
-  shell: "/usr/bin/gbak -REP -o -v {{ db_backup.ansible_facts.latest_file.path }} /opt/draeger/DRAEGERWARE.FDB"
-
-- name: Restore Database Ownership
-  ansible.builtin.file:
-    path: /opt/draeger/DRAEGERWARE.FDB
-    owner: firebird
-    group: firebird
+- import_tasks: restore-db.yml
+  when: restore_db
 
 - name: Create Draegerware database alias
   lineinfile:
@@ -88,6 +13,7 @@
    line: "draegerware = /opt/draeger/DRAEGERWARE.FDB"
    state: present
   notify: restart firebird
+  when: create_alias
 
 #- name: setup firebird.conf
 #  template:
@@ -99,10 +25,12 @@
 #     src: firebird.conf.j2
 
 # Set SYSDBA password
-- include: sysdba-pass.yml
+- import_tasks: sysdba-pass.yml
+  when: sysdba_pass
 
 - name: Copy backup script
   ansible.builtin.copy:
     src: files/firebirdbackup
     dest: /etc/cron.daily/
     mode: 0755
+  when: setup_backup
