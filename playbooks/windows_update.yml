@@ -19,5 +19,9 @@
       register: win_updates_list
 
     - name: debug output
+      vars:
+        msg: |
+           Installed Updates: {{ win_updates_list.found_update_count }},
+           list: {{ win_updates_list.updates }}
       debug:
-        msg: "Installed Updates: {{ win_updates_list.found_update_count }}, list: {{ win_updates_list.updates }}"
+        msg: "{{ msg.split('\n') }}"
