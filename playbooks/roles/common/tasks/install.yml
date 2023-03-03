@@ -3,3 +3,9 @@
   apt:
     pkg: "{{ generic_packages }}"
     state: present
+
+- name: Install qemu-guest-agent
+  apt:
+    pkg: "{{ qemu_packages }}"
+    state: present
+  when: setup_qemu

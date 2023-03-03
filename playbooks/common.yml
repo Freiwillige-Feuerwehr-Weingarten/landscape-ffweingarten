@@ -2,7 +2,7 @@
 # Common playbook needs to executed first
 - name: Common configuration shared for all nodes
   become: true
-  hosts: prod, staging, !nut
+  hosts: prod, staging
   remote_user: ffweingarten
   gather_facts: true
   roles:

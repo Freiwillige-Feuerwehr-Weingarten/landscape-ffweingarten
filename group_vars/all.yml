@@ -24,7 +24,6 @@ generic_packages:
   - net-tools
   - nfs-common
   - pv
-  - qemu-guest-agent
   - resolvconf
   - rsync
   - screen
@@ -37,3 +36,5 @@ generic_packages:
   - wget
   - zsh
 
+qemu_packages:
+  - qemu-guest-agent
