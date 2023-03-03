@@ -1,6 +1,6 @@
 ---
 - name: Setup checkmk server
-  hosts: test_checkmk
+  hosts: prod_checkmk
   remote_user: ffweingarten
   become: true
   become_user: root
