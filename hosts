@@ -6,10 +6,12 @@ all:
         rprox.feuerwehr.weingarten.local:
         vpn02.feuerwehr.weingarten.local:
         db01.feuerwehr.weingarten.local:
+        db02.feuerwehr.weingarten.local:
         web01.feuerwehr.weingarten.local:
         intra01.feuerwehr.weingarten.local:
         meet01.feuerwehr.weingarten.local:
         monitor01.feuerwehr.weingarten.local:
+        jump.feuerwehr.weingarten.local:
         nut01.feuerwehr.weingarten.local:
         nut02.feuerwehr.weingarten.local:
       children:
@@ -18,7 +20,8 @@ all:
             vpn02.feuerwehr.weingarten.local:
         dbsrv:
           hosts:
-            db01.feuerwehr.weingarten.local:
+            # db01.feuerwehr.weingarten.local:
+            db02.feuerwehr.weingarten.local:
         websrv:
           hosts:
             web01.feuerwehr.weingarten.local:
@@ -36,10 +39,17 @@ all:
         #  hosts:
         #    pve-node1.feuerwehr.weingarten.local:
         #    pve-node3.feuerwehr.weingarten.local:
-    staging:
+    test:
       hosts:
-        test-host:
-          ansible_host: 192.168.10.112
+        checkmk.test.feuerwehr.weingarten.local:
+        wireguard.test.feuerweehr.weingarten.local:
+      children:
+        test_checkmk:
+          hosts:
+            checkmk.test.feuerwehr.weingarten.local:
+        test_wireguard:
+          hosts:
+            wireguard.test.feuerwehr.weingarten.local:
     windows:
       hosts:
         eddard.feuerwehr.weingarten.local:
