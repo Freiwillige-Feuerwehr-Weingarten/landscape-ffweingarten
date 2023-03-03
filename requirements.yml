@@ -13,3 +13,4 @@ collections:
   - name: community.windows
   - name: community.mysql
   - name: chocolatey.chocolatey
+  - name: tribe29.checkmk
