@@ -11,13 +11,13 @@
     owner: www-data
     group: www-data
     mode: '0755'
-  when: not rainloop_installed.stat.exists
+  when: rainloop_installed.stat.exists == false
 
-- name: install rainloop
+- name: Download and install rainloop
   ansible.builtin.command:
     chdir: "{{ rainloop_install_path }}"
-    cmd: bash -c "curl -s http://repository.rainloop.net/installer.php | php"
-  when: not rainloop_installed.stat.exists
+    cmd: bash -c "curl -sL https://repository.rainloop.net/installer.php | php"
+  when: rainloop_installed.stat.exists == false
   notify: restart apache
 
 - name: Fix file permissions in rainloop installation

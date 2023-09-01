@@ -1,38 +1,26 @@
 ---
-- hosts: websrv
+- name: Webserver Playbook 
+  hosts: prod_webserver
   remote_user: ffweingarten
   become: true
   gather_facts: true
-  vars:
-    mountpoint: "/mnt/backup"
   roles:
-   - role: devsec.hardening.ssh_hardening
-     sftp_enabled: true
-   - role: devsec.hardening.os_hardening
-   - role: geerlingguy.ntp
-     vars:
-        ntp_timezone: Europe/Berlin
-   - role: nfs
-     vars:
+    - role: common
+      vars:
+        setup_qemu: true
+    - role: devsec.hardening.ssh_hardening
+      vars:
+        sftp_enabled: true
+    - role: devsec.hardening.os_hardening
+    - role: geerlingguy.ntp
+    - role: nfs
+      vars:
         permissions: "644"
+        mountpoint: "/mnt/backup"
         nfs_src: stark.feuerwehr.weingarten.local:/Web_Backup
         options: vers=4,rw,rsize=8192,wsize=8192,timeo=14,intr
-   - role: geerlingguy.php
-   - role: geerlingguy.apache
-     vars:
-      apache_create_vhosts: true
-      apache_vhosts:
-        - servername: "hydrant.ff-weingarten.de"
-          documentroot: "/var/www/vhosts/hydrant.ff-weingarten.de" 
-          serveradmin: "admin@ff-weingarten.de"
-        - servername: "rainloop.ff-weingarten.de"
-          serveralias: "webmail.ff-weingarten.de"
-          documentroot: "/var/www/vhosts/rainloop.ff-weingarten.de"
-          serveradmin: "admin@ff-weingarten.de"
-          options: +Indexes +FollowSymLinks +ExecCGI
-          extra_parameters: |
-              <Directory /var/www/vhosts/rainloop.ff-weingarten.de/data>
-                Require all denied
-              </Directory>
-   - role: fauust.mariadb
-   - role: webserver
+    - role: geerlingguy.php
+    - role: geerlingguy.apache
+    - role: fauust.mariadb
+    - role: webserver
+    - role: tribe29.checkmk.agent
