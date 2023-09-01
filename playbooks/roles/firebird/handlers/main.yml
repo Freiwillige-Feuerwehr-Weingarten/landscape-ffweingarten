@@ -1,7 +1,7 @@
 ---
 # handlers for firebird
 
-- name: restart firebird
-  service:
+- name: Restart firebird
+  ansible.builtin.service:
    name: firebird3.0
    state: restarted

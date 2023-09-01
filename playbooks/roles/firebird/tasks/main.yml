@@ -2,35 +2,32 @@
 # This will install Firebird
 #
 
-- import_tasks: install-firebird.yml
+- name: Install Tasks
+  ansible.builtin.import_tasks: install-firebird.yml
 
-- import_tasks: restore-db.yml
+- name: DB Restore Tasks
+  ansible.builtin.import_tasks: restore-db.yml
   when: restore_db
 
-- name: Create Draegerware database alias
-  lineinfile:
+# TODO: Sanitize ownerrights for security3.fdb
+# TODO: Backup security3.fdb
+
+- name: Create Firebird database alias
+  ansible.builtin.lineinfile:
    dest: /etc/firebird/3.0/databases.conf
-   line: "draegerware = /opt/draeger/DRAEGERWARE.FDB"
+   line: "{{ firebird_db_alias }} = {{ firebird_db_path }}/{{ firebird_db_name }}"
    state: present
   notify: restart firebird
   when: create_alias
 
-#- name: setup firebird.conf
-#  template:
-#     backup: yes
-#     dest: /etc/firebird/firebird.conf
-#     group: firebird
-#     owner: firebird
-#     mode: 0644
-#     src: firebird.conf.j2
+- name: Set Password for DB User
+  ansible.builtin.import_tasks: db-user.yml
 
-# Set SYSDBA password
-- import_tasks: sysdba-pass.yml
-  when: sysdba_pass
-
-- name: Copy backup script
-  ansible.builtin.copy:
-    src: files/firebirdbackup
-    dest: /etc/cron.daily/
-    mode: 0755
+- name: Install backup script
+  ansible.builtin.template:
+    src: templates/firebirdbackup.j2
+    dest: /etc/cron.daily/firebirdbackup
+    owner: root
+    group: root
+    mode: '0755'
   when: setup_backup

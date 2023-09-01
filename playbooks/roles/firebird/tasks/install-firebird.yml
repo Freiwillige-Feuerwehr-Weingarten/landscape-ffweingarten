@@ -2,7 +2,7 @@
 # This will install firebird and do some basic setup
 
 - name: Install Firebird Server 3.0 and anacron
-  apt:
+  ansible.builtin.apt:
     name: firebird3.0-server, anacron
     state: present
 
@@ -14,17 +14,17 @@
 
 - name: Create DB directory
   ansible.builtin.file:
-    path: "{{ fb_db_path }}"
+    path: "{{ firebird_db_path }}"
     state: directory
     mode: '0755'
     owner: firebird
     group: firebird
 
-- name: Set ISC_PASSWORD
+- name: Set SYSDBA Password
   ansible.builtin.lineinfile:
     path: /etc/firebird/3.0/SYSDBA.password
     regexp: '^ISC_PASSWORD="(.*)"'
-    line: ISC_PASSWORD="{{ sysdba_password }}"
+    line: ISC_PASSWORD="{{ firebird_database_admin_user_password }}"
 
 - name: Set AuthServer
   ansible.builtin.lineinfile:
@@ -52,6 +52,6 @@
 
 - name: Start Firebird 3.0 Service
   ansible.builtin.service:
-   name: firebird3.0
-   state: started
-   enabled: yes
+    name: firebird3.0
+    state: started
+    enabled: true

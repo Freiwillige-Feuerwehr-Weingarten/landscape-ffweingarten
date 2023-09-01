@@ -1,25 +1,25 @@
 ---
 - name: Get files in DB Backup folder
-  find:
+  ansible.builtin.find:
     paths: "{{ mountpoint }}"
-    recurse: yes
+    recurse: true
     patterns: "*.fbb"
   register: found_files
 
 - name: Get latest file
-  set_fact:
-    latest_file: "{{ found_files.files | sort(attribute='mtime',reverse=true) | first }}"
+  ansible.builtin.set_fact:
+    latest_file: "{{ found_files.files | sort(attribute='mtime', reverse=true) | first }}"
   register: db_backup
-  
-- name: debug output
-  debug:
+
+- name: Debug output
+  ansible.builtin.debug:
     msg: "Using DB backup: {{ db_backup.ansible_facts.latest_file.path }}"
 
 - name: Restore Database
-  shell: "/usr/bin/gbak -REP -o -v {{ db_backup.ansible_facts.latest_file.path }} /opt/draeger/DRAEGERWARE.FDB"
+  ansible.builtin.shell: "/usr/bin/gbak -REP -o -v -USER {{ firebird_database_user }} -PASSWORD {{ firebird_database_user_password }} {{ db_backup.ansible_facts.latest_file.path }} {{ firebird_db_path }}/{{ firebird_db_name }}"
 
 - name: Restore Database Ownership
   ansible.builtin.file:
-    path: /opt/draeger/DRAEGERWARE.FDB
+    path: "{{ firebird_db_path }}/{{ firebird_db_name }}"
     owner: firebird
     group: firebird
