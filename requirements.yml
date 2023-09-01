@@ -7,6 +7,7 @@ roles:
   - name: geerlingguy.php
   - name: fauust.mariadb
   - name: systemli.jitsi_meet
+  - name: simoncaron.nut
 
 collections:
   - name: devsec.hardening
