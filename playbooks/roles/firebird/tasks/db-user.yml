@@ -1,0 +1,21 @@
+---
+# This will setup the database user
+#
+
+- name: Copy SQL script
+  ansible.builtin.template:
+    src: templates/sysdba.j2
+    dest: /tmp/sysdba.sql
+    owner: root
+    group: root
+    mode: '0500'
+
+# This will fail if the db user already exists, hence ignore_errors
+- name: Create db user and grant him permissions on database
+  ansible.builtin.shell: "/usr/bin/isql-fb -m -m2 -user {{ firebird_database_admin_user }} -i /tmp/sysdba.sql -o /tmp/sysdba.log {{ firebird_db_path }}/{{ firebird_db_name }}"
+  ignore_errors: true
+
+- name: Remove sql script
+  ansible.builtin.file:
+    path: /tmp/sysdba.sql
+    state: absent
