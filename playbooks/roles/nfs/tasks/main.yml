@@ -1,11 +1,11 @@
 ---
 - name: Install nfs debian package
-  apt:
+  ansible.builtin.apt:
     pkg: nfs-common
     state: present
   when: ansible_os_family == 'Debian'
 
-- name: Check if the mountain exists
+- name: Check if the mountpoint exists
   ansible.builtin.file:
     path: "{{ mountpoint }}"
     state: directory
@@ -13,7 +13,7 @@
     owner: root
     group: root
 
-- name: mount nfs share
+- name: Mount nfs share
   ansible.posix.mount:
     src: "{{ nfs_src }}"
     path: "{{ mountpoint }}"
