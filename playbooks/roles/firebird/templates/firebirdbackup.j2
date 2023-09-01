@@ -1,0 +1,21 @@
+#!/bin/bash
+  
+NBACKUP=$(command -v nbackup)
+GBAK=$(command -v gbak)
+FIND=$(command -v find)
+USER_NAME="{{ firebird_database_admin_user }}"
+DATABASE="{{ firebird_db_path }}/{{ firebird_db_name }}"
+DB_PASSWORD="{{ firebird_database_admin_user_password }}"
+
+BASEDIR="/mnt/firebird_backup/"
+BACKUP_NAME="${BASEDIR}$(date +%Y)/db01-draeger-$(date +%F).nbk"
+GBAK_NAME="${BASEDIR}$(date +%Y)/db01-draeger-$(date +%F).fbb"
+LOG_NAME="${BASEDIR}$(date +%Y)/db01-draeger-$(date +%F).log"
+
+if [ ! -d "${BASEDIR}$(date +%Y)" ]; then
+        mkdir "${BASEDIR}$(date +%Y)"
+fi
+
+(${NBACKUP} -U ${USER_NAME} -P ${DB_PASSWORD} -B 0 ${DATABASE} "${BACKUP_NAME}" 2>&1) > "${LOG_NAME}"
+${GBAK} -user ${USER_NAME} -pass ${DB_PASSWORD} -backup ${DATABASE} "${GBAK_NAME}"
+${FIND} ${BASEDIR}* -mtime +120 -exec rm {} \; || true
