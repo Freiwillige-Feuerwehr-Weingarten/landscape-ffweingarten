@@ -4,27 +4,24 @@ all:
     prod:
       hosts:
         rprox.feuerwehr.weingarten.local:
-        vpn02.feuerwehr.weingarten.local:
-        db01.feuerwehr.weingarten.local:
+        # db01.feuerwehr.weingarten.local:
         db02.feuerwehr.weingarten.local:
-        web01.feuerwehr.weingarten.local:
         intra01.feuerwehr.weingarten.local:
         meet01.feuerwehr.weingarten.local:
-        monitor01.feuerwehr.weingarten.local:
-        jump.feuerwehr.weingarten.local:
+        # monitor01.feuerwehr.weingarten.local:
+        # jump.feuerwehr.weingarten.local:
         nut01.feuerwehr.weingarten.local:
-        nut02.feuerwehr.weingarten.local:
+        # nut02.feuerwehr.weingarten.local:
+        checkmk.prod.feuerwehr.weingarten.local:
+        wireguard.prod.feuerwehr.weingarten.local:
+        webserver.prod.feuerwehr.weingarten.local:
+        jitsi.prod.feuerwehr.weingarten.local:
+        nut.prod.feuerwehr.weingarten.local:
+        # nextcloud.test.feuerwehr.weingarten.local:
+        firebird.test.feuerwehr.weingarten.local:
+        draeger.prod.feuerwehr.weingarten.local:
+        bockermann.prod.feuerwehr.weingarten.local:
       children:
-        vpnsrv:
-          hosts:
-            vpn02.feuerwehr.weingarten.local:
-        dbsrv:
-          hosts:
-            # db01.feuerwehr.weingarten.local:
-            db02.feuerwehr.weingarten.local:
-        websrv:
-          hosts:
-            web01.feuerwehr.weingarten.local:
         intrasrv:
           hosts:
             intra01.feuerwehr.weingarten.local:
@@ -34,15 +31,35 @@ all:
         nut:
           hosts: 
             nut01.feuerwehr.weingarten.local:
-            nut02.feuerwehr.weingarten.local:
-        #virt:
-        #  hosts:
-        #    pve-node1.feuerwehr.weingarten.local:
-        #    pve-node3.feuerwehr.weingarten.local:
+       #     nut02.feuerwehr.weingarten.local:
+        prod_checkmk:
+          hosts:
+            checkmk.prod.feuerwehr.weingarten.local:
+        prod_wireguard:
+          hosts:
+            wireguard.prod.feuerwehr.weingarten.local:
+        prod_webserver:
+          hosts:
+            webserver.prod.feuerwehr.weingarten.local:
+        prod_jitsi:
+          hosts:
+            jitsi.prod.feuerwehr.weingarten.local:
+        prod_nut:
+          hosts:
+            nut.prod.feuerwehr.weingarten.local:
+        test_firebird:
+          hosts:
+            firebird.test.feuerwehr.weingarten.local:
+        prod_draeger:
+          hosts:
+            draeger.prod.feuerwehr.weingarten.local:
+        prod_bockermann:
+          hosts:
+            bockermann.prod.feuerwehr.weingarten.local:
     test:
       hosts:
         checkmk.test.feuerwehr.weingarten.local:
-        wireguard.test.feuerweehr.weingarten.local:
+        wireguard.test.feuerwehr.weingarten.local:
       children:
         test_checkmk:
           hosts:
@@ -52,16 +69,21 @@ all:
             wireguard.test.feuerwehr.weingarten.local:
     windows:
       hosts:
-        eddard.feuerwehr.weingarten.local:
+        eddard.feuerwehr.weingarten.local:  # Gerätewart III
         tywin.feuerwehr.weingarten.local:
         cersei.feuerwehr.weingarten.local:
-        brandon.feuerwehr.weingarten.local:
         jaime.feuerwehr.weingarten.local:
-        tyrion.feuerwehr.weingarten.local:
-        arya.feuerwehr.weingarten.local:
-        robb.feuerwehr.weingarten.local:
-        sansa.feuerwehr.weingarten.local:
-        catelyn.feuerwehr.weingarten.local:
+        tyrion.feuerwehr.weingarten.local:  # Fürhungsraum Lagekarte
+        arya.feuerwehr.weingarten.local:    # Führungsraum Sichter
+        robb.feuerwehr.weingarten.local:    # Atemschutzwerkstatt
+        brandon.feuerwehr.weingarten.local: # Atemschutzwerkstatt
+        bran.feuerwehr.weingarten.local:    # Gerätewarte I
+        rickon.feuerwehr.weingarten.local:  # Gerätewarte II
+        sansa.feuerwehr.weingarten.local:   # Kommandant
+        catelyn.feuerwehr.weingarten.local: # Gerätewarte IV
+        dorna.feuerwehr.weingarten.local:   # Alarmabfrage I
+        lancel.feuerwehr.weingartenn.local: # Alarmabfrage II
+
       vars:
         ansible_user: administrator@feuerwehr
         ansible_password: !vault |
