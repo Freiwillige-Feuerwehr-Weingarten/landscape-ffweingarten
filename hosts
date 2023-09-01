@@ -1,0 +1,100 @@
+---
+all:
+  children:
+    prod:
+      hosts:
+        rprox.feuerwehr.weingarten.local:
+        # db01.feuerwehr.weingarten.local:
+        db02.feuerwehr.weingarten.local:
+        intra01.feuerwehr.weingarten.local:
+        meet01.feuerwehr.weingarten.local:
+        # monitor01.feuerwehr.weingarten.local:
+        # jump.feuerwehr.weingarten.local:
+        nut01.feuerwehr.weingarten.local:
+        # nut02.feuerwehr.weingarten.local:
+        checkmk.prod.feuerwehr.weingarten.local:
+        wireguard.prod.feuerwehr.weingarten.local:
+        webserver.prod.feuerwehr.weingarten.local:
+        jitsi.prod.feuerwehr.weingarten.local:
+        nut.prod.feuerwehr.weingarten.local:
+        # nextcloud.test.feuerwehr.weingarten.local:
+        firebird.test.feuerwehr.weingarten.local:
+        draeger.prod.feuerwehr.weingarten.local:
+        bockermann.prod.feuerwehr.weingarten.local:
+      children:
+        intrasrv:
+          hosts:
+            intra01.feuerwehr.weingarten.local:
+        meetsrv:
+          hosts:
+            meet01.feuerwehr.weingarten.local:
+        nut:
+          hosts: 
+            nut01.feuerwehr.weingarten.local:
+       #     nut02.feuerwehr.weingarten.local:
+        prod_checkmk:
+          hosts:
+            checkmk.prod.feuerwehr.weingarten.local:
+        prod_wireguard:
+          hosts:
+            wireguard.prod.feuerwehr.weingarten.local:
+        prod_webserver:
+          hosts:
+            webserver.prod.feuerwehr.weingarten.local:
+        prod_jitsi:
+          hosts:
+            jitsi.prod.feuerwehr.weingarten.local:
+        prod_nut:
+          hosts:
+            nut.prod.feuerwehr.weingarten.local:
+        test_firebird:
+          hosts:
+            firebird.test.feuerwehr.weingarten.local:
+        prod_draeger:
+          hosts:
+            draeger.prod.feuerwehr.weingarten.local:
+        prod_bockermann:
+          hosts:
+            bockermann.prod.feuerwehr.weingarten.local:
+    test:
+      hosts:
+        checkmk.test.feuerwehr.weingarten.local:
+        wireguard.test.feuerwehr.weingarten.local:
+      children:
+        test_checkmk:
+          hosts:
+            checkmk.test.feuerwehr.weingarten.local:
+        test_wireguard:
+          hosts:
+            wireguard.test.feuerwehr.weingarten.local:
+    windows:
+      hosts:
+        eddard.feuerwehr.weingarten.local:  # Gerätewart III
+        tywin.feuerwehr.weingarten.local:
+        cersei.feuerwehr.weingarten.local:
+        jaime.feuerwehr.weingarten.local:
+        tyrion.feuerwehr.weingarten.local:  # Fürhungsraum Lagekarte
+        arya.feuerwehr.weingarten.local:    # Führungsraum Sichter
+        robb.feuerwehr.weingarten.local:    # Atemschutzwerkstatt
+        brandon.feuerwehr.weingarten.local: # Atemschutzwerkstatt
+        bran.feuerwehr.weingarten.local:    # Gerätewarte I
+        rickon.feuerwehr.weingarten.local:  # Gerätewarte II
+        sansa.feuerwehr.weingarten.local:   # Kommandant
+        catelyn.feuerwehr.weingarten.local: # Gerätewarte IV
+        dorna.feuerwehr.weingarten.local:   # Alarmabfrage I
+        lancel.feuerwehr.weingartenn.local: # Alarmabfrage II
+
+      vars:
+        ansible_user: administrator@feuerwehr
+        ansible_password: !vault |
+                  $ANSIBLE_VAULT;1.1;AES256
+                  35656661653861653263633737613132363332356534656231613766303232333463306662626433
+                  3532393530643534326136336361653930653133376130650a316337323539326431616264613534
+                  30363266626337643163376636306661396165373333393562316562323238393361346633333135
+                  3733323963326234650a633536636131323635633462636663306332333233343334343535643831
+                  3538
+        ansible_connection: winrm
+        ansible_port: 5985
+        ansible_winrm_transport: ntlm
+        # ansible_winrm_message_enncryption: always
+        ansible_winrm_server_cert_validation: ignore

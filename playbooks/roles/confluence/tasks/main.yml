@@ -1,0 +1,8 @@
+---
+- name: Install jdk
+  apt:
+    pkg: openjdk-17-jre, python3-lxml
+    state: present
+
+- include_tasks: postgres.yml
+- include_tasks: confluence.yml

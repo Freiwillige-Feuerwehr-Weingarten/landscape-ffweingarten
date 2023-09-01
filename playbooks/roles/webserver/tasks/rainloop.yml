@@ -1,0 +1,102 @@
+---
+- name: Check if rainloop is installed
+  ansible.builtin.stat:
+    path: "{{ rainloop_install_path + 'index.php' }}"
+  register: rainloop_installed
+
+- name: Create web folder for rainloop
+  ansible.builtin.file:
+    path: "{{ rainloop_install_path }}"
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: '0755'
+  when: rainloop_installed.stat.exists == false
+
+- name: Download and install rainloop
+  ansible.builtin.command:
+    chdir: "{{ rainloop_install_path }}"
+    cmd: bash -c "curl -sL https://repository.rainloop.net/installer.php | php"
+  when: rainloop_installed.stat.exists == false
+  notify: restart apache
+
+- name: Fix file permissions in rainloop installation
+  file:
+    path: "{{ rainloop_install_path }}"
+    owner: www-data
+    group: www-data
+    mode: 0644
+    recurse: yes
+
+- name: Fix directory permissions in rainloop installation
+  file:
+    path: "{{ rainloop_install_path }}"
+    owner: www-data
+    group: www-data
+    mode: 0755
+    state: directory
+    recurse: yes
+
+- name: Get files in DB Backup folder
+  find:
+    paths: "{{ mountpoint }}"
+    recurse: yes
+    patterns: "*.sql"
+  register: found_files
+
+- name: Get latest file
+  set_fact:
+    latest_file: "{{ found_files.files | sort(attribute='mtime',reverse=true) | first }}"
+  register: db_backup
+  
+- name: debug output
+  debug:
+    msg: "Using DB backup: {{ db_backup.ansible_facts.latest_file.path }}"
+
+- name: Restore rainloop database
+  community.mysql.mysql_db:
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+    name: "{{ rainloop_db }}"
+    login_user: "{{ rainloop_user }}"
+    login_password: "{{ rainloop_password }}"
+    login_host: "localhost"
+    state: import
+    target: "{{ db_backup.ansible_facts.latest_file.path }}"
+
+- name: Create directory for configuration
+  ansible.builtin.file:
+    path: "{{ rainloop_install_path }}data/_data_/_default_/configs/"
+    state: directory
+    mode: '0755'
+    owner: www-data
+    group: www-data
+
+- name: Restore rainloop configuration
+  ansible.builtin.template:
+    src: files/application.j2
+    dest: "{{ rainloop_install_path }}data/_data_/_default_/configs/application.ini"
+    owner: www-data
+    group: www-data
+    mode: 0644
+
+- name: Create directory for domains
+  ansible.builtin.file:
+    path: "{{ rainloop_install_path }}data/_data_/_default_/domains/"
+    state: directory
+    mode: '0755'
+    owner: www-data
+    group: www-data
+
+- name: Restore rainloop domains
+  ansible.builtin.template:
+    src: files/ff-weingarten.de.j2
+    dest: "{{ rainloop_install_path }}data/_data_/_default_/domains/ff-weingarten.de.ini"
+    owner: www-data
+    group: www-data
+    mode: 0644
+
+- name: Copy backup script
+  ansible.builtin.template:
+    src: files/rainloop_db_backup.j2
+    dest: /etc/cron.daily/rainloop_db_backup
+    mode: 0755

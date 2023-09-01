@@ -1,0 +1,23 @@
+---
+- hosts: prod_nut
+  remote_user: ffweingarten
+  become: true
+  gather_facts: true
+  pre_tasks:
+    - name: Install nut-snmp as dependency
+      apt:
+        name: nut-snmp
+        state: present
+  roles:
+    - role: common
+      vars:
+        setup_qemu: true
+    #- role: devsec.hardening.ssh_hardening
+    #  vars:
+    #    sftp_enabled: true
+    #- role: devsec.hardening.os_hardening
+    - role: geerlingguy.ntp
+      vars:
+        ntp_timezone: Europe/Berlin
+    - role: tribe29.checkmk.agent
+    - role: simoncaron.nut

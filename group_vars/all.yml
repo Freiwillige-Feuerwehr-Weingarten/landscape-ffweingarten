@@ -1,0 +1,72 @@
+---
+# Users that should be available on all target nodes
+local_user:
+  - ffweingarten
+
+# Packages that should be available on all target nodes
+generic_packages:
+  - anacron
+  - atop
+  - bmon
+  - curl
+  - dmidecode
+  - dstat
+  - genisoimage
+  - git
+  - gpg
+  - htop
+  - iftop
+  - ifupdown
+  - iotop
+  - ncdu
+  - nload
+  - nmap
+  - net-tools
+  - nfs-common
+  - pv
+  - resolvconf
+  - rsync
+  - screen
+  - shellcheck
+  - strace
+  - syslinux
+  - tree
+  - unzip
+  - vim
+  - wget
+  - zsh
+
+qemu_packages:
+  - qemu-guest-agent
+
+# ntp timezone
+ntp_timezone: Europe/Berlin
+
+# checkmk stuff
+checkmk_agent_edition: cre
+checkmk_agent_protocol: http
+checkmk_agent_server: checkmk.prod.feuerwehr.weingarten.local
+checkmk_agent_server_validate_certs: 'true'
+checkmk_agent_version: "2.2.0p8"
+checkmk_agent_site: "feuerwehr"
+chechmk_agent_user: "automation"
+checkmk_agent_secret: !vault |
+  $ANSIBLE_VAULT;1.1;AES256
+  35363333653164383466363532336336393630653565636534663036316535666338346132336466
+  6134623065386136316233616636333936326130333836660a613838393534656332633365646461
+  65383236316264326533393739303436646432306662353233393231616432656532323439656261
+  3239306331396665650a373339326537666435623266396237613361393830646430353431353335
+  37343135656538313730306435646239326161643336386238303636623366303361
+checkmk_agent_registration_server: "{{ checkmk_agent_server }}"
+checkmk_agent_registration_site: "{{ checkmk_agent_site }}"
+checkmk_agent_folder: "/"
+checkmk_agent_tls: 'true'
+checkmk_agent_add_host: 'true'
+checkmk_agent_discover: 'true'
+checkmk_agent_force_install: 'true'
+checkmk_agent_delegate_api_calls: localhost
+checkmk_agent_delegate_download: "{{ inventory_hostname }}"
+checkmk_agent_host_name: "{{ inventory_hostname }}"
+checkmk_agent_update: 'true'
+checkmk_agent_host_attributes:
+  ipaddress: "{{ checkmk_agent_host_ip | default(omit) }}"

@@ -1,0 +1,77 @@
+---
+- name: Install Postgres
+  apt:
+    pkg: postgresql, postgresql-contrib, python3-psycopg2
+    state: present
+
+- name: Start postgresql
+  ansible.builtin.service:
+    state: started
+    name: postgresql
+
+- name: Get files in DB Backup folder
+  find:
+    paths: "{{ mountpoint }}"
+    recurse: yes
+    patterns: "*.sql"
+  register: found_files
+
+- name: Get latest file
+  set_fact:
+    latest_file: "{{ found_files.files | sort(attribute='mtime',reverse=true) | first }}"
+  register: db_backup
+  
+- name: debug output
+  debug:
+    msg: "Using DB backup: {{ db_backup.ansible_facts.latest_file.path }}" 
+
+- name: Copy db backup to tmp
+  ansible.builtin.shell:
+    cmd: "cp -af {{ db_backup.ansible_facts.latest_file.path }} {{ confluence_db_temp_location }}"
+
+- name: Change ownership for db backup
+  ansible.builtin.file:
+    path: "{{ confluence_db_temp_location }}"
+    owner: postgres
+    group: postgres
+
+- name: Create confluence db
+  community.postgresql.postgresql_db:
+    name: "{{ confluence_db_name }}"
+  become: true
+  become_user: postgres
+  vars:
+    ansible_ssh_pipelining: true
+
+# need to create for role confluenceuser
+- name: Restore Confluence database
+  community.postgresql.postgresql_db:
+    state: restore
+    name: "{{ confluence_db_name }}"
+    owner: "{{ confluence_db_username }}"
+    target: "{{ confluence_db_temp_location }}"
+  become: true
+  become_user: postgres
+  vars:
+    ansible_ssh_pipelining: true
+
+- name: Create Confluence db User
+  community.postgresql.postgresql_user:
+    db: "{{ confluence_db_name }}"
+    name: "{{ confluence_db_username }}"
+    password: "{{ confluence_db_password }}"
+  become: true
+  become_user: postgres
+  vars:
+    ansible_ssh_pipelining: true
+
+- name: Access right for confluence db User
+  become: true
+  become_user: postgres
+  vars:
+    ansible_ssh_pipelining: true
+  community.postgresql.postgresql_privs:
+    db: "{{ confluence_db_name }}"
+    role: "{{ confluence_db_username }}"
+    type: database
+    privs: ALL

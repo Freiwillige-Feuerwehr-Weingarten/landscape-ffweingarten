@@ -1,0 +1,33 @@
+---
+# Playbook install software on windows systems
+
+- hosts: windows
+  tasks:
+    - name: Install multiple software packages
+      chocolatey.chocolatey.win_chocolatey:
+        name: '{{ item }}'
+        state: latest
+      loop:
+        - procexp
+        - putty.portable
+        - winscp.install
+        - vlc.portable
+        - winrar
+        - atom.install
+        - adobereader
+        - atlassian-companion
+        - cutepdf
+        - teamviewer-qs
+
+    - name: Uninstall multiple software packages
+      win_chocolatey:
+        name:
+        - putty
+        state: absent
+
+    - name: Gather facts
+      chocolatey.chocolatey.win_chocolatey_facts:
+
+    - name: Display the packages
+      debug:
+        var: ansible_chocolatey.packages

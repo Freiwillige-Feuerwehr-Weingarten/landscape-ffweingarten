@@ -1,0 +1,31 @@
+---
+# Install Jitsi
+- name: Common configuration shared for all nodes
+  become: true
+  hosts: prod_jitsi
+  remote_user: ffweingarten
+  gather_facts: true
+  roles:
+    - role: devsec.hardening.ssh_hardening
+      sftp_enabled: true
+    - role: devsec.hardening.os_hardening
+    - role: geerlingguy.ntp
+      vars:
+        ntp_timezone: Europe/Berlin
+    - role: systemli.jitsi_meet
+      vars:
+        jitsi_meet_server_name: "meet.ff-weingarten.de"
+        jitsi_meet_title: "Jitsi Feuerwehr Weingarten"
+        jitsi_meet_nginx_listen_https_enabled: false
+        jitsi_meet_behind_nat_enabled: true
+        jitsi_meet_nat_public_ip: "meet.ff-weingarten.de"
+        jitsi_meet_nat_local_ip: "{{ ansible_default_ipv4.address | default(ansible_all_ipv4_addresses[0]) }}"
+        jitsi_meet_videobridge_muc_nickname: "nickname"
+        jitsi_meet_turn_secret: !vault |
+              $ANSIBLE_VAULT;1.1;AES256
+              34316665323033613966643061373737666635356364653465343965383930393632613539376235
+              3133353232633963396533623738393832636665373661390a343638373730333934303230373366
+              32643563373662363031633362663035623664323438326264653434383434383939613135356331
+              3061643861333732360a623831363137643239306637653562376166323561383932643766333066
+              38376366633832376433633365393061303334653264313835333335386364643033
+    - role: tribe29.checkmk.agent

@@ -1,0 +1,10 @@
+---
+restore_db: false
+create_alias: false
+setup_backup: false
+sysdba_pass: false
+
+firebird_database_admin_user: SYSDBA
+firebird_database_admin_user_password: changeme
+firebird_database_user: FLORIX
+firebird_database_user_password: changeme

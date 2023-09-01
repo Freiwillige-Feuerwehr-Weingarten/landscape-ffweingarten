@@ -1,0 +1,10 @@
+---
+- name: Install libapache-mod-php and other dependencies
+  apt:
+    pkg: libapache2-mod-php, rsync
+    state: present
+
+- include_tasks: hydrant.yml
+- include_tasks: rainloop.yml
+
+## post_max_filesize to 100M

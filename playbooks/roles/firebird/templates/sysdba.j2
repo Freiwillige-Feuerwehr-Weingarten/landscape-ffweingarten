@@ -1,0 +1,9 @@
+connect {{ firebird_db_alias }} user {{ firebird_database_admin_user }} password '{{ firebird_database_admin_user_password }}';
+commit;
+create user {{ firebird_database_user }} password '{{ firebird_database_user_password }}' grant admin role;
+commit;
+GRANT CREATE TABLE to {{ firebird_database_user }};
+GRANT ALTER ANY TABLE to {{ firebird_database_user }};
+GRANT CREATE SEQUENCE to {{ firebird_database_user }};
+GRANT ALTER ANY SEQUENCE to {{ firebird_database_user }};
+commit;

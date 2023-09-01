@@ -1,0 +1,68 @@
+# {{ ansible_managed }}
+
+[Interface]
+Address = 192.168.69.1/24
+ListenPort = 51820
+PrivateKey = {{ server_privkey }}
+PostUp = iptables -A FORWARD -i wg0 -j ACCEPT; iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+PostDown = iptables -D FORWARD -i wg0 -j ACCEPT; iptables -t nat -D POSTROUTING -o eth0 -j MASQUERADE
+
+[Peer]
+# 5bed87a102c442b5e458ca8498369e3e MacBook
+PublicKey=3ZBSkYmnWM1ZA+/j8wjyn1Tg2ZjkihnVxrxymFp2DWk=
+AllowedIPs=192.168.69.2
+PersistentKeepalive=25
+
+[Peer]
+# 5bed87a102c442b5e458ca8498369e3e Desktop Windows
+PublicKey=TdV/zuDvwZQmlFyEfUWkwhEQ2EAorDzWVSqN9VQ3VF4=
+AllowedIPs=192.168.69.3
+PersistentKeepalive=25
+
+[Peer]
+# 5bed87a102c442b5e458ca8498369e3e Handy
+PublicKey=A3Kn8fhFzHztBUW75MRVBpx0vQKloPyRWokvvGClbzg=
+AllowedIPs=192.168.69.4
+PersistentKeepalive=25
+
+[Peer]
+# f16491bf0133c6103918b2edcd00cf89
+PublicKey=rw9WwzQtFEyW8lis57lKVmEOMOncIggR+kGZ6kTcdGI=
+AllowedIPs=192.168.69.5
+PersistentKeepalive=25
+
+[Peer]
+# ea78d2dac1023d318a3d322be3b993de
+PublicKey=COJEP7Tmu8jo9nnriZlND3MEYSXDU7dRZ2CBqcypOXM=
+AllowedIPs=192.168.69.6
+PersistentKeepalive=25
+
+[Peer]
+# 85e32a10adc84351726614dea2ae600c Handy
+PublicKey=M3EuXOooeIQa9Zr6bmG++8/4BVkUyArqHXLzNbKGLD0=
+AllowedIPs=192.168.69.7
+PersistentKeepalive=25
+
+[Peer]
+# 85e32a10adc84351726614dea2ae600c Desktop
+PublicKey=OOBNdlLYOAfi7+IbSmTR91HE+mgNz2V4I3jieV9I5Dw=
+AllowedIPs=192.168.69.8
+PersistentKeepalive=25
+
+[Peer]
+# 85e32a10adc84351726614dea2ae600c Tablet
+PublicKey=qtYLTiXs55eLS/WAS9OCtYsA4NXSIaYeZZ1PAg+kWEA=
+AllowedIPs=192.168.69.9
+PersistentKeepalive=25
+
+[Peer]
+# ad0302ad2266356434cdc493a4f0662d Handy
+PublicKey=5OLngBn9Ej7y6YiVduYm4IYI4yOGwHYR+2gpXvJno0I=
+AllowedIPs=192.168.69.10
+PersistentKeepalive=25
+
+[Peer]
+# ELW
+PublicKey=duZKSsltlEKZtjLphSffBZODyklPudd7oqDUeRV3ZHM=
+AllowedIPs=192.168.69.11
+PersistentKeepalive=25

@@ -1,0 +1,27 @@
+---
+# Playbook update windows systems
+
+- hosts: windows
+  tasks:
+    - name: Install and return list of found updates (if any), log to c:\ansible_windows_update.txt
+      ansible.windows.win_updates:
+        category_names:
+          - SecurityUpdates
+          - CriticalUpdates
+          - UpdateRollups
+          - Updates
+          - Application
+          - Definition Updates
+        state: installed
+        # state: searched
+        reboot: yes
+        log_path: c:\ansible_windows_update.txt
+      register: win_updates_list
+
+    - name: debug output
+      vars:
+        msg: |
+           Installed Updates: {{ win_updates_list.found_update_count }},
+           list: {{ win_updates_list.updates }}
+      debug:
+        msg: "{{ msg.split('\n') }}"

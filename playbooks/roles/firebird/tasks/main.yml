@@ -1,0 +1,33 @@
+---
+# This will install Firebird
+#
+
+- name: Install Tasks
+  ansible.builtin.import_tasks: install-firebird.yml
+
+- name: DB Restore Tasks
+  ansible.builtin.import_tasks: restore-db.yml
+  when: restore_db
+
+# TODO: Sanitize ownerrights for security3.fdb
+# TODO: Backup security3.fdb
+
+- name: Create Firebird database alias
+  ansible.builtin.lineinfile:
+   dest: /etc/firebird/3.0/databases.conf
+   line: "{{ firebird_db_alias }} = {{ firebird_db_path }}/{{ firebird_db_name }}"
+   state: present
+  notify: restart firebird
+  when: create_alias
+
+- name: Set Password for DB User
+  ansible.builtin.import_tasks: db-user.yml
+
+- name: Install backup script
+  ansible.builtin.template:
+    src: templates/firebirdbackup.j2
+    dest: /etc/cron.daily/firebirdbackup
+    owner: root
+    group: root
+    mode: '0755'
+  when: setup_backup

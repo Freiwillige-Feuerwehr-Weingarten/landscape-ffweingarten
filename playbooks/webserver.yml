@@ -1,0 +1,26 @@
+---
+- name: Webserver Playbook
+  hosts: prod_webserver
+  remote_user: ffweingarten
+  become: true
+  gather_facts: true
+  roles:
+    - role: common
+      vars:
+        setup_qemu: true
+    - role: devsec.hardening.ssh_hardening
+      vars:
+        sftp_enabled: true
+    - role: devsec.hardening.os_hardening
+    - role: geerlingguy.ntp
+    - role: nfs
+      vars:
+        permissions: "644"
+        mountpoint: "/mnt/backup"
+        nfs_src: stark.feuerwehr.weingarten.local:/Web_Backup
+        options: vers=4,rw,rsize=8192,wsize=8192,timeo=14,intr
+    - role: geerlingguy.php
+    - role: geerlingguy.apache
+    - role: fauust.mariadb
+    - role: webserver
+    - role: tribe29.checkmk.agent

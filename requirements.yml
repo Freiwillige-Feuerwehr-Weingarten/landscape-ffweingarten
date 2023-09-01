@@ -1,0 +1,17 @@
+---
+roles:
+  - name: alvistack.confluence
+  - name: andrewrothstein.openjdk
+  - name: geerlingguy.ntp
+  - name: geerlingguy.apache
+  - name: geerlingguy.php
+  - name: fauust.mariadb
+  - name: systemli.jitsi_meet
+  - name: simoncaron.nut
+
+collections:
+  - name: devsec.hardening
+  - name: community.windows
+  - name: community.mysql
+  - name: chocolatey.chocolatey
+  - name: tribe29.checkmk

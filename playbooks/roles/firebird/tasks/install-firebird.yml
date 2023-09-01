@@ -1,0 +1,57 @@
+---
+# This will install firebird and do some basic setup
+
+- name: Install Firebird Server 3.0 and anacron
+  ansible.builtin.apt:
+    name: firebird3.0-server, anacron
+    state: present
+
+- name: Enable Remote DB access
+  ansible.builtin.lineinfile:
+    path: /etc/firebird/3.0/firebird.conf
+    search_string: 'RemoteBindAddress = localhost'
+    line: RemoteBindAddress =
+
+- name: Create DB directory
+  ansible.builtin.file:
+    path: "{{ firebird_db_path }}"
+    state: directory
+    mode: '0755'
+    owner: firebird
+    group: firebird
+
+- name: Set SYSDBA Password
+  ansible.builtin.lineinfile:
+    path: /etc/firebird/3.0/SYSDBA.password
+    regexp: '^ISC_PASSWORD="(.*)"'
+    line: ISC_PASSWORD="{{ firebird_database_admin_user_password }}"
+
+- name: Set AuthServer
+  ansible.builtin.lineinfile:
+    path: /etc/firebird/3.0/firebird.conf
+    regexp: '^AuthServer ="(.*)"'
+    line: AuthServer = Srp, Win_Sspi, Legacy_Auth
+
+- name: Set AuthClient
+  ansible.builtin.lineinfile:
+    path: /etc/firebird/3.0/firebird.conf
+    regexp: '^AuthClient ="(.*)"'
+    line: AuthClient = Srp, Srp256, Win_Sspi, Legacy_Auth
+
+- name: Disable Wirecrypt
+  ansible.builtin.lineinfile:
+    path: /etc/firebird/3.0/firebird.conf
+    regexp: '^WireCrypt ="(.*)"'
+    line: WireCrypt = Disabled
+
+- name: Set UserManager
+  ansible.builtin.lineinfile:
+    path: /etc/firebird/3.0/firebird.conf
+    regexp: '^UserManager ="(.*)"'
+    line: UserManager = Legacy_UserManager
+
+- name: Start Firebird 3.0 Service
+  ansible.builtin.service:
+    name: firebird3.0
+    state: started
+    enabled: true
