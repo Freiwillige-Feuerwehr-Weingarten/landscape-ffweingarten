@@ -1,5 +1,5 @@
 ---
-- name: Webserver Playbook 
+- name: Webserver Playbook
   hosts: prod_webserver
   remote_user: ffweingarten
   become: true
