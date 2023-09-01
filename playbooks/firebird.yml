@@ -1,30 +1,20 @@
 ---
-# Playbook example for Firebird
+# Playbook for Firebird Server 3.0 installation
 
-- hosts: dbsrv
+- hosts: prod_draeger, prod_bockermann
+  name: Install Firebird 3.0
   remote_user: ffweingarten
   become: true
   become_user: root
   gather_facts: true
-  vars:
-    #mountpoint: "/mnt/firebird_backup"
-    #sysdba_password: !vault |
-    #      $ANSIBLE_VAULT;1.1;AES256
-    #      64636135633164336135666535396535353533363139376632356335343765303864613338323466
-    #      3130373634613731646165323438616338303963656334620a636630666166656235333263333161
-    #      63376562343835656565363434336134333564653566613061326535396164643963663766623636
-    #      6434363037363565640a626133633265666432656565383634336238636231303338616536623366
-    #      6166
   roles:
-   #- role: devsec.hardening.ssh_hardening
-   #  sftp_enabled: true
-   #- role: devsec.hardening.os_hardening
-   #- role: geerlingguy.ntp
-   #  vars:
-   #     ntp_timezone: Europe/Berlin
-   #- role: nfs
-   #  vars:
-   #     permissions: "644"
-  #      nfs_src: stark.feuerwehr.weingarten.local:/Firebird_Backup
-  #      options: vers=4,rw,rsize=8192,wsize=8192,timeo=14,intr,user
-  - role: firebird
+    - role: devsec.hardening.ssh_hardening
+      sftp_enabled: true
+    - role: devsec.hardening.os_hardening
+    - role: common
+      vars:
+        setup_qemu: true
+    - role: geerlingguy.ntp
+    - role: nfs
+    - role: firebird
+    - role: tribe29.checkmk.agent
