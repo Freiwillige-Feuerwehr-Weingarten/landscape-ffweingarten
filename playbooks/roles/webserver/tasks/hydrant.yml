@@ -19,4 +19,5 @@
     owner: www-data
     group: www-data
     recurse: true
+    mode: '0640'
   notify: restart apache
