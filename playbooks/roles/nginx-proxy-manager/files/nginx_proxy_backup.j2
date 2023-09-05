@@ -21,4 +21,4 @@ fi
 ${CP} "${NPM_HOME}/data/."        "${BACKUPDIR}/data/."        --recursive
 ${CP} "${NPM_HOME}/letsencrypt/." "${BACKUPDIR}/letsencrypt/." --recursive
 (${DOCKER} exec -it ${CONTAINER_NAME} mysqldump --user=${DB_USER} --password=${DB_PASSWORD} ${DB_NAME} -h 127.0.0.1) > "${BACKUPDIR}/npm-export.sql"
-${FIND} ${BASEDIR}* -mtime +120 -exec rm {} \; || true
+${FIND} ${BASEDIR}* -mtime +60 -exec rm {} \; || true
