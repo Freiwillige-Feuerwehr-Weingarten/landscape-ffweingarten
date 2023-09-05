@@ -11,14 +11,14 @@
     owner: www-data
     group: www-data
     mode: '0755'
-  when: rainloop_installed.stat.exists == false
+  when: not rainloop_installed.stat.exists
 
 - name: Download and install rainloop
   ansible.builtin.command:
     chdir: "{{ rainloop_install_path }}"
     cmd: bash -c "curl -sL https://repository.rainloop.net/installer.php | php"
-  when: rainloop_installed.stat.exists == false
   notify: restart apache
+  when: not rainloop_installed.stat.exists
 
 - name: Fix file permissions in rainloop installation
   ansible.builtin.file:
@@ -43,15 +43,18 @@
     recurse: true
     patterns: "*.sql"
   register: found_files
+  when: webserver_setup_rainloop_backup
 
 - name: Get latest file
   ansible.builtin.set_fact:
     latest_file: "{{ found_files.files | sort(attribute='mtime', reverse=true) | first }}"
   register: db_backup
+  when: webserver_setup_rainloop_backup
 
 - name: Debug output
   ansible.builtin.debug:
     msg: "Using DB backup: {{ db_backup.ansible_facts.latest_file.path }}"
+  when: webserver_setup_rainloop_backup
 
 - name: Restore rainloop database
   community.mysql.mysql_db:
@@ -62,6 +65,7 @@
     login_host: "localhost"
     state: import
     target: "{{ db_backup.ansible_facts.latest_file.path }}"
+  when: webserver_setup_rainloop_backup
 
 - name: Create directory for configuration
   ansible.builtin.file:
@@ -71,7 +75,7 @@
     owner: www-data
     group: www-data
 
-- name: Restore rainloop configuration
+- name: Install Rainloop configuration
   ansible.builtin.template:
     src: files/application.j2
     dest: "{{ rainloop_install_path }}data/_data_/_default_/configs/application.ini"
@@ -100,3 +104,4 @@
     src: files/rainloop_db_backup.j2
     dest: /etc/cron.daily/rainloop_db_backup
     mode: '0750'
+  when: webserver_setup_rainloop_backupscript

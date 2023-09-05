@@ -8,7 +8,7 @@ mariadb_databases: []
 webserver_setup_hydrant: true
 webserver_setup_rainloop: true
 webserver_setup_rainloop_backup: true
-webserver_setup_rainloop_backupscript: true
+webserver_setup_rainloop_backupscript: false
 
 # NFS
 permissions: "644"

@@ -6,7 +6,10 @@
 
 - name: Include tasks for hydrant setup
   ansible.builtin.include_tasks: hydrant.yml
+  when: webserver_setup_hydrant
+
 - name: Include tasks for rainloop setup
   ansible.builtin.include_tasks: rainloop.yml
+  when: webserver_setup_rainloop
 
 ## post_max_filesize to 100M
