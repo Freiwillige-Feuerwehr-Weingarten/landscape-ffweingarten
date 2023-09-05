@@ -26,7 +26,7 @@
     owner: www-data
     group: www-data
     mode: 0644
-    recurse: yes
+    recurse: true
 
 - name: Fix directory permissions in rainloop installation
   file:
@@ -35,12 +35,12 @@
     group: www-data
     mode: 0755
     state: directory
-    recurse: yes
+    recurse: true
 
 - name: Get files in DB Backup folder
   find:
     paths: "{{ mountpoint }}"
-    recurse: yes
+    recurse: true
     patterns: "*.sql"
   register: found_files
 
@@ -48,8 +48,8 @@
   set_fact:
     latest_file: "{{ found_files.files | sort(attribute='mtime',reverse=true) | first }}"
   register: db_backup
-  
-- name: debug output
+
+- name: Debug output
   debug:
     msg: "Using DB backup: {{ db_backup.ansible_facts.latest_file.path }}"
 
