@@ -33,7 +33,6 @@
 - name: Add Servers to know_hosts
   ansible.builtin.known_hosts:
     name: "{{ item.item }}"
-    key: "{{ item.stdout }}"  
+    key: "{{ item.stdout }}"
     path: "{{ ssh_known_hosts_file }}"
   with_items: "{{ ssh_known_host_results.results }}"
-  
