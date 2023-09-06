@@ -1,4 +1,5 @@
 *.fbb
+playbooks/roles/jump/files/*
 .vault_password
 _debianserver.yml
 _debianserver_old.yml
