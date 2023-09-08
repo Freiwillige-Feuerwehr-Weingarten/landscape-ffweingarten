@@ -40,3 +40,4 @@
         db_name: "nginx"
         db_user: "nginxuser"
         db_container_name: "nginx_db"
+    - role: tribe29.checkmk.agent
