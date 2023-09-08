@@ -1,5 +1,6 @@
 ---
-- hosts: rprox.feuerwehr.weingarten.local
+- name: Playbook for setting up Nging Reverse Proxy
+  hosts: rprox.feuerwehr.weingarten.local
   become: true
   become_user: root
   gather_facts: true
