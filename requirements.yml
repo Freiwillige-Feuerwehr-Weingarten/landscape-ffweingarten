@@ -13,5 +13,6 @@ collections:
   - name: devsec.hardening
   - name: community.windows
   - name: community.mysql
+  - name: community.docker
   - name: chocolatey.chocolatey
   - name: tribe29.checkmk
