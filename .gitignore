@@ -4,3 +4,4 @@ playbooks/roles/jump/files/*
 _debianserver.yml
 _debianserver_old.yml
 _prepare.yml
+.vscode
