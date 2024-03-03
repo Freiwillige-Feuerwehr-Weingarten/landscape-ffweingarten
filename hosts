@@ -16,6 +16,8 @@ all:
         bockermann.prod.feuerwehr.weingarten.local:
         jump.test.feuerwehr.weingarten.local:
         jump.prod.ff-weingarten.de:
+        docker.prod.ff-weingarten.de:
+        netbox.test.feuerwehr.weingarten.local:
       children:
         intrasrv:
           hosts:
@@ -50,6 +52,9 @@ all:
         prod_jump:
           hosts:
             jump.prod.ff-weingarten.de:
+        prod_docker:
+          hosts:
+            docker.prod.ff-weingarten.de:
     test:
       hosts:
         checkmk.test.feuerwehr.weingarten.local:
@@ -68,6 +73,12 @@ all:
         test_jump:
           hosts:
             jump.test.feuerwehr.weingarten.local:
+        test_netbox:
+          hosts:
+            netbox.test.feuerwehr.weingarten.local:
+        test_docker:
+          hosts:
+            192.168.10.122
     windows:
       hosts:
         eddard.feuerwehr.weingarten.local:  # Gerätewart III
