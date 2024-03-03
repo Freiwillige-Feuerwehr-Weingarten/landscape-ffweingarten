@@ -47,9 +47,11 @@
   loop:
     - docker-ce
     - docker-ce-cli
+    - docker-compose
     - containerd.io
     - docker-buildx-plugin
     - docker-compose-plugin
+    - python3-docker
 
 - name: Add Docker group
   ansible.builtin.group:
@@ -70,6 +72,11 @@
   loop:
     - docker.service
     - containerd.service
+
+- name: Include tasks for netboot
+  ansible.builtin.include_tasks: netboot.yml
+  # when: webserver_setup_rainloop
+
 
 - name: Copy backup script
   ansible.builtin.template:
