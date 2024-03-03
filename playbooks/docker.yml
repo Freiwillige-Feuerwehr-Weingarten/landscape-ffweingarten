@@ -6,7 +6,7 @@
   remote_user: ffweingarten
   gather_facts: true
   roles:
-    - common
-    - nfs
+    # - common
+    # - nfs
     - docker
-    - portainer
+    # - portainer
