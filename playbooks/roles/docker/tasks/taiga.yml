@@ -1,0 +1,31 @@
+---
+- name: Create a taiga directory if it does not exist
+  ansible.builtin.file:
+    path: /srv/taiga
+    state: directory
+    mode: '0755'
+
+- name: Git checkout
+  ansible.builtin.git:
+    repo: 'https://github.com/kaleidos-ventures/taiga-docker.git'
+    dest: /srv/taiga
+    depth: 1
+    force: true
+    version: stable
+
+- name: Copy taiga .env filename
+  ansible.builtin.template:
+    src: files/taiga.prod.env.j2
+    dest: /srv/taiga/.env
+    mode: '0750'
+
+- name: Create and start taiga.io services
+  community.docker.docker_compose_v2:
+    project_src: /srv/taiga
+    build: always
+    env_files: .env
+  register: taigaoutput
+
+- name: Show results
+  ansible.builtin.debug:
+    var: taigaoutput

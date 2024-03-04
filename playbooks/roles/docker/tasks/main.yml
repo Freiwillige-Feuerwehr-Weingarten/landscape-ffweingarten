@@ -77,6 +77,8 @@
   ansible.builtin.include_tasks: netboot.yml
   # when: webserver_setup_rainloop
 
+- name: Include tasks for taiga
+  ansible.builtin.include_tasks: taiga.yml
 
 - name: Copy backup script
   ansible.builtin.template:
