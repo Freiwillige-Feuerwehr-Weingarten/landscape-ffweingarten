@@ -17,7 +17,61 @@
   ansible.builtin.template:
     src: files/taiga.prod.env.j2
     dest: /srv/taiga/.env
-    mode: '0750'
+    mode: '0644'
+
+- name: Change to local build
+  #ansible.builtin.lineinfile:
+  #  path: /srv/taiga/docker-compose.yml
+  #  search_string: 'image: taigaio/taiga-back:latest'
+  #  line: '    build: ./custom-back'
+  ansible.builtin.replace:
+    path: /srv/taiga/docker-compose.yml
+    after: '  taiga-back:'
+    before: '  taiga-async:'
+    regexp: '^(    image: taigaio/taiga-back:latest)$'
+    replace: '    build: ./custom-back'
+
+- name: Create custom-back directory
+  ansible.builtin.file:
+    path: /srv/taiga/custom-back
+    state: directory
+    mode: '0755'
+
+- name: Copy config.append.py file
+  ansible.builtin.template:
+    src: files/taiga.config.append.j2
+    dest: /srv/taiga/custom-back/config.append.py
+    mode: '0644'
+
+- name: Copy Dockerfile
+  ansible.builtin.template:
+    src: files/taiga.dockerfile.j2
+    dest: /srv/taiga/custom-back/Dockerfile
+    mode: '0754'
+
+- name: Recomment volume
+  ansible.builtin.lineinfile:
+    path: /srv/taiga/docker-compose.yml
+    search_string: '# volumes:'
+    line: '    volumes:'
+
+- name: Set taiga-front volume
+  ansible.builtin.lineinfile:
+    path: /srv/taiga/docker-compose.yml
+    search_string: '#   - ./conf.json:/usr/share/nginx/html/conf.json'
+    line: '      - ./custom-front/conf.override.json:/usr/share/nginx/html/conf.json'
+
+- name: Create custom-front directory
+  ansible.builtin.file:
+    path: /srv/taiga/custom-front
+    state: directory
+    mode: '0755'
+
+- name: Create config.json
+  ansible.builtin.template:
+    src: files/taiga.config.json.j2
+    dest: /srv/taiga/custom-front/conf.override.json
+    mode: '0644'
 
 - name: Create and start taiga.io services
   community.docker.docker_compose_v2:
