@@ -18,6 +18,7 @@ all:
         jump.prod.ff-weingarten.de:
         docker.prod.ff-weingarten.de:
         netbox.test.feuerwehr.weingarten.local:
+        psql.prod.ff-weingarten.de:
       children:
         intrasrv:
           hosts:
@@ -55,11 +56,15 @@ all:
         prod_docker:
           hosts:
             docker.prod.ff-weingarten.de:
+        prod_psql:
+          hosts:
+            psql.prod.ff-weingarten.de:
     test:
       hosts:
         checkmk.test.feuerwehr.weingarten.local:
         wireguard.test.feuerwehr.weingarten.local:
         webserver.test.feuerwehr.weingarten.local:
+        psql.test.ff-weingarten.de:
       children:
         test_checkmk:
           hosts:
@@ -79,6 +84,9 @@ all:
         test_docker:
           hosts:
             192.168.10.122
+        test_psql:
+          hosts:
+            psql.test.ff-weingarten.de:
     windows:
       hosts:
         eddard.feuerwehr.weingarten.local:  # Gerätewart III
@@ -94,7 +102,7 @@ all:
         sansa.feuerwehr.weingarten.local:   # Kommandant
         catelyn.feuerwehr.weingarten.local: # Gerätewarte IV
         dorna.feuerwehr.weingarten.local:   # Alarmabfrage I
-        lancel.feuerwehr.weingartenn.local: # Alarmabfrage II
+        lancel.feuerwehr.weingarten.local: # Alarmabfrage II
 
       vars:
         ansible_user: administrator@feuerwehr
