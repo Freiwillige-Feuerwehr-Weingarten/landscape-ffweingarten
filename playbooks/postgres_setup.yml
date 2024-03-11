@@ -1,6 +1,6 @@
 ---
 - name: Postgres Setup Playbook
-  hosts: test_psql
+  hosts: psql
   remote_user: ffweingarten
   become: true
   gather_facts: true
