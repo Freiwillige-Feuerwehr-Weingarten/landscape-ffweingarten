@@ -79,8 +79,11 @@
 - name: Include tasks for taiga
   ansible.builtin.include_tasks: taiga.yml
 
-- name: Include tasks for traccar
-  ansible.builtin.include_tasks: traccar.yml
+- name: Include tasks for traccar_test
+  ansible.builtin.include_tasks: traccar_test.yml
+  
+- name: Include tasks for traccar_prod
+  ansible.builtin.include_tasks: traccar_prod.yml
 
 - name: Copy backup script
   ansible.builtin.template:
