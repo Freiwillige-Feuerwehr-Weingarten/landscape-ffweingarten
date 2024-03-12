@@ -1,4 +1,13 @@
 ---
+# NFS
+nfs_permissions: "644"
+nfs_mountpoint: "/mnt/backup"
+nfs_src: stark.feuerwehr.weingarten.local:/Backup_PSQL_Test
+nfs_options: vers=4,rw,rsize=8192,wsize=8192,timeo=14,intr
+
+# PSQL
+setup_backup: true
+
 psql_db_semaphore_password: !vault |
           $ANSIBLE_VAULT;1.1;AES256
           30643139373263636436323861613165306331636339396366383837343932633534646335323830
