@@ -1,0 +1,26 @@
+---
+- name: Dump all Databases to /tmp/
+  ansible.builtin.command:
+    argv:
+      - /usr/bin/pg_dumpall
+      - -f
+      - /tmp/backup.sql
+  become: true
+  become_user: postgres
+
+- name: Compress Backup
+  community.general.archive:
+    path: /tmp/backup.sql
+    remove: true
+
+- name: Pull DB backup
+  ansible.builtin.fetch:
+    src: /tmp/backup.sql.gz
+    dest: /tmp
+    fail_on_missing: true
+    validate_checksum: true
+
+- name: Remove remote backup
+  ansible.builtin.file:
+    path: /tmp/backup.sql.gz
+    state: absent
