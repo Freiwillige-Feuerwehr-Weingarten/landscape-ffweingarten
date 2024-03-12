@@ -1,0 +1,35 @@
+---
+- name: Create a traccar directory if it does not exist
+  ansible.builtin.file:
+    path: /srv/traccar_test
+    state: directory
+    mode: '0755'
+
+- name: Copy traccar docker-compose file
+  ansible.builtin.template:
+    src: files/traccar_test.docker-compose.j2
+    dest: /srv/traccar_test/docker-compose.yml
+    mode: '0644'
+
+#- name: Copy traccar .env file
+#  ansible.builtin.template:
+#    src: files/traccar.env.j2
+#    dest: /srv/traccar/.env
+#    mode: '0644'
+
+- name: Copy traccar traccar.xml file
+  ansible.builtin.template:
+    src: files/traccar_test.xml.j2
+    dest: /srv/traccar_test/traccar.xml
+    mode: '0644'
+
+- name: Create and start traccar services
+  community.docker.docker_compose_v2:
+    project_src: /srv/traccar_test
+    build: always
+    #env_files: .env
+  register: traccartestoutput
+
+- name: Show results
+  ansible.builtin.debug:
+    var: traccartestoutput

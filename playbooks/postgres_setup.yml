@@ -1,0 +1,12 @@
+---
+- name: Postgres Setup Playbook
+  hosts: psql
+  remote_user: ffweingarten
+  become: true
+  gather_facts: true
+  roles:
+    - role: common
+      vars:
+        setup_qemu: false
+    - role: nfs
+    - role: postgres_setup

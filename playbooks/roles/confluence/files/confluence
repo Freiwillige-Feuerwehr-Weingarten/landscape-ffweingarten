@@ -22,4 +22,4 @@ fi
 ${SUDO} -u ${BACKUP_USER} "${PG_DUMP}" "${DB}" > "${BACKUP_NAME}"
 ${TAR} -czf "${BACKUP_ATTACHMENT_NAME}" "${ATTACHMENT_PATH}"
 ${CP} "${CONFIGURATION_FILE}" "${BACKUP_CONFIGURATION_FILE}"
-${FIND} ${BASEDIR}* -mtime +60 -exec rm {} \; || true
+${FIND} ${BASEDIR}* -mtime +30 -exec rm {} \; || true

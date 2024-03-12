@@ -1,0 +1,134 @@
+---
+- name: Install postgres debian packages
+  ansible.builtin.apt:
+    pkg:
+      - postgresql
+      - postgresql-contrib
+      - postgresql-client
+      - python3
+      - python3-pip
+      - python3-psycopg2
+      - acl
+    state: present
+
+- name: Start end enable services
+  ansible.builtin.systemd_service:
+    name: postgresql
+    state: started
+    enabled: true
+
+- name: Set Options
+  community.postgresql.postgresql_set:
+    name: "listen_addresses"
+    value: "*"
+  become: true
+  become_user: postgres
+  notify:
+    - "Restart postgresql"
+
+- name: Create Semaphore Database
+  community.postgresql.postgresql_db:
+    state: present
+    name: "semaphore"
+  become: true
+  become_user: postgres
+
+- name: Create Traccar Database
+  community.postgresql.postgresql_db:
+    state: present
+    name: "traccar"
+  become: true
+  become_user: postgres
+
+- name: Create semaphore db user
+  community.postgresql.postgresql_user:
+    state: present
+    name: "semaphore"
+    password: "{{ psql_db_semaphore_password }}"
+  become: true
+  become_user: postgres
+
+- name: Create Traccar db user
+  community.postgresql.postgresql_user:
+    state: present
+    name: "traccar"
+    password: "{{ psql_db_traccar_password }}"
+  become: true
+  become_user: postgres
+
+- name: Grant db user access to semaphore
+  community.postgresql.postgresql_privs:
+    type: database
+    state: present
+    database: "semaphore"
+    roles: "semaphore"
+    grant_option: false
+    privs: all
+  become: true
+  become_user: postgres
+
+- name: Grant db user traccar access to traccar DB
+  community.postgresql.postgresql_privs:
+    type: database
+    state: present
+    database: "traccar"
+    roles: "traccar"
+    grant_option: false
+    privs: all
+  become: true
+  become_user: postgres
+
+- name: Privileges on public schema
+  community.postgresql.postgresql_privs:
+    type: schema
+    db: semaphore
+    privs: all
+    objs: public
+    role: semaphore
+  become: true
+  become_user: postgres
+
+- name: Privileges on public schema
+  community.postgresql.postgresql_privs:
+    type: schema
+    db: traccar
+    privs: all
+    objs: public
+    role: traccar
+  become: true
+  become_user: postgres
+
+- name: Add entries to pg_hba
+  community.postgresql.postgresql_pg_hba:
+    dest: "/etc/postgresql/15/main/pg_hba.conf"
+    address: "192.168.10.130"
+    contype: "host"
+    databases: "semaphore"
+    method: "md5"
+    users: "semaphore"
+  become: true
+  become_user: postgres
+  notify:
+    - Restart postgresql
+
+- name: Add entries to pg_hba
+  community.postgresql.postgresql_pg_hba:
+    dest: "/etc/postgresql/15/main/pg_hba.conf"
+    address: "192.168.10.130"
+    contype: "host"
+    databases: "traccar"
+    method: "md5"
+    users: "traccar"
+  become: true
+  become_user: postgres
+  notify:
+    - Restart postgresql
+
+- name: Install backup script
+  ansible.builtin.template:
+    src: files/backup.j2
+    dest: /etc/cron.daily/psqlbackup
+    owner: root
+    group: root
+    mode: '0755'
+  when: setup_backup

@@ -1,5 +1,4 @@
 ---
-mountpoint: "/mnt/firebird_backup"
 restore_db: false
 create_alias: true
 setup_backup: true
@@ -26,9 +25,10 @@ firebird_database_user_password: !vault |
           3138
 
 # NFS
-permissions: "644"
+nfs_permissions: "644"
 nfs_src: stark.feuerwehr.weingarten.local:/Firebird_Backup_Bockermann
-options: vers=4,rw,rsize=8192,wsize=8192,timeo=14,intr,user
+nfs_options: vers=4,rw,rsize=8192,wsize=8192,timeo=14,intr,user
+nfs_mountpoint: "/mnt/firebird_backup"
 
 # NTP
 ntp_timezone: Europe/Berlin

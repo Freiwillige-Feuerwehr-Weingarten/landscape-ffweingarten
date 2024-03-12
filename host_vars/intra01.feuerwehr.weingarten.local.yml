@@ -20,3 +20,9 @@ confluence_db_password: !vault |
           3461366537653965360a306237636531653165306561633230356364613337373662333762623730
           34313661316438616130636431396334653063363166333362663030613131353333
 confluence_db_temp_location: "/tmp/confluence.sql"
+
+# NFS
+nfs_permissions: "644"
+nfs_src: stark.feuerwehr.weingarten.local:/Confluence_Backup
+nfs_options: vers=4,rw,rsize=8192,wsize=8192,timeo=14,intr
+nfs_mountpoint: "/mnt/backup"

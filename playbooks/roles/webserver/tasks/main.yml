@@ -1,10 +1,15 @@
 ---
 - name: Install libapache-mod-php and other dependencies
-  apt:
+  ansible.builtin.apt:
     pkg: libapache2-mod-php, rsync
     state: present
 
-- include_tasks: hydrant.yml
-- include_tasks: rainloop.yml
+- name: Include tasks for hydrant setup
+  ansible.builtin.include_tasks: hydrant.yml
+  when: webserver_setup_hydrant
+
+- name: Include tasks for rainloop setup
+  ansible.builtin.include_tasks: rainloop.yml
+  when: webserver_setup_rainloop
 
 ## post_max_filesize to 100M

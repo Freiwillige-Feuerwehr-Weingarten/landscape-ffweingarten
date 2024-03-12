@@ -7,16 +7,16 @@
 
 - name: Check if the mountpoint exists
   ansible.builtin.file:
-    path: "{{ mountpoint }}"
+    path: "{{ nfs_mountpoint }}"
     state: directory
-    mode: "{{ permissions }}"
+    mode: "{{ nfs_permissions }}"
     owner: root
     group: root
 
 - name: Mount nfs share
   ansible.posix.mount:
     src: "{{ nfs_src }}"
-    path: "{{ mountpoint }}"
+    path: "{{ nfs_mountpoint }}"
     fstype: nfs
-    opts: "{{ options }}"
+    opts: "{{ nfs_options }}"
     state: mounted

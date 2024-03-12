@@ -1,0 +1,14 @@
+hosts:
+  docker.prod.ff-weingarten.de:
+  jump.prod.ff-weingarten.de:
+  psql.prod.ff-weingarten.de:
+  children:
+    docker:
+      hosts:
+        web.prod.ff-weingarten.de:
+    jump:
+      hosts:
+        jump.prod.ff-weingarten.de:
+    psql:
+      hosts:
+        psql.prod.ff-weingarten.de:

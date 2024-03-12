@@ -18,5 +18,6 @@
     path: "{{ hydrant_install_path }}"
     owner: www-data
     group: www-data
-    recurse: yes
+    recurse: true
+    mode: '0640'
   notify: restart apache

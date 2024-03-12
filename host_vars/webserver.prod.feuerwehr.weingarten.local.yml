@@ -4,7 +4,19 @@ mariadb_use_official_repo: false
 # Databases
 mariadb_databases: []
 
-#rainloop config
+# Webserver configuration
+webserver_setup_hydrant: true
+webserver_setup_rainloop: true
+webserver_setup_rainloop_backup: true
+webserver_setup_rainloop_backupscript: true
+
+# NFS
+nfs_permissions: "644"
+nfs_mountpoint: "/mnt/backup"
+nfs_src: stark.feuerwehr.weingarten.local:/Web_Backup
+nfs_options: vers=4,rw,rsize=8192,wsize=8192,timeo=14,intr
+
+# Rainloop config
 rainloop_user: rainloop
 rainloop_password: !vault |
           $ANSIBLE_VAULT;1.1;AES256
@@ -16,7 +28,7 @@ rainloop_password: !vault |
 rainloop_db: rainloop
 rainloop_install_path: "/var/www/vhosts/rainloop.ff-weingarten.de/"
 
-#hydrant config
+# Hydrant config
 hydrant_install_path: "/var/www/vhosts/hydrant.ff-weingarten.de/"
 hydrant_backup_path: "{{ mountpoint }}/Hydrant/"
 
@@ -68,4 +80,3 @@ apache_vhosts:
         <Directory /var/www/vhosts/rainloop.ff-weingarten.de/data>
           Require all denied
         </Directory>
-

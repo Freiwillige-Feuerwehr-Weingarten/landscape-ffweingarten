@@ -1,0 +1,14 @@
+hosts:
+  webs.test.ff-weingarten.de:
+  jump.test.ff-weingarten.de:
+  psql.test.ff-weingarten.de:
+  children:
+    webserver:
+      hosts:
+        web.test.ff-weingarten.de:
+    jump:
+      hosts:
+        jump.test.ff-weingarten.de:
+    psql:
+      hosts:
+        psql.test.ff-weingarten.de:

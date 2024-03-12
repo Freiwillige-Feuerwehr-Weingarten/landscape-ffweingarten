@@ -1,0 +1,19 @@
+#!/bin/bash
+ 
+PG_DUMPALL=$(command -v pg_dumpall)
+SUDO=$(command -v sudo)
+GZIP=$(command -v gzip)
+FIND=$(command -v find)
+HOSTNAME=$(command -v hostname)
+BACKUP_USER="postgres"
+ 
+BASEDIR="/mnt/backup/"
+BACKUP_NAME="${BASEDIR}$(date +%Y)/$(hostname -f)-$(date +%F).sql"
+
+ 
+if [ ! -d "${BASEDIR}$(date +%Y)" ]; then
+        mkdir "${BASEDIR}$(date +%Y)"
+fi
+ 
+${SUDO} -Hiu ${BACKUP_USER} ${PG_DUMPALL} | ${GZIP} > "${BACKUP_NAME}.gz"
+${FIND} ${BASEDIR}* -mtime +30 -exec rm {} \; || true

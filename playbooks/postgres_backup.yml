@@ -1,0 +1,7 @@
+---
+- name: Postgres Backup Playbook
+  hosts: psql
+  remote_user: ffweingarten
+  become: true
+  roles:
+    - role: postgres_backup

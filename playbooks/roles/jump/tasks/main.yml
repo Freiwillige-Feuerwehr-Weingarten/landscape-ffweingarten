@@ -1,0 +1,38 @@
+---
+# This will setup SSH
+#
+
+- name: Install SSH public Key
+  ansible.posix.authorized_key:
+    user: ffweingarten
+    state: present
+    key: '{{ item }}'
+  with_file:
+    - 'files/id_rsa_1.pub'
+
+- name: Install SSH private Key
+  ansible.builtin.copy:
+    src: ~/.ssh/id_rsa_feuerwehr
+    dest: /home/ffweingarten/.ssh/id_rsa
+    owner: ffweingarten
+    group: ffweingarten
+    mode: "0600"
+
+- name: Create known_hosts if needed
+  ansible.builtin.file:
+    path: "~/.ssh/known_hosts"
+    mode: "0600"
+    state: touch
+
+- name: For each host, scan for its ssh public key
+  ansible.builtin.shell: "ssh-keyscan {{ item }}, `dig +short {{ item }}`"
+  with_items: "{{ ssh_known_hosts }}"
+  register: ssh_known_host_results
+  ignore_errors: true
+
+- name: Add Servers to know_hosts
+  ansible.builtin.known_hosts:
+    name: "{{ item.item }}"
+    key: "{{ item.stdout }}"
+    path: "{{ ssh_known_hosts_file }}"
+  with_items: "{{ ssh_known_host_results.results }}"

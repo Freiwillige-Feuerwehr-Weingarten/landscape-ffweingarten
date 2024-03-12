@@ -1,0 +1,25 @@
+---
+- name: Playbook to install a jumphost
+  hosts: prod_jump
+  remote_user: ffweingarten
+  gather_facts: true
+  pre_tasks:
+  - name: Install dnsutils as dependency
+    become: true
+    ansible.builtin.apt:
+      name: dnsutils
+      state: present
+  roles:
+    - role: common
+      become: true
+      vars:
+        setup_qemu: true
+    - role: geerlingguy.ntp
+      become: true
+    - role: devsec.hardening.ssh_hardening
+      become: true
+      sftp_enabled: true
+    - role: devsec.hardening.os_hardening
+      become: true
+    - role: jump
+    - role: tribe29.checkmk.agent

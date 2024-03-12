@@ -1,0 +1,20 @@
+version: '3'
+
+volumes:
+  traccar_prod_logs:
+  traccar_prod_media:
+
+services:
+  traccar:
+    container_name: traccarprod
+    image: traccar/traccar:latest
+    hostname: traccarprod
+    restart: unless-stopped
+    environment:
+        - "TZ=Europ/Berlin"
+    ports:
+      - 8084:8082
+    volumes:
+      - /srv/traccar_prod/traccar.xml:/opt/traccar/conf/traccar.xml:rw
+      - traccar_prod_media:/opt/traccar/media
+      - traccar_prod_logs:/opt/traccar/logs
