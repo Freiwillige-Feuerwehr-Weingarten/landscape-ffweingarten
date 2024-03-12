@@ -123,3 +123,12 @@
   become_user: postgres
   notify:
     - Restart postgresql
+
+- name: Install backup script
+  ansible.builtin.template:
+    src: files/backup.j2
+    dest: /etc/cron.daily/psqlbackup
+    owner: root
+    group: root
+    mode: '0755'
+  when: setup_backup
