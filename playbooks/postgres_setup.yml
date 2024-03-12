@@ -8,4 +8,5 @@
     - role: common
       vars:
         setup_qemu: false
+    - role: nfs
     - role: postgres_setup
