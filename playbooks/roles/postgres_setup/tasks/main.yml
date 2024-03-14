@@ -98,6 +98,9 @@
   become: true
   become_user: postgres
 
+# TODO: Determine the location of the conf file with
+# psql -t -P format=unaligned -c 'show hba_file';
+
 - name: Add entries to pg_hba
   community.postgresql.postgresql_pg_hba:
     dest: "/etc/postgresql/15/main/pg_hba.conf"
