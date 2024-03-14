@@ -1,5 +1,32 @@
 ---
-- name: Dump all Databases to /tmp/
+- name: "Set timestamp for the backups"
+  ansible.builtin.set_fact:
+    now: '{{ lookup("pipe", "date +%F-%T") }}'
+
+- name: Create ad-hoc directory
+  ansible.builtin.file:
+    path: "{{ nfs_mountpoint }}/ad-hoc"
+    state: directory
+    mode: '0755'
+
+- name: Backup Databases
+  community.postgresql.postgresql_db:
+    state: dump
+    name: "{{ item }}"
+    target: "/tmp/{{ item }}-{{ now }}.dump.gz"
+  become: true
+  become_user: postgres
+  with_items: "{{ psql_databases }}"
+
+# Copy single DB Backups to the NFS Share
+- name: Copy file with owner and permissions
+  ansible.builtin.copy:
+    src: "/tmp/{{ item }}-{{ now }}.dump.gz"
+    dest: "{{ nfs_mountpoint }}/ad-hoc/"
+    remote_src: true
+  with_items: "{{ psql_databases }}"
+
+- name: Dump all Databases to tmp
   ansible.builtin.command:
     argv:
       - /usr/bin/pg_dumpall
@@ -13,6 +40,7 @@
     path: /tmp/backup.sql
     remove: true
 
+# Copy all DB Backup to local: 
 - name: Pull DB backup
   ansible.builtin.fetch:
     src: /tmp/backup.sql.gz
