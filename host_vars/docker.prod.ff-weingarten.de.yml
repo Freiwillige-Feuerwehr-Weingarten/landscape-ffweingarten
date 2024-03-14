@@ -15,7 +15,6 @@ ldap_bind_password: !vault |
           3831616564653934320a393538616335396138643762636233663463656566396437333164343833
           3732
 
-# ldap_bind_password: HRFFikRRmz26mx
 ldap_search_base: OU=Aktive,OU=Feuerwehr,DC=feuerwehr,DC=weingarten,DC=local
 
 taiga_secret_key: !vault |

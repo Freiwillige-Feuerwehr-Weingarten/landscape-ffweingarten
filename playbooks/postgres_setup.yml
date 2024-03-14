@@ -8,5 +8,6 @@
     - role: common
       vars:
         setup_qemu: false
+    - role: geerlingguy.ntp
     - role: nfs
     - role: postgres_setup

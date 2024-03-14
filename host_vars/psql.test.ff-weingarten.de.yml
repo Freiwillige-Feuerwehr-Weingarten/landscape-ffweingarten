@@ -1,4 +1,7 @@
 ---
+# NTP
+ntp_timezone: Europe/Berlin
+
 # NFS
 nfs_permissions: "644"
 nfs_mountpoint: "/mnt/backup"
