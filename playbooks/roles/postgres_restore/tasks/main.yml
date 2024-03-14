@@ -1,0 +1,22 @@
+---
+- name: "Copy Backup file"
+  ansible.builtin.copy:
+    src: "{{ nfs_mountpoint }}/ad-hoc/{{ backup_file }}"
+    dest: "/tmp/"
+    remote_src: true
+    owner: postgres
+    group: postgres
+    mode: '0644'
+
+- name: "Restore the databases"
+  community.postgresql.postgresql_db:
+    state: restore
+    name: "{{ db }}"
+    target: "/tmp/{{ backup_file }}"
+  become: true
+  become_user: postgres
+
+- name: "Remove copied backup"
+  ansible.builtin.file:
+    path: "/tmp/{{ backup_file }}"
+    state: absent
