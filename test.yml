@@ -12,3 +12,5 @@ hosts:
     psql:
       hosts:
         psql.test.ff-weingarten.de:
+    nginx:
+      hosts:
