@@ -31,6 +31,9 @@ psql_db_traccar_password: !vault |
           39363665323662303462316163326636663862326437303838663631343962323034363462353662
           636465343066363963393261363233313765
 
+psql_db_alarm_password: "alarm"
+
 psql_databases:
   - semaphore
   - traccar
+  - alarm
