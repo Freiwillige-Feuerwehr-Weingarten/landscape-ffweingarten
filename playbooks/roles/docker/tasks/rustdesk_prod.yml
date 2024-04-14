@@ -1,0 +1,24 @@
+---
+- name: Create a rustdesk directory if it does not exist
+  ansible.builtin.file:
+    path: /srv/rustdesk
+    state: directory
+    mode: '0755'
+
+- name: Copy docker compose
+  ansible.builtin.template:
+    src: files/rustdesk.docker-compose.j2
+    dest: /srv/rustdesk/docker-compose.yml
+    mode: '0750'
+
+- name: Create and start services
+  community.docker.docker_compose_v2:
+    project_src: /srv/rustdesk
+    build: always
+    pull: policy
+    recreate: auto
+  register: rustdeskoutput
+
+- name: Show results
+  ansible.builtin.debug:
+    var: rustdeskoutput
