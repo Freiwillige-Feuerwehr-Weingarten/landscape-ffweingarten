@@ -1,5 +1,6 @@
 ---
 install_docker: false
+install_backup: false
 # NFS
 nfs_permissions: "644"
 nfs_mountpoint: "/mnt/nfs"

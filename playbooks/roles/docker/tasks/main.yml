@@ -24,8 +24,9 @@
 - name: Include tasks for rustdesk_prod
   ansible.builtin.include_tasks: rustdesk_prod.yml
 
-#- name: Copy backup script
-#  ansible.builtin.template:
-#    src: files/docker_backup.j2
-#    dest: /etc/cron.daily/docker_backup
-#    mode: '0750'
+- name: Copy backup script
+  ansible.builtin.template:
+    src: files/docker_backup.j2
+    dest: /etc/cron.daily/docker_backup
+    mode: '0750'
+  when: install_backup
