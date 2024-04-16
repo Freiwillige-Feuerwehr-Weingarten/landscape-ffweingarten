@@ -7,6 +7,7 @@
   community.docker.docker_container:
     name: "{{ db_container_name }}"
     image: jc21/mariadb-aria:latest
+    pull: always
     env:
       MYSQL_ROOT_PASSOWRD: "{{ db_root_password }}"
       MYSQL_DATABASE: "{{ db_name }}"
@@ -23,6 +24,7 @@
   community.docker.docker_container:
     name: nginx_proxy
     image: jc21/nginx-proxy-manager:latest
+    pull: always
     ports:
       - "80:80"
       - "81:81"
