@@ -11,9 +11,9 @@
 
 - name: Include tasks for traccar_test
   ansible.builtin.include_tasks: traccar_test.yml
-  
-#- name: Include tasks for traccar_prod
-#  ansible.builtin.include_tasks: traccar_prod.yml
+
+- name: Include tasks for traccar_prod
+  ansible.builtin.include_tasks: traccar_prod.yml
 
 - name: Include tasks for heimdall_test
   ansible.builtin.include_tasks: heimdall_test.yml
