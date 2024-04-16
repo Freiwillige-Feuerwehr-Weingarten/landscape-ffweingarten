@@ -44,18 +44,18 @@
       DB_MYSQL_NAME: "{{ db_name }}"
 
 - name: Getting a list of directories in the backup folder
-  find:
+  ansible.builtin.find:
     paths: "{{ mountpoint }}"
     file_type: directory
   register: found_files
 
 - name: Getting newest backup directory
-  set_fact:
-    latest_file: "{{ found_files.files | sort(attribute='mtime',reverse=true) | first }}"
+  ansible.builtin.set_fact:
+    latest_file: "{{ found_files.files | sort(attribute='mtime', reverse=true) | first }}"
   register: db_backup
-  
+
 - name: debug output
-  debug:
+  ansible.builtin.debug:
     msg: "Using DB backup: {{ db_backup.ansible_facts.latest_file.path }}"
 
 - name: Restore backup letsencrypt
