@@ -1,0 +1,13 @@
+---
+- name: Maria DB Setup Playbook
+  hosts: mysql
+  remote_user: ffweingarten
+  become: true
+  gather_facts: true
+  roles:
+    - role: common
+      vars:
+        setup_qemu: false
+    - role: geerlingguy.ntp
+    - role: nfs
+    - role: mariadb_setup

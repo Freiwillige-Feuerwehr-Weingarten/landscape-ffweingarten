@@ -1,0 +1,12 @@
+---
+- name: Install postgres debian packages
+  ansible.builtin.apt:
+    pkg:
+      - mariadb-server
+    state: present
+
+- name: Start end enable services
+  ansible.builtin.systemd_service:
+    name: mariadb
+    state: started
+    enabled: true
