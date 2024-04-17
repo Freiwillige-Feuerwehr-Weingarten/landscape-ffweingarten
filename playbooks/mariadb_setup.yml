@@ -5,10 +5,7 @@
   become: true
   gather_facts: true
   roles:
-    - role: common
-      vars:
-        setup_qemu: false
+    - role: common  
     - role: geerlingguy.ntp
     - role: nfs
-#    - role: mariadb_setup
     - role: fauust.mariadb

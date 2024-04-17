@@ -1,3 +1,6 @@
+# Common
+setup_qemu: false
+
 # NTP
 ntp_timezone: Europe/Berlin
 
