@@ -1,0 +1,19 @@
+---
+- name: "Set timestamp for the backups"
+  ansible.builtin.set_fact:
+    now: '{{ lookup("pipe", "date +%F-%T") }}'
+
+- name: Create ad-hoc directory
+  ansible.builtin.file:
+    path: "{{ nfs_mountpoint }}/ad-hoc"
+    state: directory
+    mode: '0755'
+
+- name: Backup Databases
+  community.mysql.mysql_db:
+    state: dump
+    name: "{{ item }}"
+    target: "/tmp/{{ item }}.sql"
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+  become: true
+  with_items: "{{ mariadb_backup_db_name }}"
