@@ -56,5 +56,4 @@ mariadb_backup_cron_std_output: "2>&1 | tee"
 # name of the database to dump
 # (mandatory if mariadb_backup_db is set to true)
 mariadb_backup_db_name:
-    - bookstackapp
-
+  - bookstackapp
