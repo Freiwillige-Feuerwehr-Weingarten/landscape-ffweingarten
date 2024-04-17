@@ -1,0 +1,44 @@
+# NTP
+ntp_timezone: Europe/Berlin
+
+# NFS
+nfs_permissions: "644"
+nfs_mountpoint: "/mnt/backup"
+nfs_src: stark.feuerwehr.weingarten.local:/Backup_MySQL_Test
+nfs_options: vers=4,rw,rsize=8192,wsize=8192,timeo=14,intr
+
+# MariaDB
+deny_remote_connections: true
+mysql_root_password: test
+
+# fauust mariadb
+mariadb_enabled_on_startup: true
+mariadb_can_restart: true
+
+mariadb_bind_address: "0.0.0.0"
+
+maridadb_databases:
+  - name: bookstackapp
+    collation: utf8_general_ci
+    encoding: utf8
+    replicate: false
+
+mariadb_users:
+  - name: bookstack
+    host: 192.168.10.130
+    password: gfd8l3nd0a0s
+    priv: "bookstackapp.*:ALL"
+    state: present
+
+mariadb_backup_db: true
+mariadb_backup_db_cron_min: 15
+mariadb_backup_db_cron_hour: 20
+mariadb_backup_db_dir: /mnt/backup
+mariadb_backup_db_rotation: 15
+# set to "1>" to get only STDERR on cron
+mariadb_backup_cron_std_output: "2>&1 | tee"
+
+# name of the database to dump
+# (mandatory if mariadb_backup_db is set to true)
+mariadb_backup_db_name:
+    - bookstackapp
