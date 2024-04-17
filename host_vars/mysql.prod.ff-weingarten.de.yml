@@ -1,0 +1,60 @@
+# Common
+setup_qemu: false
+
+# NTP
+ntp_timezone: Europe/Berlin
+
+# NFS
+nfs_permissions: "644"
+nfs_mountpoint: "/mnt/backup"
+nfs_src: stark.feuerwehr.weingarten.local:/Backup_MySQL_Prod
+nfs_options: vers=4,rw,rsize=8192,wsize=8192,timeo=14,intr
+
+# MariaDB
+deny_remote_connections: true
+mysql_root_password: !vault |
+          $ANSIBLE_VAULT;1.1;AES256
+          61616531623137303438326663343165643264353664326131656636346565623637653866386536
+          6663656366336430366639363235346134386537653239300a303162363764323038663633646334
+          61343038313431363762393861623761323336373535313162343139643835333865653430346662
+          3735393136383732320a653634353162313964336431363333373461363461613233653264366236
+          37363966363366393736343231306165663635306338373164633233326337316139
+
+# fauust mariadb
+mariadb_enabled_on_startup: true
+mariadb_can_restart: true
+
+mariadb_bind_address: "0.0.0.0"
+
+maridadb_databases:
+  - name: bookstackapp
+    collation: utf8_general_ci
+    encoding: utf8
+    replicate: false
+
+mariadb_users:
+  - name: bookstack
+    host: 192.168.10.130
+    password: !vault |
+          $ANSIBLE_VAULT;1.1;AES256
+          31313138316535346264623038626266633665633937333463366266333562613431383733353030
+          6665643165636265393432343839306333393039326235370a326339353831386136633637333265
+          31633431363936643632653339383738623264373637326463363334386663376630363330386131
+          3434646230323833340a353164383034326435383763663738656463653638383739373433383332
+          6339
+    priv: "bookstackapp.*:ALL"
+    state: present
+
+mariadb_backup_db: true
+mariadb_backup_db_cron_min: 15
+mariadb_backup_db_cron_hour: 20
+mariadb_backup_db_dir: /mnt/backup
+mariadb_backup_db_rotation: 15
+# set to "1>" to get only STDERR on cron
+mariadb_backup_cron_std_output: "2>&1 | tee"
+
+# name of the database to dump
+# (mandatory if mariadb_backup_db is set to true)
+mariadb_backup_db_name:
+    - bookstackapp
+
