@@ -3,6 +3,7 @@ hosts:
   jump.prod.ff-weingarten.de:
   psql.prod.ff-weingarten.de:
   rproxy.prod.feuerwehr.weingarten.local:
+  mysql.prod.ff-weingarten.de:
   children:
     docker:
       hosts:
@@ -16,3 +17,6 @@ hosts:
     nginx:
       hosts:
         rproxy.prod.feuerwehr.weingarten.local:
+    mysql:
+      hosts:
+        mysql.prod.ff-weingarten.de:
