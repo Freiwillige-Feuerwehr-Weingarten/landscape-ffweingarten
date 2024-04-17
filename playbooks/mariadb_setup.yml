@@ -10,4 +10,5 @@
         setup_qemu: false
     - role: geerlingguy.ntp
     - role: nfs
-    - role: mariadb_setup
+#    - role: mariadb_setup
+    - role: fauust.mariadb
