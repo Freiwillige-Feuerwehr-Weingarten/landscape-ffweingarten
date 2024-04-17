@@ -40,7 +40,7 @@
     path: /tmp/backup.sql
     remove: true
 
-# Copy all DB Backup to local: 
+# Copy all DB Backup to local:
 - name: Pull DB backup
   ansible.builtin.fetch:
     src: /tmp/backup.sql.gz
