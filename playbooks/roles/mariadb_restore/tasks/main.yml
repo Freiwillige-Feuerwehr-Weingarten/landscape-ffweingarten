@@ -4,32 +4,14 @@
     src: "{{ nfs_mountpoint }}/ad-hoc/{{ backup_file }}"
     dest: "/tmp/"
     remote_src: true
-    # owner: postgres
-    # group: postgres
     mode: '0644'
-
-# - name: Remove database before restoring
-#   community.mysql.mysql_db:
-#     name: "{{ db }}"
-#     state: absent
-#     login_unix_socket: /var/run/mysqld/mysqld.sock
-#   become: true
-
-# - name: Recreate database before restoring
-#   community.mysql.mysql_db:
-#     name: "{{ db }}"
-#     state: absent
-#     login_unix_socket: /var/run/mysqld/mysqld.sock
-#   become: true
 
 - name: Restore database
   community.mysql.mysql_db:
-    # name: "{{ db }}"
     name: all
     state: import
     login_unix_socket: /var/run/mysqld/mysqld.sock
     target: "/tmp/{{ backup_file }}"
-    # force: true
   become: true
 
 - name: "Remove copied backup"
