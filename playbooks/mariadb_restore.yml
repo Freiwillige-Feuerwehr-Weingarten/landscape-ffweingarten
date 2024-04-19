@@ -1,0 +1,8 @@
+---
+- name: Maria DB Backup Playbook
+  hosts: mysql
+  remote_user: ffweingarten
+  become: true
+  # --extra-vars "db=bookstackapp, backup_file=bookstackapp.sql"
+  roles:
+    - role: mariadb_restore
