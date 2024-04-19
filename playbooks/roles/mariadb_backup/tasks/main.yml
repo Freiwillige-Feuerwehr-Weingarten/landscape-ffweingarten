@@ -14,35 +14,26 @@
     state: dump
     name: all
     target: "/tmp/mysql_all.sql"
-    # name: "{{ item }}"
-    # target: "/tmp/{{ item }}.sql"
     login_unix_socket: /var/run/mysqld/mysqld.sock
   become: true
-  # with_items: "{{ mariadb_backup_db_name }}"
 
-# Copy single DB Backups to backup NFS Share
+# Copy complete DB Backup to backup NFS Share
 - name: Copy file with owner and permissions
   ansible.builtin.copy:
-    # src: "/tmp/{{ item }}.sql"
     src: "/tmp/mysql_all.sql"
     dest: "{{ nfs_mountpoint }}/ad-hoc/"
     remote_src: true
     mode: '0644'
-  # with_items: "{{ mariadb_backup_db_name }}"
 
-# Copy all single DB Backups to local machine:
+# Copy complete DB Backup to local machine:
 - name: Pull DB backup
   ansible.builtin.fetch:
-    # src: "/tmp/{{ item }}.sql"
     src: "/tmp/mysql_all.sql"
     dest: /tmp
     fail_on_missing: true
     validate_checksum: true
-  # with_items: "{{ mariadb_backup_db_name }}"
 
 - name: Remove remote backup
   ansible.builtin.file:
-    # path: "/tmp/{{ item }}.sql"
     path: "/tmp/mysql_all.sql"
     state: absent
-  #  with_items: "{{ mariadb_backup_db_name }}"
