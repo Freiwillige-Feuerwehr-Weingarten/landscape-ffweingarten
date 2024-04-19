@@ -61,6 +61,9 @@
     search_string: '#   - ./conf.json:/usr/share/nginx/html/conf.json'
     line: '      - ./custom-front/conf.override.json:/usr/share/nginx/html/conf.json'
 
+# TODO Add to taiga-gateway:
+# restart: on-failure
+
 - name: Create custom-front directory
   ansible.builtin.file:
     path: /srv/taiga/custom-front

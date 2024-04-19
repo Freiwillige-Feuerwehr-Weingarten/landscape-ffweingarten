@@ -1,4 +1,7 @@
 ---
+# NTP
+ntp_timezone: Europe/Berlin
+
 # NFS
 nfs_permissions: "644"
 nfs_mountpoint: "/mnt/backup"
@@ -27,3 +30,10 @@ psql_db_traccar_password: !vault |
           61636139383537636135663865326661663536316536353637666666323461386665663263626632
           39363665323662303462316163326636663862326437303838663631343962323034363462353662
           636465343066363963393261363233313765
+
+psql_db_alarm_password: "alarm"
+
+psql_databases:
+  - semaphore
+  - traccar
+  - alarm

@@ -1,0 +1,39 @@
+---
+- name: "Set timestamp for the backups"
+  ansible.builtin.set_fact:
+    now: '{{ lookup("pipe", "date +%F-%T") }}'
+
+- name: Create ad-hoc directory
+  ansible.builtin.file:
+    path: "{{ nfs_mountpoint }}/ad-hoc"
+    state: directory
+    mode: '0755'
+
+- name: Backup Databases
+  community.mysql.mysql_db:
+    state: dump
+    name: all
+    target: "/tmp/mysql_all.sql"
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+  become: true
+
+# Copy complete DB Backup to backup NFS Share
+- name: Copy file with owner and permissions
+  ansible.builtin.copy:
+    src: "/tmp/mysql_all.sql"
+    dest: "{{ nfs_mountpoint }}/ad-hoc/"
+    remote_src: true
+    mode: '0644'
+
+# Copy complete DB Backup to local machine:
+- name: Pull DB backup
+  ansible.builtin.fetch:
+    src: "/tmp/mysql_all.sql"
+    dest: /tmp
+    fail_on_missing: true
+    validate_checksum: true
+
+- name: Remove remote backup
+  ansible.builtin.file:
+    path: "/tmp/mysql_all.sql"
+    state: absent

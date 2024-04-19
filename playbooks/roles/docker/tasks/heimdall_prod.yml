@@ -1,24 +1,24 @@
 ---
-- name: Create a netboot directory if it does not exist
+- name: Create a heimdall directory if it does not exist
   ansible.builtin.file:
-    path: /srv/netboot
+    path: /srv/heimdall
     state: directory
     mode: '0755'
 
 - name: Copy docker compose
   ansible.builtin.template:
-    src: files/netboot.xyz.j2
-    dest: /srv/netboot/docker-compose.yml
+    src: files/heimdall_prod.docker-compose.j2
+    dest: /srv/heimdall/docker-compose.yml
     mode: '0750'
 
 - name: Create and start services
   community.docker.docker_compose_v2:
-    project_src: /srv/netboot
+    project_src: /srv/heimdall
     build: always
     pull: policy
     recreate: auto
-  register: netbootoutput
+  register: heimdalloutput
 
 - name: Show results
   ansible.builtin.debug:
-    var: netbootoutput
+    var: heimdalloutput

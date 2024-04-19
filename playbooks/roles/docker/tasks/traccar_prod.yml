@@ -21,6 +21,8 @@
   community.docker.docker_compose_v2:
     project_src: /srv/traccar_prod
     build: always
+    pull: policy
+    recreate: auto
   register: traccarprodoutput
 
 - name: Show results

@@ -40,6 +40,14 @@
   become: true
   become_user: postgres
 
+- name: Create Alarm Database
+  community.postgresql.postgresql_db:
+    state: present
+    name: "alarm"
+    template: "template0"
+  become: true
+  become_user: postgres
+
 - name: Create semaphore db user
   community.postgresql.postgresql_user:
     state: present
@@ -53,6 +61,14 @@
     state: present
     name: "traccar"
     password: "{{ psql_db_traccar_password }}"
+  become: true
+  become_user: postgres
+
+- name: Create alarm db user
+  community.postgresql.postgresql_user:
+    state: present
+    name: "alarm"
+    password: "{{ psql_db_alarm_password }}"
   become: true
   become_user: postgres
 
@@ -78,6 +94,17 @@
   become: true
   become_user: postgres
 
+- name: Grant db user alarm access to alarm DB
+  community.postgresql.postgresql_privs:
+    type: database
+    state: present
+    database: "alarm"
+    roles: "alarm"
+    grant_option: false
+    privs: all
+  become: true
+  become_user: postgres
+
 - name: Privileges on public schema
   community.postgresql.postgresql_privs:
     type: schema
@@ -97,6 +124,20 @@
     role: traccar
   become: true
   become_user: postgres
+
+- name: Privileges on public schema
+  community.postgresql.postgresql_privs:
+    type: schema
+    db: alarm
+    privs: all
+    objs: public
+    role: alarm
+  become: true
+  become_user: postgres
+
+
+# TODO: Determine the location of the conf file with
+# psql -t -P format=unaligned -c 'show hba_file';
 
 - name: Add entries to pg_hba
   community.postgresql.postgresql_pg_hba:
@@ -119,6 +160,19 @@
     databases: "traccar"
     method: "md5"
     users: "traccar"
+  become: true
+  become_user: postgres
+  notify:
+    - Restart postgresql
+
+- name: Add entries to pg_hba
+  community.postgresql.postgresql_pg_hba:
+    dest: "/etc/postgresql/15/main/pg_hba.conf"
+    address: "192.168.0.0/16"
+    contype: "host"
+    databases: "alarm"
+    method: "md5"
+    users: "alarm"
   become: true
   become_user: postgres
   notify:

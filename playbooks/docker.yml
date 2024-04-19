@@ -2,7 +2,7 @@
 # Role to install docker
 - name: Install docker
   become: true
-  hosts: prod_docker
+  hosts: docker
   remote_user: ffweingarten
   gather_facts: true
   roles:

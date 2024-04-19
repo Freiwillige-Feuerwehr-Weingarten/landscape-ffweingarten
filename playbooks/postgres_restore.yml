@@ -1,0 +1,8 @@
+---
+- name: Postgres Backup Playbook
+  hosts: psql
+  remote_user: ffweingarten
+  become: true
+  # --extra-vars "db=semaphore, backup_file=semaphore-2024-03-14-20:08:19.dump.gz"
+  roles:
+    - role: postgres_restore

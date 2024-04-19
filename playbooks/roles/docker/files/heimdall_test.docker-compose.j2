@@ -1,0 +1,16 @@
+---
+services:
+  heimdall:
+    image: lscr.io/linuxserver/heimdall:latest
+    container_name: heimdall_test
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Berlin
+    volumes:
+      - heimdall_test_config:/config
+    ports:
+      - 8096:80
+    restart: unless-stopped
+volumes:
+  heimdall_test_config:

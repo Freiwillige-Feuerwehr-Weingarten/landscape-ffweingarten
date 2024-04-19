@@ -27,7 +27,8 @@
   community.docker.docker_compose_v2:
     project_src: /srv/traccar_test
     build: always
-    #env_files: .env
+    pull: policy
+    recreate: auto
   register: traccartestoutput
 
 - name: Show results
