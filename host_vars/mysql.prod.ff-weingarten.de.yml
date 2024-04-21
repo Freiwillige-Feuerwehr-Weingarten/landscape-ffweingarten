@@ -26,11 +26,13 @@ mariadb_can_restart: true
 
 mariadb_bind_address: "0.0.0.0"
 
-maridadb_databases:
+mariadb_databases:
   - name: bookstackapp
+    state: present
     collation: utf8_general_ci
     encoding: utf8
     replicate: false
+    login_unix_socket: /run/mysqld/mysqld.sock
 
 mariadb_users:
   - name: bookstack
@@ -44,6 +46,8 @@ mariadb_users:
           6339
     priv: "bookstackapp.*:ALL"
     state: present
+    login_unix_socket: /run/mysqld/mysqld.sock
+
 
 mariadb_backup_db: true
 mariadb_backup_db_cron_min: 15
