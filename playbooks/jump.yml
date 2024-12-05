@@ -1,14 +1,14 @@
 ---
 - name: Playbook to install a jumphost
-  hosts: prod_jump
+  hosts: jump
   remote_user: ffweingarten
   gather_facts: true
   pre_tasks:
-  - name: Install dnsutils as dependency
-    become: true
-    ansible.builtin.apt:
-      name: dnsutils
-      state: present
+    - name: Install dnsutils as dependency
+      become: true
+      ansible.builtin.apt:
+        name: dnsutils
+        state: present
   roles:
     - role: common
       become: true
