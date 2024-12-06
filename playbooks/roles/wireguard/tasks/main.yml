@@ -1,9 +1,9 @@
 ---
 - name: Install wireguard packages
-  apt:
+  ansible.builtin.apt:
     name: wireguard, iptables
     state: present
-    update_cache: yes
+    update_cache: true
 
 - name: Create server wireguard config
   ansible.builtin.template:
@@ -15,15 +15,15 @@
   notify: reload wireguard config
 
 - name: Enable and persist ip forwarding
-  sysctl:
+  ansible.posix.sysctl:
     name: net.ipv4.ip_forward
     value: "1"
     state: present
-    sysctl_set: yes
-    reload: yes
+    sysctl_set: true
+    reload: true
 
-- name: start wireguard and enable on boot
-  systemd:
+- name: Start wireguard and enable on boot
+  ansible.builtin.systemd:
     name: wg-quick@wg0
-    enabled: yes
+    enabled: true
     state: started
