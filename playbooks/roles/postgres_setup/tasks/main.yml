@@ -48,6 +48,13 @@
   become: true
   become_user: postgres
 
+- name: Create Netbox Database
+  community.postgresql.postgresql_db:
+    state: present
+    name: "netbox"
+  become: true
+  become_user: postgres
+
 - name: Create semaphore db user
   community.postgresql.postgresql_user:
     state: present
@@ -69,6 +76,14 @@
     state: present
     name: "alarm"
     password: "{{ psql_db_alarm_password }}"
+  become: true
+  become_user: postgres
+
+- name: Create netbox db user
+  community.postgresql.postgresql_user:
+    state: present
+    name: "netbox"
+    password: "{{ psql_db_netbox_password }}"
   become: true
   become_user: postgres
 
@@ -105,6 +120,17 @@
   become: true
   become_user: postgres
 
+- name: Grant db user netbox access to netbox DB
+  community.postgresql.postgresql_privs:
+    type: database
+    state: present
+    database: "netbox"
+    roles: "netbox"
+    grant_option: false
+    privs: all
+  become: true
+  become_user: postgres
+
 - name: Privileges on public schema
   community.postgresql.postgresql_privs:
     type: schema
@@ -132,6 +158,16 @@
     privs: all
     objs: public
     role: alarm
+  become: true
+  become_user: postgres
+
+- name: Privileges on public schema
+  community.postgresql.postgresql_privs:
+    type: schema
+    db: netbox
+    privs: all
+    objs: public
+    role: netbox
   become: true
   become_user: postgres
 
@@ -173,6 +209,19 @@
     databases: "alarm"
     method: "md5"
     users: "alarm"
+  become: true
+  become_user: postgres
+  notify:
+    - Restart postgresql
+
+- name: Add entries to pg_hba
+  community.postgresql.postgresql_pg_hba:
+    dest: "/etc/postgresql/15/main/pg_hba.conf"
+    address: "192.168.10.161"
+    contype: "host"
+    databases: "netbox"
+    method: "md5"
+    users: "netbox"
   become: true
   become_user: postgres
   notify:
