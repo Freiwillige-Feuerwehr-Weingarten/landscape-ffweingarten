@@ -39,7 +39,7 @@
 
 - name: Get files in DB Backup folder
   ansible.builtin.find:
-    paths: "{{ mountpoint }}"
+    paths: "{{ nfs_mountpoint }}"
     recurse: true
     patterns: "*.sql"
   register: found_files
