@@ -29,6 +29,7 @@
   with_items: "{{ ssh_known_hosts }}"
   register: ssh_known_host_results
   ignore_errors: true
+  changed_when: true
 
 - name: Add Servers to know_hosts
   ansible.builtin.known_hosts:
