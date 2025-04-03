@@ -55,6 +55,13 @@
   become: true
   become_user: postgres
 
+- name: Create Nextcloud Database
+  community.postgresql.postgresql_db:
+    state: present
+    name: "nextcloud"
+  become: true
+  become_user: postgres
+
 - name: Create semaphore db user
   community.postgresql.postgresql_user:
     state: present
@@ -84,6 +91,14 @@
     state: present
     name: "netbox"
     password: "{{ psql_db_netbox_password }}"
+  become: true
+  become_user: postgres
+
+- name: Create nextcloud db user
+  community.postgresql.postgresql_user:
+    state: present
+    name: "nextcloud"
+    password: "{{ psql_db_nextcloud_password }}"
   become: true
   become_user: postgres
 
@@ -131,6 +146,17 @@
   become: true
   become_user: postgres
 
+- name: Grant db user nextcloud access to nextcloud DB
+  community.postgresql.postgresql_privs:
+    type: database
+    state: present
+    database: "nextcloud"
+    roles: "nextcloud"
+    grant_option: false
+    privs: all
+  become: true
+  become_user: postgres
+
 - name: Privileges on public schema
   community.postgresql.postgresql_privs:
     type: schema
@@ -171,6 +197,16 @@
   become: true
   become_user: postgres
 
+- name: Privileges on public schema
+  community.postgresql.postgresql_privs:
+    type: schema
+    db: nextcloud
+    privs: all
+    objs: public
+    role: nextcloud
+  become: true
+  become_user: postgres
+
 
 # TODO: Determine the location of the conf file with
 # psql -t -P format=unaligned -c 'show hba_file';
@@ -178,7 +214,7 @@
 - name: Add entries to pg_hba
   community.postgresql.postgresql_pg_hba:
     dest: "/etc/postgresql/15/main/pg_hba.conf"
-    address: "192.168.10.130"
+    address: "192.168.10.0/24"
     contype: "host"
     databases: "semaphore"
     method: "md5"
@@ -191,7 +227,7 @@
 - name: Add entries to pg_hba
   community.postgresql.postgresql_pg_hba:
     dest: "/etc/postgresql/15/main/pg_hba.conf"
-    address: "192.168.10.130"
+    address: "192.168.10.0/24"
     contype: "host"
     databases: "traccar"
     method: "md5"
@@ -217,11 +253,24 @@
 - name: Add entries to pg_hba
   community.postgresql.postgresql_pg_hba:
     dest: "/etc/postgresql/15/main/pg_hba.conf"
-    address: "192.168.10.161"
+    address: "192.168.10.0/24"
     contype: "host"
     databases: "netbox"
     method: "md5"
     users: "netbox"
+  become: true
+  become_user: postgres
+  notify:
+    - Restart postgresql
+
+- name: Add entries to pg_hba for nextcloud
+  community.postgresql.postgresql_pg_hba:
+    dest: "/etc/postgresql/15/main/pg_hba.conf"
+    address: "192.168.10.0/24"
+    contype: "host"
+    databases: "nextcloud"
+    method: "md5"
+    users: "nextcloud"
   become: true
   become_user: postgres
   notify:
