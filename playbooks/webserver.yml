@@ -1,6 +1,6 @@
 ---
 - name: Webserver Playbook
-  hosts: test_webserver
+  hosts: webserver
   remote_user: ffweingarten
   become: true
   gather_facts: true
