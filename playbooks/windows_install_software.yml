@@ -13,21 +13,32 @@
         - winscp.install
         - vlc.portable
         - winrar
-        - atom.install
+        - ghostscript.app
+        # - atom.install
         - adobereader
-        - atlassian-companion
+        # - atlassian-companion
         - cutepdf
-        - teamviewer-qs
+        # - teamviewer-qs
+        - vscode.install
+        - chocolateygui
+        - chocolatey-core.extension
+        # - autohotkey.portable
+        # - rustdesk.install
+
+    - name: Upgrade installed packages
+      chocolatey.chocolatey.win_chocolatey:
+        name: all
+        state: latest
 
     - name: Uninstall multiple software packages
-      win_chocolatey:
+      chocolatey.chocolatey.win_chocolatey:
         name:
-        - putty
+          - putty
         state: absent
 
     - name: Gather facts
       chocolatey.chocolatey.win_chocolatey_facts:
 
     - name: Display the packages
-      debug:
+      ansible.builtin.debug:
         var: ansible_chocolatey.packages
