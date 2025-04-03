@@ -3,29 +3,29 @@
   ansible.builtin.include_tasks: install_docker.yml
   when: install_docker
 
-- name: Include tasks for netboot
-  ansible.builtin.include_tasks: netboot.yml
+#- name: Include tasks for netboot
+#  ansible.builtin.include_tasks: netboot.yml
 
-- name: Include tasks for taiga
-  ansible.builtin.include_tasks: taiga.yml
+#- name: Include tasks for taiga
+#  ansible.builtin.include_tasks: taiga.yml
 
-- name: Include tasks for traccar_test
-  ansible.builtin.include_tasks: traccar_test.yml
+#- name: Include tasks for traccar_test
+#  ansible.builtin.include_tasks: traccar_test.yml
 
-- name: Include tasks for traccar_prod
-  ansible.builtin.include_tasks: traccar_prod.yml
+#- name: Include tasks for traccar_prod
+#  ansible.builtin.include_tasks: traccar_prod.yml
 
-- name: Include tasks for heimdall_test
-  ansible.builtin.include_tasks: heimdall_test.yml
+#- name: Include tasks for heimdall_test
+#  ansible.builtin.include_tasks: heimdall_test.yml
 
-- name: Include tasks for heimdall_prod
-  ansible.builtin.include_tasks: heimdall_prod.yml
+#- name: Include tasks for heimdall_prod
+#  ansible.builtin.include_tasks: heimdall_prod.yml
 
-- name: Include tasks for rustdesk_prod
-  ansible.builtin.include_tasks: rustdesk_prod.yml
+#- name: Include tasks for rustdesk_prod
+#  ansible.builtin.include_tasks: rustdesk_prod.yml
 
-- name: Include tasks for bookstack_test
-  ansible.builtin.include_tasks: bookstack.yml
+#- name: Include tasks for bookstack_test
+#  ansible.builtin.include_tasks: bookstack.yml
 
 - name: Copy backup script
   ansible.builtin.template:
