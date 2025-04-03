@@ -20,3 +20,6 @@ hosts:
     mysql:
       hosts:
         mysql.prod.ff-weingarten.de:
+    wireguard:
+      hosts:
+        wireguard.prod.ff-weingarten.de:
