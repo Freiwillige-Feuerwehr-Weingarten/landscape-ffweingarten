@@ -15,6 +15,45 @@ hosts:
         psql.test.ff-weingarten.de:
     nginx:
       hosts:
+    docker:
+      hosts:
+        docker.test.ff-weingarten.de:
     mysql:
       hosts:
         mysql.test.ff-weingarten.de:
+    windows:
+      hosts:
+        192.168.2.50:
+        192.168.2.51:
+        192.168.2.52:
+        192.168.2.53:
+        192.168.2.54:
+        192.168.2.55:
+        192.168.2.56:
+        192.168.2.57:
+        192.168.2.60:
+        192.168.2.61:
+        192.168.2.62:
+        192.168.2.63:
+        192.168.2.64:
+        192.168.2.65:
+        192.168.2.66:
+        192.168.2.67:
+        192.168.2.70:
+        192.168.2.71:
+        192.168.8.19:
+
+      vars:
+        ansible_user: administrator@feuerwehr
+        ansible_password: !vault |
+                  $ANSIBLE_VAULT;1.1;AES256
+                  35656661653861653263633737613132363332356534656231613766303232333463306662626433
+                  3532393530643534326136336361653930653133376130650a316337323539326431616264613534
+                  30363266626337643163376636306661396165373333393562316562323238393361346633333135
+                  3733323963326234650a633536636131323635633462636663306332333233343334343535643831
+                  3538
+        ansible_connection: winrm
+        ansible_port: 5985
+        ansible_winrm_transport: ntlm
+        # ansible_winrm_message_enncryption: always
+        ansible_winrm_server_cert_validation: ignore
