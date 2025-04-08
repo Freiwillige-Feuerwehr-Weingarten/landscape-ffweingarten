@@ -22,3 +22,4 @@
 - name: Show results
   ansible.builtin.debug:
     var: netbootoutput
+  when: docker_debug
