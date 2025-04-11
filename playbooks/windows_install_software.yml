@@ -1,7 +1,8 @@
 ---
 # Playbook install software on windows systems
 
-- hosts: windows
+- name: Install Software on Windows systems
+  hosts: windows
   tasks:
     - name: Install multiple software packages
       chocolatey.chocolatey.win_chocolatey:
@@ -14,16 +15,11 @@
         - vlc.portable
         - winrar
         - ghostscript.app
-        # - atom.install
         - adobereader
-        # - atlassian-companion
         - cutepdf
-        # - teamviewer-qs
         - vscode.install
         - chocolateygui
         - chocolatey-core.extension
-        # - autohotkey.portable
-        # - rustdesk.install
 
     - name: Upgrade installed packages
       chocolatey.chocolatey.win_chocolatey:
