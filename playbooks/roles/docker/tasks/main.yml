@@ -9,8 +9,8 @@
 #- name: Include tasks for taiga
 #  ansible.builtin.include_tasks: taiga.yml
 
-#- name: Include tasks for traccar_prod
-#  ansible.builtin.include_tasks: traccar_prod.yml
+- name: Include tasks for traccar
+  ansible.builtin.include_tasks: traccar.yml
 
 - name: Include tasks for heimdall
   ansible.builtin.include_tasks: heimdall.yml
