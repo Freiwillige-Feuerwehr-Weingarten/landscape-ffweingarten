@@ -3,4 +3,4 @@
   ansible.builtin.service:
     name: qemu-guest-agent
     state: started
-  when: setup_qemu
+  when: common_setup_qemu
