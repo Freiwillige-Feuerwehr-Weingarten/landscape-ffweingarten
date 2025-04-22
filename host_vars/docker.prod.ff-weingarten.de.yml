@@ -94,6 +94,7 @@ bookstack_app_url: "http://bookstack.test.ff-weingarten.de"
 # traccar
 psql_db_url: jdbc:postgresql://psql.prod.ff-weingarten.de/traccar
 psql_db_user: traccar
+traccar_loglevel: warning
 
 # TODO: Need to move this somewhere else, as it is duplicate right now
 psql_db_traccar_test_password: !vault |
