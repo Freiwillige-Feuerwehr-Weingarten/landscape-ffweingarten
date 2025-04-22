@@ -11,5 +11,6 @@
     - netboot
     - heimdall
     - rustdesk
+    - traccar
     # - docker
     # - portainer
