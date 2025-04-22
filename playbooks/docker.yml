@@ -9,5 +9,6 @@
     - common
     - nfs
     - netboot
+    - heimdall
     # - docker
     # - portainer
