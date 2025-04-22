@@ -68,15 +68,15 @@ php_packages:
 
 apache_create_vhosts: true
 apache_vhosts:
-  - servername: "hydrant.ff-weingarten.de"
-    documentroot: "/var/www/vhosts/hydrant.ff-weingarten.de" 
-    serveradmin: "admin@ff-weingarten.de"
-  - servername: "rainloop.ff-weingarten.de"
-    serveralias: "webmail.ff-weingarten.de"
-    documentroot: "/var/www/vhosts/rainloop.ff-weingarten.de"
-    serveradmin: "admin@ff-weingarten.de"
-    options: +Indexes +FollowSymLinks +ExecCGI
-    extra_parameters: |
-        <Directory /var/www/vhosts/rainloop.ff-weingarten.de/data>
-          Require all denied
-        </Directory>
+    - servername: "hydrant.ff-weingarten.de"
+      documentroot: "/var/www/vhosts/hydrant.ff-weingarten.de"
+      serveradmin: "admin@ff-weingarten.de"
+    - servername: "rainloop.ff-weingarten.de"
+      serveralias: "webmail.ff-weingarten.de"
+      documentroot: "/var/www/vhosts/rainloop.ff-weingarten.de"
+      serveradmin: "admin@ff-weingarten.de"
+      options: +Indexes +FollowSymLinks +ExecCGI
+      extra_parameters: |
+          <Directory /var/www/vhosts/rainloop.ff-weingarten.de/data>
+            Require all denied
+          </Directory>

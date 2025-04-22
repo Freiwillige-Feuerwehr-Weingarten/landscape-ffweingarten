@@ -69,7 +69,7 @@ php_packages:
 apache_create_vhosts: true
 apache_vhosts:
   - servername: "hydrant.ff-weingarten.de"
-    documentroot: "/var/www/vhosts/hydrant.ff-weingarten.de" 
+    documentroot: "/var/www/vhosts/hydrant.ff-weingarten.de"
     serveradmin: "admin@ff-weingarten.de"
   - servername: "rainloop.ff-weingarten.de"
     serveralias: "webmail.ff-weingarten.de"

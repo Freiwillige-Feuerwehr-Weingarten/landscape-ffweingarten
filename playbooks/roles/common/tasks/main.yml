@@ -1,6 +1,6 @@
 ---
 # Main playbook for common configuration
-- name: Upgrade OS 
+- name: Upgrade OS
   ansible.builtin.include_tasks: upgrade.yml
 - name: Install Software
   ansible.builtin.include_tasks: install.yml
