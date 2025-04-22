@@ -49,34 +49,34 @@ php_enable_apc: true
 php_apc_shm_size: "96M"
 php_apc_enable_cli: "0"
 php_packages:
-  - php
-  - php-apcu
-  - php-cli
-  - php-curl
-  - php-common
-  - php-dev
-  - php-gd
-  - php-mbstring
-  - php-pdo
-  - php-xml
-  - php-sqlite3
-  - php-mysql
-  - php-fpm
-  - php-xml
-  - php-json
-  - php-pdo
+   - php
+   - php-apcu
+   - php-cli
+   - php-curl
+   - php-common
+   - php-dev
+   - php-gd
+   - php-mbstring
+   - php-pdo
+   - php-xml
+   - php-sqlite3
+   - php-mysql
+   - php-fpm
+   - php-xml
+   - php-json
+   - php-pdo
 
 apache_create_vhosts: true
 apache_vhosts:
-    - servername: "hydrant.ff-weingarten.de"
-      documentroot: "/var/www/vhosts/hydrant.ff-weingarten.de"
-      serveradmin: "admin@ff-weingarten.de"
-    - servername: "rainloop.ff-weingarten.de"
-      serveralias: "webmail.ff-weingarten.de"
-      documentroot: "/var/www/vhosts/rainloop.ff-weingarten.de"
-      serveradmin: "admin@ff-weingarten.de"
-      options: +Indexes +FollowSymLinks +ExecCGI
-      extra_parameters: |
-          <Directory /var/www/vhosts/rainloop.ff-weingarten.de/data>
-            Require all denied
-          </Directory>
+   - servername: "hydrant.ff-weingarten.de"
+     documentroot: "/var/www/vhosts/hydrant.ff-weingarten.de"
+     serveradmin: "admin@ff-weingarten.de"
+   - servername: "rainloop.ff-weingarten.de"
+     serveralias: "webmail.ff-weingarten.de"
+     documentroot: "/var/www/vhosts/rainloop.ff-weingarten.de"
+     serveradmin: "admin@ff-weingarten.de"
+     options: +Indexes +FollowSymLinks +ExecCGI
+     extra_parameters: |
+        <Directory /var/www/vhosts/rainloop.ff-weingarten.de/data>
+          Require all denied
+        </Directory>
