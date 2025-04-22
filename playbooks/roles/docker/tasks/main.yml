@@ -3,13 +3,10 @@
   ansible.builtin.include_tasks: install_docker.yml
   when: install_docker
 
-#- name: Include tasks for taiga
+# - name: Include tasks for taiga
 #  ansible.builtin.include_tasks: taiga.yml
 
-- name: Include tasks for traccar
-  ansible.builtin.include_tasks: traccar.yml
-
-#- name: Include tasks for bookstack_test
+# - name: Include tasks for bookstack_test
 #  ansible.builtin.include_tasks: bookstack.yml
 
 - name: Copy backup script
