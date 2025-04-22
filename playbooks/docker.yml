@@ -8,5 +8,6 @@
   roles:
     - common
     - nfs
-    - docker
+    - netboot
+    # - docker
     # - portainer
