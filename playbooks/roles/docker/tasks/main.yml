@@ -9,9 +9,6 @@
 - name: Include tasks for traccar
   ansible.builtin.include_tasks: traccar.yml
 
-- name: Include tasks for rustdesk_prod
-  ansible.builtin.include_tasks: rustdesk.yml
-
 #- name: Include tasks for bookstack_test
 #  ansible.builtin.include_tasks: bookstack.yml
 

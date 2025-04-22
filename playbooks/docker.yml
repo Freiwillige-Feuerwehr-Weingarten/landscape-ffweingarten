@@ -10,5 +10,6 @@
     - nfs
     - netboot
     - heimdall
+    - rustdesk
     # - docker
     # - portainer
