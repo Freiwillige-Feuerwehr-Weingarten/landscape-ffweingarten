@@ -1,5 +1,6 @@
 ---
 docker_debug: true
+docker_backup_suffix: test
 # NFS
 nfs_permissions: "644"
 nfs_mountpoint: "/mnt/nfs"

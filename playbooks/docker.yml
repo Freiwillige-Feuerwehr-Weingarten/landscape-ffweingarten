@@ -10,8 +10,8 @@
     - nfs
     - docker
     - portainer
-    # - netboot
-    # - heimdall
+    - netboot
+    - heimdall
     # - rustdesk
     # - traccar
     # - bookstack

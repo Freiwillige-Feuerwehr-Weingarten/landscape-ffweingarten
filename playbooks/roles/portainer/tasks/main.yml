@@ -3,10 +3,16 @@
   community.docker.docker_volume:
     name: portainer_data
 
+- name: Create a directory if it does not exist
+  ansible.builtin.file:
+    path: /tmp/portainer_password
+    state: directory
+    mode: '0755'
+
 - name: Copy password file
   ansible.builtin.template:
     src: templates/pwd.j2
-    dest: /tmp/portainer_password.pwd
+    dest: /tmp/portainer_password/pwd
     mode: '0644'
 
 - name: Start Portainer Container
@@ -14,16 +20,16 @@
     name: portainer
     image: portainer/portainer-ce:latest
     restart_policy: "always"
-    command: "--admin-password-file /tmp/portainer_password.pwd"
+    command: "--admin-password-file /tmp/portainer_password/pwd"
     published_ports:
       - 8000:8000
       - 9443:9443
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - portainer_data:/data
-      - /tmp/portainer_password.pwd:/tmp/portainer_password
+      - /tmp/portainer_password:/tmp/portainer_password
 
-- name: Remove password file
-  ansible.builtin.file:
-    path: /tmp/portainer_password.pwd
-    state: absent
+# - name: Remove password file
+#  ansible.builtin.file:
+#    path: /tmp/portainer_password.pwd
+#    state: absent

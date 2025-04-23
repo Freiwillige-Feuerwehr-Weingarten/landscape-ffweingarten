@@ -4,7 +4,7 @@ source_dir="/var/lib/docker/volumes"
 backup_dir="/mnt/nfs"
 keep_backups=10
 current_datetime=$(date +"%Y-%m-%d_%H-%M-%S")
-backup_filename="${current_datetime}-backup.tar"
+backup_filename="${current_datetime}-{{ docker_backup_suffix }}-backup.tar"
 
 
 # remote_target="${remote_user}@${remote_server}"
