@@ -9,10 +9,10 @@
     - common
     - nfs
     - docker
+    - portainer
     # - netboot
     # - heimdall
     # - rustdesk
     # - traccar
     # - bookstack
     # - taiga
-    # - portainer
