@@ -2,21 +2,36 @@
 services:
   bookstack:
     image: lscr.io/linuxserver/bookstack
-    container_name: bookstacktest
+    container_name: bookstack
     environment:
       - PUID=1000
       - PGID=1000
-      - APP_URL=http://bookstack.test.ff-weingarten.de
-      #- DB_HOST=bookstack_db
-      #- DB_PORT=3306
-      #- DB_USER=bookstack
-      #- DB_PASS={{ bookstack_mysql_password }}
-      #- DB_DATABASE=bookstackapp
+      - APP_URL=https://bookstack.ff-weingarten.de
+      - DB_HOST=bookstack_db
+      - DB_PORT=3306
+      - DB_USER=bookstack
+      - DB_PASS={{ bookstack_mysql_password }}
+      - DB_DATABASE=bookstackapp
     volumes:
-      - bookstack_app_data_test:/config
+      - bookstack_app_data:/config
     ports:
-      - 6876:80
+      - 6875:80
+    restart: unless-stopped
+  bookstack_db:
+    image: lscr.io/linuxserver/mariadb
+    container_name: bookstack_db
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - MYSQL_ROOT_PASSWORD={{ bookstack_mysql_root_password }}
+      - TZ=Europe/Berlin
+      - MYSQL_DATABASE=bookstackapp
+      - MYSQL_USER=bookstack
+      - MYSQL_PASSWORD={{ bookstack_mysql_password }}
+    volumes:
+      - bookstack_db_data:/config
     restart: unless-stopped
 
 volumes:
-  bookstack_app_data_test:
+  bookstack_db_data:
+  bookstack_app_data:

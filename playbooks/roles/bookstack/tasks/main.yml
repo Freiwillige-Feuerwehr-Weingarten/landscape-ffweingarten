@@ -1,14 +1,14 @@
 ---
 - name: Create a bookstack directory if it does not exist
   ansible.builtin.file:
-    path: /srv/bookstacktest
+    path: /srv/bookstack
     state: directory
     mode: '0755'
 
 - name: Copy docker compose
   ansible.builtin.template:
     src: templates/bookstack.docker-compose.j2
-    dest: /srv/bookstacktest/docker-compose.yml
+    dest: /srv/bookstack/docker-compose.yml
     mode: '0750'
   register: compose_result
   changed_when: "compose_result.changed == true"
@@ -16,7 +16,7 @@
 
 - name: Create and start services
   community.docker.docker_compose_v2:
-    project_src: /srv/bookstacktest
+    project_src: /srv/bookstack
     build: always
     pull: always
     recreate: auto
@@ -25,7 +25,7 @@
 - name: Copy .env file
   ansible.builtin.template:
     src: templates/bookstack.env.j2
-    dest: /var/lib/docker/volumes/bookstacktest_bookstack_app_data_test/_data/www/.env
+    dest: /var/lib/docker/volumes/bookstack_bookstack_app_data/_data/www/.env
     mode: '0705'
   register: env_result
   changed_when: "env_result.changed == true"
