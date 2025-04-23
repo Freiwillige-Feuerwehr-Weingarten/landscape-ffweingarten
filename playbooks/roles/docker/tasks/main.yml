@@ -3,9 +3,6 @@
   ansible.builtin.include_tasks: install_docker.yml
   when: install_docker
 
-# - name: Include tasks for taiga
-#  ansible.builtin.include_tasks: taiga.yml
-
 - name: Copy backup script
   ansible.builtin.template:
     src: files/docker_backup.j2
