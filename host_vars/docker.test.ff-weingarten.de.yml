@@ -1,6 +1,4 @@
 ---
-install_docker: true
-install_backup: false
 docker_debug: true
 # NFS
 nfs_permissions: "644"

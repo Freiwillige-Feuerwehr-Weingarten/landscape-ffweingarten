@@ -8,11 +8,11 @@
   roles:
     - common
     - nfs
-    - netboot
-    - heimdall
-    - rustdesk
-    - traccar
-    - bookstack
+    - docker
+    # - netboot
+    # - heimdall
+    # - rustdesk
+    # - traccar
+    # - bookstack
     # - taiga
-    # - docker
     # - portainer
