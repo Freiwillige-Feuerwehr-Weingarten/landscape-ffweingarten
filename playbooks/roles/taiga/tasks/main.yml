@@ -20,7 +20,7 @@
     mode: '0644'
 
 - name: Change to local build
-  #ansible.builtin.lineinfile:
+  # ansible.builtin.lineinfile:
   #  path: /srv/taiga/docker-compose.yml
   #  search_string: 'image: taigaio/taiga-back:latest'
   #  line: '    build: ./custom-back'
