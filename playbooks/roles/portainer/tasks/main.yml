@@ -1,0 +1,9 @@
+---
+- name: Include tasks for portainer installation
+  ansible.builtin.include_tasks: install.yml
+  when: portainer_install
+
+- name: Include tasks for portainer update_cache
+  ansible.builtin.include_tasks: update.yml
+  when: portainer_update
+

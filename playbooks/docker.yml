@@ -9,7 +9,7 @@
     - common
     - nfs
     - docker
-    - portainer_install
+    - portainer
     - netboot
     - heimdall
     # - rustdesk

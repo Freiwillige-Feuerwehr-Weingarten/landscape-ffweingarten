@@ -28,8 +28,3 @@
       - /var/run/docker.sock:/var/run/docker.sock
       - portainer_data:/data
       - /tmp/portainer_password:/tmp/portainer_password
-
-# - name: Remove password file
-#  ansible.builtin.file:
-#    path: /tmp/portainer_password.pwd
-#    state: absent
