@@ -1,6 +1,3 @@
-# Common
-common_setup_qemu: false
-
 # NTP
 ntp_timezone: Europe/Berlin
 
@@ -47,6 +44,19 @@ mariadb_users:
     priv: "bookstackapp.*:ALL"
     state: present
     login_unix_socket: /run/mysqld/mysqld.sock
+  - name: bookstack
+    host: localhost
+    password: !vault |
+          $ANSIBLE_VAULT;1.1;AES256
+          31313138316535346264623038626266633665633937333463366266333562613431383733353030
+          6665643165636265393432343839306333393039326235370a326339353831386136633637333265
+          31633431363936643632653339383738623264373637326463363334386663376630363330386131
+          3434646230323833340a353164383034326435383763663738656463653638383739373433383332
+          6339
+    priv: "bookstackapp.*:ALL"
+    state: present
+    login_unix_socket: /run/mysqld/mysqld.sock
+    check_mode: false
 
 
 mariadb_backup_db: true
@@ -60,4 +70,4 @@ mariadb_backup_cron_std_output: "2>&1 | tee"
 # name of the database to dump
 # (mandatory if mariadb_backup_db is set to true)
 mariadb_backup_db_name:
-  - bookstackapp
+  - bookstackapp_prod

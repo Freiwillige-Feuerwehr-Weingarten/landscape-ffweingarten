@@ -6,9 +6,6 @@
 # - name: Include tasks for taiga
 #  ansible.builtin.include_tasks: taiga.yml
 
-# - name: Include tasks for bookstack_test
-#  ansible.builtin.include_tasks: bookstack.yml
-
 - name: Copy backup script
   ansible.builtin.template:
     src: files/docker_backup.j2
