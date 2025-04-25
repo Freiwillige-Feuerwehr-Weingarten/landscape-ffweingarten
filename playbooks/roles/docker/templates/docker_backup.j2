@@ -5,27 +5,34 @@ backup_dir="/mnt/nfs"
 keep_backups=10
 current_datetime=$(date +"%Y-%m-%d_%H-%M-%S")
 backup_filename="${current_datetime}-{{ docker_backup_suffix }}-backup.tar"
+# db_backup_filename="${current_datetime}-{{ docker_backup_suffix }}-backup.tar"
+DOCKER=$(command -v docker)
+GZIP=$(command -v gzip)
+TAR=$(command -v tar)
+FIND=$(command -v find)
 
 
 # remote_target="${remote_user}@${remote_server}"
 backup_fullpath="${backup_dir}/${backup_filename}"
+# db_backup_fullpath=${backup_dir}/${db_backup_filename}"
  
 # Docker-Container herunterfahren
-docker stop $(docker ps -q)
+# docker stop $(docker ps -q)
+${DOCKER} stop taiga-taiga-db-1
 # Erstelle das Backup-Archiv
-tar -cpf "${backup_fullpath}" "${source_dir}"
+${TAR} -cpf "${backup_fullpath}" "${source_dir}"
 # Docker-Container wieder starten
-docker start $(docker ps -a -q)
+# docker start $(docker ps -a -q)
+${DOCKER} start taiga-taiga-db-1
 # Komprimiere das Backup-Archiv
-gzip "${backup_fullpath}"
+${GZIP} "${backup_fullpath}"
 backup_fullpath="${backup_fullpath}.gz"
-# Kopiere das Backup auf den Zielserver mit SCP ohne Passwort
-# scp "${backup_fullpath}" "${remote_target}:$remote_dir/"
+
+# docker exec -it taiga-taiga-db-1 /usr/bin/pg_dumpall -Utaiga  -f ./tmp/backup.sql
+# tar -cpf "${backup_fullpath}" "${source_dir}"
+# gzip "${backup_fullpath}"
+# backup_fullpath="${backup_fullpath}.gz"
+
 # Lösche ältere lokale Backups mit `find`
-find "$backup_dir" -type f -name "*-backup.tar.gz" -mtime +$keep_backups -exec rm {} \;
-# Lösche ältere remote Backups mit `find`
-# ssh "${remote_target}" "find ${remote_dir} -type f -name '*-backup.tar.gz' -mtime +$keep_backups -exec rm {} \;"
+${FIND} "$backup_dir" -type f -name "*-backup.tar.gz" -mtime +$keep_backups -exec rm {} \;
  
-echo "Backup wurde erstellt: ${backup_fullpath} und auf ${remote_target} kopiert."
-# ${CP} "${NPM_HOME}/data/."        "${BACKUPDIR}/data/."        --recursive
-# ${CP} "${NPM_HOME}/letsencrypt/." "${BACKUPDIR}/letsencrypt/." --recursive
