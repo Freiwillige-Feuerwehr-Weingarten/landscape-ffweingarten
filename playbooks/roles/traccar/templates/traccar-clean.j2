@@ -1,0 +1,7 @@
+#!/bin/bash
+
+log_dir="/var/lib/docker/volumes/traccar_prod_traccar_prod_logs/_data"
+keep_backups=10
+FIND=$(command -v find)
+
+${FIND} "$log_dir" -type f -name "*.log.*" -mtime +$keep_backups -exec rm {} \;

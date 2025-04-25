@@ -25,6 +25,12 @@
     recreate: auto
   register: traccarprodoutput
 
+- name: Copy log deletion script
+  ansible.builtin.template:
+    src: templates/traccar-clean.j2
+    dest: /etc/cron.daily/traccar_clean
+    mode: '0750'
+
 - name: Show results
   ansible.builtin.debug:
     var: traccarprodoutput
