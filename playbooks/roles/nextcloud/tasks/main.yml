@@ -1,0 +1,41 @@
+---
+- name: Create a nextcloud directory if it does not exist
+  ansible.builtin.file:
+    path: /srv/nextcloud
+    state: directory
+    mode: '0755'
+
+- name: Copy docker compose
+  ansible.builtin.template:
+    src: templates/nextcloud.j2
+    dest: /srv/nextcloud/docker-compose.yml
+    mode: '0750'
+
+#- name: Create and start services
+#  community.docker.docker_compose_v2:
+#    project_src: /srv/nextcloud
+#    build: always
+#    pull: always
+#    recreate: auto
+#  register: nextcloudoutput
+
+- name: Run apt update in container
+  community.docker.docker_container_exec:
+    container: nextcloud
+    command: /bin/bash -c "apt update"
+    chdir: /root
+  register: apt_update_result
+  changed_when: apt_update_result.rc != 0
+
+- name: Install smbclient in container
+  community.docker.docker_container_exec:
+    container: nextcloud
+    command: /bin/bash -c "apt install smbclient -y"
+    chdir: /root
+  register: apt_install_result
+  changed_when: apt_install_result.rc != 0
+
+- name: Show results
+  ansible.builtin.debug:
+    var: nextcloudoutput
+  when: docker_debug

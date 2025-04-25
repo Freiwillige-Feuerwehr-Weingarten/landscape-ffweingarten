@@ -1,0 +1,73 @@
+---
+version: '3'
+
+services:
+  nextcloud:
+    image: nextcloud
+    container_name: nextcloud
+    restart: unless-stopped
+    networks: 
+      - cloud
+    depends_on:
+      - redis
+    ports:
+      - 8080:80
+    volumes:
+      # - ./html:/var/www/html
+      - nextcloud_html:/var/www/html
+      # - ./custom_apps:/var/www/html/custom_apps
+      - nextcloud_custom_apps:/var/www/html/custom_apps
+      # - ./config:/var/www/html/config
+      - nextcloud_config:/var/www/html/config
+      # - ./data:/var/www/html/data
+      - nextcloud_data:/var/www/html/data
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Berlin
+      - POSTGRES_HOST=psql.prod.ff-weingarten.de
+      - POSTGRES_PASSWORD={{ nextcloud_psql_db_password }}
+      - POSTGRES_DB=nextcloud
+      - POSTGRES_USER=nextcloud
+      - REDIS_HOST=redis
+      - TRUSTED_PROXIES=192.168.10.103
+      - OVERWRITEHOST=nextcloud.ff-weingarten.de
+      - OVERWRITEPROTOCOL=https
+      
+  collabora:
+    image: collabora/code
+    container_name: collabora
+    restart: unless-stopped
+    networks: 
+      - cloud
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Berlin
+      - password={{ nextcloud_collabora_password }}
+      - username=nextcloud
+      - domain=ff-weingarten.de
+      - extra_params=--o:ssl.enable=true
+    ports:
+      - 9980:9980
+
+  redis:
+    image: redis:alpine
+    container_name: redis
+    volumes:
+      # - ./redis:/data  
+      - nextcloud_redis:/data
+    networks: 
+      - cloud
+  
+networks:
+  cloud:
+    name: cloud
+    driver: bridge
+
+volumes:
+  nextcloud_redis:
+  nextcloud_html:
+  nextcloud_custom_apps:
+  nextcloud_config:
+  nextcloud_data:
