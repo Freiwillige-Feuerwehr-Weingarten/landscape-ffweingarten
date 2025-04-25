@@ -1,0 +1,25 @@
+---
+- name: Create a adminer directory if it does not exist
+  ansible.builtin.file:
+    path: /srv/adminer
+    state: directory
+    mode: '0755'
+
+- name: Copy docker compose
+  ansible.builtin.template:
+    src: templates/adminer.j2
+    dest: /srv/adminer/docker-compose.yml
+    mode: '0750'
+
+- name: Create and start services
+  community.docker.docker_compose_v2:
+    project_src: /srv/adminer
+    build: always
+    pull: always
+    recreate: auto
+  register: admineroutput
+
+- name: Show results
+  ansible.builtin.debug:
+    var: admineroutput
+  when: docker_debug
