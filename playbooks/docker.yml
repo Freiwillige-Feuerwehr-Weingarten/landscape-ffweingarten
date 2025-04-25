@@ -12,7 +12,9 @@
     - portainer
     - netboot
     - heimdall
-    # - rustdesk
-    # - traccar
-    # - bookstack
+    - rustdesk
+    - traccar
+    - bookstack
+    - nextcloud
+    - adminer
     # - taiga
