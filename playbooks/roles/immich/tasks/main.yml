@@ -1,0 +1,31 @@
+---
+- name: Create a immich directory if it does not exist
+  ansible.builtin.file:
+    path: /srv/immich
+    state: directory
+    mode: '0755'
+
+- name: Copy docker compose
+  ansible.builtin.template:
+    src: templates/immich.docker-compose.j2
+    dest: /srv/immich/docker-compose.yml
+    mode: '0750'
+
+- name: Copy .env file
+  ansible.builtin.template:
+    src: templates/bookstack.env.j2
+    dest: /srv/immich/.env
+    mode: '0750'
+
+- name: Create and start services
+  community.docker.docker_compose_v2:
+    project_src: /srv/immich
+    build: always
+    pull: always
+    recreate: auto
+  register: immichoutput
+
+- name: Show results
+  ansible.builtin.debug:
+    var: immichoutput
+  when: docker_debug
