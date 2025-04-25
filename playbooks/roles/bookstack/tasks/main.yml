@@ -20,7 +20,8 @@
     build: always
     pull: always
     recreate: auto
-  register: bookstacktestoutput
+    remove_orphans: true
+  register: bookstackoutput
 
 - name: Copy .env file
   ansible.builtin.template:
@@ -33,4 +34,4 @@
 
 - name: Show results
   ansible.builtin.debug:
-    var: bookstacktestoutput
+    var: bookstackoutput
