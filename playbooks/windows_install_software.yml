@@ -20,6 +20,8 @@
         - vscode.install
         - chocolateygui
         - chocolatey-core.extension
+        - firefox
+        - thunderbird
 
     - name: Upgrade installed packages
       chocolatey.chocolatey.win_chocolatey:
