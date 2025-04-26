@@ -3,7 +3,7 @@ docker_debug: true
 docker_backup_suffix: prod
 
 portainer_install: false
-portainer_update: false
+portainer_update: true
 # NFS
 nfs_permissions: "644"
 nfs_mountpoint: "/mnt/nfs"
