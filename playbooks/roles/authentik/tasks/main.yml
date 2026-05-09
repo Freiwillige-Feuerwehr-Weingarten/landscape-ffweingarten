@@ -1,0 +1,38 @@
+---
+- name: Create a authentik directory if it does not exist
+  ansible.builtin.file:
+    path: /srv/authentik
+    state: directory
+    mode: '0755'
+
+- name: Copy docker compose
+  ansible.builtin.template:
+    src: templates/docker-compose.j2
+    dest: /srv/authentik/docker-compose.yml
+    mode: '0750'
+  register: compose_result
+  changed_when: "compose_result.changed == true"
+  # notify: Restart Authentik
+
+- name: Copy .env file
+  ansible.builtin.template:
+    src: templates/env.j2
+    dest: /srv/authentik/.env
+    mode: '0705'
+  register: env_result
+  changed_when: "env_result.changed == true"
+  # notify: Restart Authentik
+
+- name: Create and start services
+  community.docker.docker_compose_v2:
+    project_src: /srv/authentik
+    build: always
+    pull: policy
+    recreate: auto
+    remove_orphans: true
+  register: authentikoutput
+
+
+- name: Show results
+  ansible.builtin.debug:
+    var: authentikoutput
