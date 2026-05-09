@@ -24,12 +24,14 @@ generic_packages:
   - nmap
   - net-tools
   - nfs-common
+  #- mlocate
   - pv
   #- resolvconf
   - rsync
   - screen
   - shellcheck
   - strace
+  - sudo
   - syslinux
   - tree
   - unzip
