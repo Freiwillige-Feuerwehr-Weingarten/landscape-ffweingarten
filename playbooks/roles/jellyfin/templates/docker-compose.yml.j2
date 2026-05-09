@@ -1,0 +1,20 @@
+---
+services:
+  jellyfin:
+    image: lscr.io/linuxserver/jellyfin:{{ jellyfin_version }}
+    container_name: jellyfin
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+      - JELLYFIN_PublishedServerUrl=http://{{ ansible_default_ipv4.address }}
+    volumes:
+      - {{ jellyfin_installation_directory }}/config:/config
+      - {{ jellyfin_installation_directory }}/cache:/cache
+      - /mnt/media:/data/media
+    ports:
+      - 8096:8096
+      - 8920:8920
+      - 7359:7359/udp
+      - 1900:1900/udp
+    restart: unless-stopped

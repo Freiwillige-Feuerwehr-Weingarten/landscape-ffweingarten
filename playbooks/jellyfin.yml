@@ -1,0 +1,18 @@
+---
+- name: Install Docker
+  hosts: jellyfin
+  remote_user: ffweingarten
+  become: true
+  gather_facts: true
+  roles:
+    - common
+    - docker
+    - nfs
+
+- name: Install Jellyfin
+  hosts: jellyfin
+  remote_user: ffweingarten
+  become: true
+  gather_facts: true
+  roles:
+    - jellyfin
