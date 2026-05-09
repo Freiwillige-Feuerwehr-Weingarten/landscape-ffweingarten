@@ -3,6 +3,7 @@
 
 - name: Install Windows Updates
   hosts: windows
+  strategy: free
   tasks:
     - name: Install and return list of found updates (if any), log to c:\ansible_windows_update.txt
       ansible.windows.win_updates:
