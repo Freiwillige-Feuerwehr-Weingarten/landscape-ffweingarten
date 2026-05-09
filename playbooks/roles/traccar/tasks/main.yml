@@ -10,18 +10,24 @@
     src: templates/traccar.docker-compose.j2
     dest: /srv/traccar_prod/docker-compose.yml
     mode: '0644'
+  register: compose_result
+  changed_when: "compose_result.changed == true"
+  notify: Restart Traccar
 
 - name: Copy traccar traccar.xml file
   ansible.builtin.template:
     src: templates/traccar.xml.j2
     dest: /srv/traccar_prod/traccar.xml
     mode: '0644'
+  register: xml_result
+  changed_when: "xml_result.changed == true"
+  notify: Restart Traccar
 
 - name: Create and start traccar services
   community.docker.docker_compose_v2:
     project_src: /srv/traccar_prod
-    build: always
-    pull: always
+    build: policy
+    pull: missing
     recreate: auto
   register: traccarprodoutput
 

@@ -5,7 +5,7 @@ volumes:
 services:
   traccar:
     container_name: traccarprod
-    image: traccar/traccar:latest
+    image: traccar/traccar:6.10.0-debian
     hostname: traccarprod
     restart: unless-stopped
     environment:

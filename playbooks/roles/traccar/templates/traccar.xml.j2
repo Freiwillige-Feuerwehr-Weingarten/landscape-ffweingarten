@@ -3,8 +3,28 @@
 <properties>
 <entry key="config.default">./conf/default.xml</entry>
 <entry key='database.driver'>org.postgresql.Driver</entry>
-<entry key='database.url'>{{ psql_db_url }}</entry>
-<entry key='database.user'>{{ psql_db_user }}</entry>
-<entry key='database.password'>{{ psql_db_traccar_prod_password }}</entry>
+<entry key='database.url'>{{ traccar_psql_db_url }}</entry>
+<entry key='database.user'>{{ traccar_psql_db_user }}</entry>
+<entry key='database.password'>{{ traccar_psql_db_password }}</entry>
 <entry key='logger.level'>{{ traccar_loglevel }}</entry>
+
+<entry key='openid.clientId'>{{ traccar_oidc_clientid }}</entry>
+<entry key='openid.clientSecret'>{{ traccar_oidc_secret }}</entry>
+<entry key='openid.issuerUrl'>https://authentik.ff-weingarten.de/application/o/traccar/</entry>
+<entry key='openid.authUrl'>https://authentik.ff-weingarten.de/application/o/authorize/</entry>
+<entry key='openid.tokenUrl'>https://authentik.ff-weingarten.de/application/o/token/</entry>
+<entry key='openid.userInfoUrl'>https://authentik.ff-weingarten.de/application/o/userinfo/</entry>
+<entry key='openid.allowGroup'>Aktive</entry>
+<entry key='openid.adminGroup'>Traccar_Admin</entry>
+
+<entry key='mail.smtp.host'>athena.ff-weingarten.de</entry>
+<entry key='mail.smtp.port'>587</entry>
+<entry key='mail.smtp.starttls.enable'>True</entry>
+<entry key='mail.smtp.starttls.required'>True</entry>
+<entry key='mail.smtp.username'>{{ traccar_email_user }}</entry>
+<entry key='mail.smtp.password'>{{ traccar_email_password }}</entry>
+<entry key='mail.smtp.from'>traccar@ff-weingarten.de</entry>
+<entry key='mail.smtp.fromName'>Traccar Feuerwehr Weingarten</entry>
+
+<entry key='web.url'>{{ traccar_url }}</entry>
 </properties>
