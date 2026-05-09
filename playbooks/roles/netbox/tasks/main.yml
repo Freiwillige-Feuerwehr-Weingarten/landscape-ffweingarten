@@ -1,0 +1,247 @@
+---
+#- name: Get Hostname
+#  ansible.builtin.debug:
+#    var: hostvars[groups['psql'][0]]['ansible_eth0']['ipv4']['address']
+
+- name: Install package dependencies
+  ansible.builtin.apt:
+    pkg:
+      - gcc-x86-64-linux-gnu
+      - libpq-dev
+      - python3-dev
+      - python3-venv
+      - python3-setuptools
+      - build-essential
+      - redis-server
+      - expect
+      - nginx
+    state: present
+
+- name: Check if we downloaded netbox already
+  ansible.builtin.stat:
+    path: /opt/v{{ netbox_version }}.tar.gz
+  register: netbox_already_downloaded
+
+- name: Download Netbox Release .tar.gz file
+  ansible.builtin.get_url:
+    url: https://github.com/netbox-community/netbox/archive/refs/tags/v{{ netbox_version }}.tar.gz
+    dest: /opt/v{{ netbox_version }}.tar.gz
+    mode: '0440'
+  when: not netbox_already_downloaded.stat.exists
+
+- name: Unpack netbox
+  ansible.builtin.unarchive:
+    src: /opt/v{{ netbox_version }}.tar.gz
+    dest: /opt
+    remote_src: true
+
+- name: Create symbolic link to /opt/netbox
+  ansible.builtin.file:
+    src: /opt/netbox-{{ netbox_version }}
+    dest: /opt/netbox
+    owner: root
+    group: root
+    state: link
+
+- name: Create netbox/media directory if it does not exist
+  ansible.builtin.file:
+    path: "{{ netbox_installation_path }}media"
+    state: directory
+    mode: '0755'
+
+- name: Ensure group "netbox" exists
+  ansible.builtin.group:
+    name: netbox
+    state: present
+
+- name: Add the user 'netbox' and add him to group 'netbox'
+  ansible.builtin.user:
+    name: netbox
+    group: netbox
+    state: present
+    system: true
+
+- name: Recursively change ownership of netbox/media, netbox/reports and netbox/scripts
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    recurse: true
+    owner: netbox
+    group: netbox
+  loop:
+    - "{{ netbox_installation_path }}media"
+    - "{{ netbox_installation_path }}reports"
+    - "{{ netbox_installation_path }}scripts"
+
+- name: Copy configuration file from example
+  ansible.builtin.copy:
+    src: "{{ netbox_installation_path }}netbox/configuration_example.py"
+    dest: "{{ netbox_installation_path }}netbox/configuration.py"
+    remote_src: true
+    owner: netbox
+    group: netbox
+    mode: '0644'
+
+- name: Change allowed hosts in configuration
+  ansible.builtin.replace:
+    path: "{{ netbox_installation_path }}netbox/configuration.py"
+    regexp: '{{ item.regexp }}'
+    replace: '{{ item.line }}'
+  with_items:
+    - { regexp: '^ALLOWED_HOSTS = \[\]', line: "ALLOWED_HOSTS = ['{{ netbox_allowed_hosts }}']"}
+
+- name: Change database details in configuration
+  ansible.builtin.replace:
+    path: "{{ netbox_installation_path }}netbox/configuration.py"
+    regexp: '{{ item.regexp }}'
+    replace: '{{ item.line }}'
+    after: "DATABASES = {"
+    before: "REDIS = {"
+  with_items:
+    - { regexp: "^[ ]*'USER': '',", line: "        'USER': 'netbox',"}
+    - { regexp: "^[ ]*'PASSWORD': '',", line: "        'PASSWORD': '{{ hostvars[groups['psql'][0]]['psql_db_netbox_password'] }}',"}
+    - { regexp: "^[ ]*'HOST': 'localhost',", line: "        'HOST': '{{ hostvars[groups['psql'][0]]['ansible_eth0']['ipv4']['address'] }}',"}
+
+- name: Generate Secret key
+  ansible.builtin.command: "python3 {{ netbox_installation_path }}generate_secret_key.py"
+  changed_when: false
+  register: ppass
+
+- name: Add secret_key to configuration
+  ansible.builtin.replace:
+    path: "{{ netbox_installation_path }}netbox/configuration.py"
+    regexp: "^SECRET_KEY = ''"
+    replace: "SECRET_KEY = '{{ ppass.stdout_lines[0] }}'"
+
+- name: Run netbox upgrade.sh
+  ansible.builtin.command:
+    cmd: /bin/bash /opt/netbox/upgrade.sh
+  register: upgrade_out
+
+- name: Super user existed?
+  ansible.builtin.command: echo "from django.contrib.auth import get_user_model; User = get_user_model(); print(User.objects.filter(username='{{ netbox_admin_user }}').count()>0)" | /opt/netbox/venv/bin/python ./manage.py shell
+  args:
+    chdir: "/opt/netbox/netbox/"
+  changed_when: false
+  register: superuser_existed
+
+- name: Super user debug
+  ansible.builtin.debug:
+    var: superuser_existed
+
+- name: Create superuser
+  community.general.django_manage:
+    command: "createsuperuser --username={{ netbox_admin_user }} --noinput --email={{ netbox_admin_email }}"
+    project_path: "{{ netbox_installation_path }}"
+    virtualenv: "/opt/netbox/venv/"
+  when: not superuser_existed
+  # TODO: not working
+
+- name: Copy change password template file
+  ansible.builtin.template:
+    src: roles/netbox/templates/changepassword.sh.j2
+    dest: "{{ netbox_installation_path }}changepassword.sh"
+    mode: '0755'
+
+- name: Change password
+  ansible.builtin.command:
+    cmd: "{{ netbox_installation_path }}changepassword.sh"
+
+- name: Remove changepassword.sh
+  ansible.builtin.file:
+    path: "{{ netbox_installation_path }}changepassword.sh"
+    state: absent
+
+# Install pyuwsgi
+- name: Install pyuwsgi python package
+  ansible.builtin.pip:
+    name: pyuwsgi
+    virtualenv: /opt/netbox/venv
+
+- name: Add pyuwsgi as requirement in venv
+  ansible.builtin.lineinfile:
+    path: /opt/netbox/local_requirements.txt
+    line: pyuwsgi
+    create: true
+# TODO: make sure it will no be appended a second time
+
+- name: Copy uwsgi configuration in place
+  ansible.builtin.copy:
+    src: /opt/netbox/contrib/uwsgi.ini
+    dest: /opt/netbox/uwsgi.ini
+    mode: '0644'
+    remote_src: true
+
+- name: Copy required systemd services into place
+  ansible.builtin.copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: '0640'
+    remote_src: true
+  with_items:
+    - {"src": "/opt/netbox/contrib/netbox.service", "dest": "/etc/systemd/system/"}
+    - {"src": "/opt/netbox/contrib/netbox-rq.service", "dest": "/etc/systemd/system/"}
+
+- name: Change ExecStart in netbox.service
+  ansible.builtin.replace:
+    path: "/etc/systemd/system/netbox.service"
+    regexp: '{{ item.regexp }}'
+    replace: '{{ item.line }}'
+  with_items:
+    - { regexp: '^ExecStart=(.)*', line: ""}
+    - { regexp: '^#ExecStart=(.)*', line: "ExecStart=/opt/netbox/venv/bin/uwsgi --ini /opt/netbox/uwsgi.ini"}
+
+- name: Enable service netbox and netbox-rq
+  ansible.builtin.systemd_service:
+    name: "{{ item }}"
+    enabled: true
+    state: started
+    daemon_reload: true
+  with_items:
+    - netbox
+    - netbox-rq
+
+# TODO: pip install gunicorn==20.1.0 - Downgrade gunicorn due to 502 bad gateway
+
+# Configure nginx
+- name: Remove default nginx site
+  ansible.builtin.file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+
+- name: Copy netbox config to sites available
+  ansible.builtin.copy:
+    src: "/opt/netbox/contrib/nginx.conf"
+    dest: "/etc/nginx/sites-available/netbox"
+    mode: '0640'
+    remote_src: true
+
+- name: Change netbox nginx config
+  ansible.builtin.replace:
+    path: "/etc/nginx/sites-available/netbox"
+    regexp: '{{ item.regexp }}'
+    replace: '{{ item.line }}'
+  with_items:
+    - { regexp: '^(\s+)listen(.)*', line: '\1listen 80\2'}
+    - { regexp: '^(\s+)server_name(.)*', line: '\1server_name netbox.prod.ff-weingarten.de\2'}
+    - { regexp: '^(\s+)ssl_certificate /etc/ssl/certs/netbox.crt;', line: '\1# ssl_certificate /etc/ssl/certs/netbox.crt;‚'}
+    - { regexp: '^(\s+)ssl_certificate_key /etc/ssl/private/netbox.key;', line: '\1# ssl_certificate_key /etc/ssl/private/netbox.key;'}
+    - { regexp: '^(\s+)proxy_pass(.)*', line: ""}
+    - { regexp: '^(\s+)proxy_set_header(.)*', line: ""}
+    - { regexp: '^(\s+)# include uwsgi_params;', line: '\1include uwsgi_params;'}
+    - { regexp: '^(\s+)# uwsgi_pass  127.0.0.1:8001;', line: '\1uwsgi_pass 127.0.0.1:8001;'}
+    - { regexp: '^(\s+)# uwsgi_param Host \$host;', line: '\1uwsgi_param Host $host;'}
+    - { regexp: '^(\s+)# uwsgi_param X-Real-IP \$remote_addr;', line: '\1uwsgi_param X-Real-IP $remote_addr;'}
+    - { regexp: '^(\s+)# uwsgi_param X-Forwarded-For \$proxy_add_x_forwarded_for;', line: '\1uwsgi_param X-Forwarded-For $proxy_add_x_forwarded_for;'}
+    - { regexp: '^(\s+)# uwsgi_param X-Forwarded-Proto \$http_x_forwarded_proto;', line: '\1uwsgi_param X-Forwarded-Proto $http_x_forwarded_proto;'}
+
+# TODO: remove second server {} block
+
+- name: Create symbolic link for nginx netbox site
+  ansible.builtin.file:
+    src: /etc/nginx/sites-available/netbox
+    dest: /etc/nginx/sites-enabled/netbox
+    owner: root
+    group: root
+    state: link
+  notify: Restart nginx

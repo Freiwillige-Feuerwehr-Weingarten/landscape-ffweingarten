@@ -1,0 +1,22 @@
+---
+- name: Gather facts
+  hosts: psql
+  remote_user: ffweingarten
+  become: true
+  gather_facts: true
+  tasks: []
+
+- name: LXC Base setup
+  hosts: netbox
+  remote_user: root
+  roles:
+    - role: lxc-base-setup
+
+- name: Netbox Playbook
+  hosts: netbox
+  remote_user: ffweingarten
+  become: true
+  gather_facts: true
+  roles:
+    - role: common
+    - role: netbox
