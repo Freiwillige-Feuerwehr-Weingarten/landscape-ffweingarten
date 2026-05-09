@@ -15,7 +15,7 @@
   community.docker.docker_compose_v2:
     project_src: /srv/adminer
     build: always
-    pull: always
+    pull: policy
     recreate: auto
   register: admineroutput
 
