@@ -4,6 +4,9 @@ hosts:
   psql.prod.ff-weingarten.de:
   rproxy.prod.feuerwehr.weingarten.local:
   mysql.prod.ff-weingarten.de:
+  webserver.prod.ff-weingarten.de:
+  netbox.prod.ff-weingarten.de:
+  jellyfin.prod.ff-weingarten.de:
   children:
     docker:
       hosts:
@@ -23,6 +26,16 @@ hosts:
     wireguard:
       hosts:
         wireguard.prod.ff-weingarten.de:
+    webserver:
+      hosts:
+        webserver.prod.ff-weingarten.de:
+        # 192.168.10.117:
+    netbox:
+      hosts:
+        netbox.prod.ff-weingarten.de:
+    jellyfin:
+      hosts:
+        jellyfin.prod.ff-weingarten.de:
     windows:
       hosts:
         192.168.2.50:

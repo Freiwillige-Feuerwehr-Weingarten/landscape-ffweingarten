@@ -1,8 +1,10 @@
 hosts:
-  webs.test.ff-weingarten.de:
+  web.test.ff-weingarten.de:
   jump.test.ff-weingarten.de:
   psql.test.ff-weingarten.de:
   mysql.test.ff-weingarten.de:
+  netbox.test.ff-weingarten.de:
+  jellyfin.test.ff-weingarten.de:
   children:
     webserver:
       hosts:
@@ -21,33 +23,37 @@ hosts:
     mysql:
       hosts:
         mysql.test.ff-weingarten.de:
+    netbox:
+      hosts:
+        netbox.test.ff-weingarten.de:
+    jellyfin:
+      hosts:
+        jellyfin.test.ff-weingarten.de:
+
     windows:
       hosts:
-        192.168.2.50:
-        192.168.2.51:
-        192.168.2.52:
-        192.168.2.53:
-        192.168.2.54:
-        192.168.2.55:
-        192.168.2.56:
-        192.168.2.57:
-        192.168.2.60:
-        192.168.2.61:
-        192.168.2.62:
-        192.168.2.63:
-        192.168.2.64:
-        192.168.2.65:
-        192.168.2.66:
-        192.168.2.67:
-        192.168.2.70:
-        192.168.2.71:
-        192.168.8.19:
-        192.168.200.2:
-        192.168.200.5:
-        192.168.200.6:
-        192.168.200.7:
-        192.168.200.8:
-        192.168.200.9:
+        # 192.168.2.50:
+        # 192.168.2.51:
+        # 192.168.2.52:
+        # 192.168.2.53:
+        # 192.168.2.54:
+        # 192.168.2.55:
+        # 192.168.2.56:
+        # 192.168.2.57:
+        # 192.168.2.60:
+        # 192.168.2.61:
+        # 192.168.2.62:
+        # 192.168.2.63:
+        # 192.168.2.64:
+        # 192.168.2.65:
+        # 192.168.2.66:
+        # 192.168.2.67:
+        # 192.168.2.70:
+        # 192.168.2.71:
+        # 192.168.8.19:
+        # 192.168.10.137:
+        192.168.10.138:
+
 
       vars:
         ansible_user: administrator@feuerwehr
