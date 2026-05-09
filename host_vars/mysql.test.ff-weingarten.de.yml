@@ -34,7 +34,7 @@ mariadb_databases:
 
 mariadb_users:
   - name: bookstack
-    host: 192.168.10.130
+    host: 192.168.10.131
     password: !vault |
           $ANSIBLE_VAULT;1.1;AES256
           33343631333634636165363839313639663432663363313238376339653733366438373730343932
@@ -60,7 +60,7 @@ mariadb_users:
     login_unix_socket: /run/mysqld/mysqld.sock
     check_mode: false
 
-mariadb_backup_db: true
+mariadb_backup_db: false
 mariadb_backup_db_cron_min: 15
 mariadb_backup_db_cron_hour: 20
 mariadb_backup_db_dir: /mnt/backup

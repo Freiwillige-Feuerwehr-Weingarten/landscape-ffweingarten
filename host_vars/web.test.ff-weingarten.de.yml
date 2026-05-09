@@ -7,6 +7,8 @@ mariadb_databases: []
 # Webserver configuration
 webserver_setup_hydrant: true
 webserver_setup_rainloop: true
+webserver_setup_ebon: true
+webserver_setup_tdot: true
 webserver_setup_rainloop_backup: true
 webserver_setup_rainloop_backupscript: false
 
@@ -31,6 +33,12 @@ rainloop_install_path: "/var/www/vhosts/rainloop.ff-weingarten.de/"
 # Hydrant config
 hydrant_install_path: "/var/www/vhosts/hydrant.ff-weingarten.de/"
 hydrant_backup_path: "{{ nfs_mountpoint }}/Hydrant/"
+
+# Ebon config
+ebon_install_path: "/var/www/vhosts/ebon.ff-weingarten.de/"
+
+# Tdot config
+tdot_install_path: "/var/www/vhosts/tdot.ff-weingarten.de/"
 
 # Users
 mariadb_users:
@@ -68,6 +76,12 @@ php_packages:
 
 apache_create_vhosts: true
 apache_vhosts:
+   - servername: "ebon.ff-weingarten.de"
+     documentroot: "/var/www/vhosts/ebon.ff-weingarten.de"
+     serveradmin: "admin@ff-weingarten.de"
+   - servername: "tdot.ff-weingarten.de"
+     documentroot: "/var/www/vhosts/tdot.ff-weingarten.de"
+     serveradmin: "admin@ff-weingarten.de"
    - servername: "hydrant.ff-weingarten.de"
      documentroot: "/var/www/vhosts/hydrant.ff-weingarten.de"
      serveradmin: "admin@ff-weingarten.de"
