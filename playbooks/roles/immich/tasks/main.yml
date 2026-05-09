@@ -13,7 +13,7 @@
 
 - name: Copy .env file
   ansible.builtin.template:
-    src: templates/bookstack.env.j2
+    src: templates/env.j2
     dest: /srv/immich/.env
     mode: '0750'
 
