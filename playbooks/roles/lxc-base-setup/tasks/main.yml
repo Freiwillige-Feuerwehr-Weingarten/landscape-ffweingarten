@@ -1,0 +1,37 @@
+---
+# Base Installation start
+- name: Ensure group "ffweingarten" exists
+  ansible.builtin.group:
+    name: ffweingarten
+    state: present
+
+- name: Add the user 'ffweingarten' and add it to group 'ffweingarten'
+  ansible.builtin.user:
+    name: ffweingarten
+    group: ffweingarten
+    create_home: true
+    state: present
+
+- name: Set authorized key taken from file
+  ansible.posix.authorized_key:
+    user: ffweingarten
+    state: present
+    key: "{{ lookup('file', 'roles/jump/files/id_rsa_feuerwehr.pub') }}"
+
+
+- name: Install package dependencies
+  ansible.builtin.apt:
+    pkg:
+      - sudo
+    state: present
+
+- name: Allow ffweingarten to run commands as root
+  community.general.sudoers:
+    name: ffweingarten-to-root
+    state: present
+    user: ffweingarten
+    runas: root
+    nopassword: true
+    commands: ALL
+
+# End Base Installation
