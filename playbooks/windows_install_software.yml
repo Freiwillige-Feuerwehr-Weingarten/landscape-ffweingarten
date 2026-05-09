@@ -3,12 +3,14 @@
 
 - name: Install Software on Windows systems
   hosts: windows
+  strategy: free
   tasks:
     - name: Install multiple software packages
       chocolatey.chocolatey.win_chocolatey:
         name: '{{ item }}'
         state: latest
       loop:
+        - rustdesk.install
         - procexp
         - putty.portable
         - winscp.install
@@ -22,6 +24,9 @@
         - chocolatey-core.extension
         - firefox
         - thunderbird
+        - notepadplusplus.install
+        - googlechrome
+        - bitwarden-chrome
 
     - name: Upgrade installed packages
       chocolatey.chocolatey.win_chocolatey:
