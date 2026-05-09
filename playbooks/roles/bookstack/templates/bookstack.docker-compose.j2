@@ -1,12 +1,12 @@
 ---
 services:
   bookstack:
-    image: lscr.io/linuxserver/bookstack
+    image: linuxserver/bookstack:25.07.3
     container_name: bookstack
     environment:
       - PUID=1000
       - PGID=1000
-      - APP_URL=https://bookstack.ff-weingarten.de
+      - APP_URL={{ bookstack_app_url }}
       # - DB_HOST=bookstack_db
       # - DB_PORT=3306
       # - DB_USER=bookstack
