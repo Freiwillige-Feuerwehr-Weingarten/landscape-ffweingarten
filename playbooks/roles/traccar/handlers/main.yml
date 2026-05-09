@@ -1,0 +1,5 @@
+---
+- name: Restart Traccar
+  community.docker.docker_compose_v2:
+    project_src: /srv/traccar_prod
+    state: restarted
