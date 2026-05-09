@@ -7,3 +7,4 @@
     src: templates/docker_backup.j2
     dest: /etc/cron.daily/docker_backup
     mode: '0750'
+  when: docker_install_backup_script

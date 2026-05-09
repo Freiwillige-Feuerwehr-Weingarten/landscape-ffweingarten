@@ -12,32 +12,48 @@
       - ca-certificates
       - curl
       - gnupg
-      - software-properties-common
-
-- name: Create directory for Docker's GPG key
-  ansible.builtin.file:
-    path: /etc/apt/keyrings
-    state: directory
-    mode: '0755'
-
-- name: Add Docker's official GPG key
-  ansible.builtin.apt_key:
-    url: https://download.docker.com/linux/debian/gpg
-    keyring: /etc/apt/keyrings/docker.gpg
-    state: present
+      # - software-properties-common
 
 - name: Print architecture variables
   ansible.builtin.debug:
     msg: "Architecture: {{ ansible_architecture }}, Codename: {{ ansible_lsb.codename }}"
 
-- name: Add Docker repository
-  ansible.builtin.apt_repository:
-    repo: >-
-      deb [arch=amd64
-      signed-by=/etc/apt/keyrings/docker.gpg]
-      https://download.docker.com/linux/debian {{ ansible_lsb.codename }} stable
-    filename: docker
+- name: Add repo using key from URL
+  ansible.builtin.deb822_repository:
+    name: docker
+    types: deb
+    # uris: "https://download.docker.com/linux/{{ ansible_distribution | lower }}"
+    uris: "https://download.docker.com/linux/debian"
+    # suites: ["{{ ansible_distribution_release | lower }}"]
+    suites: trixie
+    components: stable
+    # architectures: "{{ ansible_architecture }}"
+    architectures: amd64
+    # signed_by: "https://download.docker.com/linux/{{ ansible_distribution | lower }}/gpg"
+    signed_by: "https://download.docker.com/linux/debian/gpg"
     state: present
+    enabled: true
+
+#- name: Create directory for Docker's GPG key
+#  ansible.builtin.file:
+#    path: /etc/apt/keyrings
+#    state: directory
+#    mode: '0755'
+
+#- name: Add Docker's official GPG key
+#  ansible.builtin.apt_key:
+#    url: https://download.docker.com/linux/debian/gpg
+#    keyring: /etc/apt/keyrings/docker.gpg
+#    state: present
+
+#- name: Add Docker repository
+#  ansible.builtin.apt_repository:
+#    repo: >-
+#      deb [arch=amd64
+#      signed-by=/etc/apt/keyrings/docker.gpg]
+#      https://download.docker.com/linux/debian {{ ansible_lsb.codename }} stable
+#    filename: docker
+#    state: present
 
 - name: Install Docker and related packages
   ansible.builtin.apt:
@@ -46,7 +62,7 @@
     pkg:
       - docker-ce
       - docker-ce-cli
-      - docker-compose
+      # - docker-compose
       - containerd.io
       - docker-buildx-plugin
       - docker-compose-plugin
