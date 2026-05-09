@@ -1,0 +1,8 @@
+---
+- name: Create web folder for ebon
+  ansible.builtin.file:
+    path: "{{ ebon_install_path }}"
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: '0755'

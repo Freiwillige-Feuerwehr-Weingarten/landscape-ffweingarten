@@ -1,0 +1,8 @@
+---
+- name: Create web folder for tdot
+  ansible.builtin.file:
+    path: "{{ tdot_install_path }}"
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: '0755'

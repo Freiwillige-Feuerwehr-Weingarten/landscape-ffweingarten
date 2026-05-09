@@ -12,4 +12,12 @@
   ansible.builtin.include_tasks: rainloop.yml
   when: webserver_setup_rainloop
 
+- name: Include tasks for ordersrpinter ebon
+  ansible.builtin.include_tasks: ebon.yml
+  when: webserver_setup_ebon
+
+- name: Include tasks for tdot
+  ansible.builtin.include_tasks: tdot.yml
+  when: webserver_setup_tdot
+
 ## post_max_filesize to 100M
