@@ -1,0 +1,41 @@
+---
+# Filesystem layout
+rustdesk_dir: /srv/rustdesk
+rustdesk_compose_mode: '0644'
+
+# Image / version — pin both services to the same tag.
+rustdesk_image: rustdesk/rustdesk-server
+rustdesk_version: 1.1.14
+
+# Public hostname clients should reach the relay (hbbr) on.
+# Override per host in host_vars/ — defaults to the inventory hostname.
+rustdesk_host: "{{ inventory_hostname }}"
+
+# Ports — keep TCP/UDP split explicit; web client ports stay disabled by default.
+rustdesk_hbbs_tcp_ports:
+  - 21115
+  - 21116
+rustdesk_hbbs_udp_ports:
+  - 21116
+rustdesk_hbbr_tcp_ports:
+  - 21117
+rustdesk_expose_web_client: false   # set true to also publish 21118 (hbbs) and 21119 (hbbr)
+
+# Container runtime
+rustdesk_restart_policy: unless-stopped
+rustdesk_network_name: rustdesk-net
+rustdesk_data_volume: data
+
+# Log rotation (json-file driver)
+rustdesk_log_max_size: "10m"
+rustdesk_log_max_file: "3"
+
+# Resource limits (leave empty to disable)
+rustdesk_mem_limit: "512m"
+rustdesk_cpus: "1.0"
+
+# Security hardening — flip off per host if anything breaks.
+rustdesk_no_new_privileges: true
+rustdesk_drop_all_caps: true
+# read_only is stricter: rustdesk only persists under /root (volume), but verify before enabling.
+rustdesk_read_only: false

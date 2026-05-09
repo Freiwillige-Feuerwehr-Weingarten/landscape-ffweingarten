@@ -103,3 +103,6 @@ bookstack_app_key: !vault |
           65346562663435373034623734613531643861656137376233346336303636343339336334653462
           303136393161323632616637363037643936
 bookstack_app_url: "http://bookstack.test.ff-weingarten.de"
+
+# rustdesk
+rustdesk_host: rustdesk.test.ff-weingarten.de

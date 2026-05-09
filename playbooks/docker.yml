@@ -13,7 +13,7 @@
     - authentik
     - netboot
     - heimdall
-    - rustdesk
+    - { role: rustdesk, tags: [rustdesk] }
     - traccar
     - bookstack
     - nextcloud

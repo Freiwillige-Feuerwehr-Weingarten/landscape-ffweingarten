@@ -1,37 +1,98 @@
+#jinja2: lstrip_blocks: True
 networks:
-  rustdesk-net:
-    external: false
+  {{ rustdesk_network_name }}:
 
 services:
   hbbs:
     container_name: hbbs
+    image: {{ rustdesk_image }}:{{ rustdesk_version }}
+    command: hbbs -r {{ rustdesk_host }}:21117
     ports:
-      - 21115:21115
-      - 21116:21116
-      - 21116:21116/udp
-      # - 21118:21118
-    image: rustdesk/rustdesk-server:1.1.14
-    command: hbbs -r rustdesk.prod.ff-weingarten.de:21117
+{% for port in rustdesk_hbbs_tcp_ports %}
+      - "0.0.0.0:{{ port }}:{{ port }}"
+{% endfor %}
+{% for port in rustdesk_hbbs_udp_ports %}
+      - "0.0.0.0:{{ port }}:{{ port }}/udp"
+{% endfor %}
+{% if rustdesk_expose_web_client %}
+      - "0.0.0.0:21118:21118"
+{% endif %}
     volumes:
-      - data:/root
+      - {{ rustdesk_data_volume }}:/root
     networks:
-      - rustdesk-net
+      - {{ rustdesk_network_name }}
     depends_on:
       - hbbr
-    restart: unless-stopped
+    restart: {{ rustdesk_restart_policy }}
+{% if rustdesk_mem_limit %}
+    mem_limit: {{ rustdesk_mem_limit }}
+{% endif %}
+{% if rustdesk_cpus %}
+    cpus: {{ rustdesk_cpus }}
+{% endif %}
+{% if rustdesk_no_new_privileges %}
+    security_opt:
+      - no-new-privileges:true
+{% endif %}
+{% if rustdesk_drop_all_caps %}
+    cap_drop:
+      - ALL
+{% endif %}
+{% if rustdesk_read_only %}
+    read_only: true
+    tmpfs:
+      - /tmp
+{% endif %}
+{% if rustdesk_log_max_size %}
+    logging:
+      driver: json-file
+      options:
+        max-size: "{{ rustdesk_log_max_size }}"
+        max-file: "{{ rustdesk_log_max_file }}"
+{% endif %}
 
   hbbr:
     container_name: hbbr
-    ports:
-      - 21117:21117
-      # - 21119:21119
-    image: rustdesk/rustdesk-server:1.1.14
+    image: {{ rustdesk_image }}:{{ rustdesk_version }}
     command: hbbr
+    ports:
+{% for port in rustdesk_hbbr_tcp_ports %}
+      - "0.0.0.0:{{ port }}:{{ port }}"
+{% endfor %}
+{% if rustdesk_expose_web_client %}
+      - "0.0.0.0:21119:21119"
+{% endif %}
     volumes:
-      - data:/root
+      - {{ rustdesk_data_volume }}:/root
     networks:
-      - rustdesk-net
-    restart: unless-stopped
+      - {{ rustdesk_network_name }}
+    restart: {{ rustdesk_restart_policy }}
+{% if rustdesk_mem_limit %}
+    mem_limit: {{ rustdesk_mem_limit }}
+{% endif %}
+{% if rustdesk_cpus %}
+    cpus: {{ rustdesk_cpus }}
+{% endif %}
+{% if rustdesk_no_new_privileges %}
+    security_opt:
+      - no-new-privileges:true
+{% endif %}
+{% if rustdesk_drop_all_caps %}
+    cap_drop:
+      - ALL
+{% endif %}
+{% if rustdesk_read_only %}
+    read_only: true
+    tmpfs:
+      - /tmp
+{% endif %}
+{% if rustdesk_log_max_size %}
+    logging:
+      driver: json-file
+      options:
+        max-size: "{{ rustdesk_log_max_size }}"
+        max-file: "{{ rustdesk_log_max_file }}"
+{% endif %}
 
 volumes:
-  data:
+  {{ rustdesk_data_volume }}:
