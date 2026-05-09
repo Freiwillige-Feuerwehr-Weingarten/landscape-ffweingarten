@@ -3,7 +3,7 @@ version: '3'
 
 services:
   nextcloud:
-    image: nextcloud
+    image: nextcloud:32.0.1
     container_name: nextcloud
     restart: unless-stopped
     networks: 
@@ -21,6 +21,7 @@ services:
       - nextcloud_config:/var/www/html/config
       # - ./data:/var/www/html/data
       - nextcloud_data:/var/www/html/data
+      - ad_fuehrungsgruppe:/mnt/ad_fuehrungsgruppe
     environment:
       - PUID=1000
       - PGID=1000
@@ -33,9 +34,12 @@ services:
       - TRUSTED_PROXIES=192.168.10.103
       - OVERWRITEHOST=nextcloud.ff-weingarten.de
       - OVERWRITEPROTOCOL=https
+      - LC_ALL=de_DE.UTF-8
+      - LANG=de_DE.UTF-8
+      - LANGUAGE=de_DE.UTF-8
       
   collabora:
-    image: collabora/code
+    image: collabora/code:latest
     container_name: collabora
     restart: unless-stopped
     networks: 
@@ -71,3 +75,9 @@ volumes:
   nextcloud_custom_apps:
   nextcloud_config:
   nextcloud_data:
+  ad_fuehrungsgruppe:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=192.168.1.6,rw,vers=4.1
+      device: ":/Fuehrungsgruppe"

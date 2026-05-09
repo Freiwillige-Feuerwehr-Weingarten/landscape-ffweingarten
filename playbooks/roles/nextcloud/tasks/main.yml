@@ -11,13 +11,13 @@
     dest: /srv/nextcloud/docker-compose.yml
     mode: '0750'
 
-#- name: Create and start services
-#  community.docker.docker_compose_v2:
-#    project_src: /srv/nextcloud
-#    build: always
-#    pull: always
-#    recreate: auto
-#  register: nextcloudoutput
+- name: Create and start services
+  community.docker.docker_compose_v2:
+      project_src: /srv/nextcloud
+      build: always
+      pull: always
+      recreate: auto
+  register: nextcloudoutput
 
 - name: Run apt update in container
   community.docker.docker_container_exec:
