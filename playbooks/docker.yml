@@ -10,6 +10,7 @@
     - nfs
     - docker
     - portainer
+    - authentik
     - netboot
     - heimdall
     - rustdesk
@@ -17,4 +18,4 @@
     - bookstack
     - nextcloud
     - adminer
-    # - taiga
+    - taiga
