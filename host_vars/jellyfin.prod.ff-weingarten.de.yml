@@ -8,7 +8,3 @@ nfs_permissions: "644"
 nfs_mountpoint: "/mnt/media"
 nfs_src: stark.prod.ff-weingarten.de:/media
 nfs_options: vers=4,rw,rsize=8192,wsize=8192,timeo=14,intr
-
-# Jellyfin
-jellyfin_version: "10.10.7"
-jellyfin_installation_directory: "/srv/jellyfin"

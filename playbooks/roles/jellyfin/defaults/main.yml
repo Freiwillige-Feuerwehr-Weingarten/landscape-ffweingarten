@@ -1,0 +1,56 @@
+---
+# Filesystem layout
+# Kept overridable per-host because both inventories already pin
+# jellyfin_installation_directory in host_vars/.
+jellyfin_installation_directory: /srv/jellyfin
+jellyfin_compose_mode: '0644'
+
+# Image / version
+jellyfin_image: lscr.io/linuxserver/jellyfin
+jellyfin_version: "10.10.7"
+
+# linuxserver.io PUID/PGID — must own the config + cache + media paths.
+jellyfin_puid: 1000
+jellyfin_pgid: 1000
+jellyfin_tz: Europe/Berlin
+
+# Published server URL advertised to clients (autodiscovery, casting, etc.).
+# Defaults to host's primary IPv4. Override in host_vars/ when fronted by
+# a reverse proxy or accessible via FQDN.
+jellyfin_published_server_url: "http://{{ ansible_default_ipv4.address }}"
+
+# Media bind-mount. nfs_mountpoint comes from the nfs role; pinning it here
+# keeps jellyfin self-contained if the NFS layout ever diverges.
+jellyfin_media_host_path: /mnt/media
+jellyfin_media_container_path: /data/media
+
+# Host-side ports
+jellyfin_http_port: 8096
+jellyfin_https_port: 8920
+jellyfin_discovery_port: 7359   # UDP, client autodiscovery
+jellyfin_dlna_port: 1900        # UDP, DLNA / SSDP
+
+# Optional hardware transcoding — list of devices to expose (e.g.
+# ["/dev/dri:/dev/dri"] for Intel QuickSync / VAAPI). Empty = no HW accel.
+jellyfin_devices: []
+
+# Container runtime
+jellyfin_restart_policy: unless-stopped
+
+# Log rotation (json-file driver)
+jellyfin_log_max_size: "10m"
+jellyfin_log_max_file: "3"
+
+# Resource limits (leave empty to disable). Transcoding is CPU-heavy, so the
+# defaults are intentionally generous; tighten per-host if needed.
+jellyfin_mem_limit: "4g"
+jellyfin_cpus: "4.0"
+
+# Security hardening — defaults err on the side of compatibility:
+#   - cap_drop: ALL is usually fine (jellyfin binds non-privileged ports), but
+#     some transcoding paths poke at ioctls; verify before enabling.
+#   - read_only is risky because the lscr image writes to /run, /tmp, and a
+#     handful of paths under / outside the mapped volumes.
+jellyfin_no_new_privileges: true
+jellyfin_drop_all_caps: false
+jellyfin_read_only: false

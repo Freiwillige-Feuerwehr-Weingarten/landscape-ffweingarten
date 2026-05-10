@@ -5,27 +5,30 @@
     state: directory
     mode: '0755'
   with_items:
-    # - "/mnt/media"
     - "{{ jellyfin_installation_directory }}"
     - "{{ jellyfin_installation_directory }}/config"
     - "{{ jellyfin_installation_directory }}/cache"
-
+  tags: [config]
 
 - name: Copy docker compose
   ansible.builtin.template:
     src: templates/docker-compose.yml.j2
     dest: "{{ jellyfin_installation_directory }}/docker-compose.yml"
-    mode: '0750'
+    mode: "{{ jellyfin_compose_mode }}"
+  notify: Restart Jellyfin
+  tags: [config]
 
 - name: Create and start services
   community.docker.docker_compose_v2:
     project_src: "{{ jellyfin_installation_directory }}"
-    build: always
+    build: policy
     pull: policy
     recreate: auto
   register: jellyfinoutput
+  tags: [service]
 
 - name: Show results
   ansible.builtin.debug:
     var: jellyfinoutput
   when: docker_debug
+  tags: [debug]

@@ -1,20 +1,53 @@
----
+#jinja2: lstrip_blocks: True
 services:
   jellyfin:
-    image: lscr.io/linuxserver/jellyfin:{{ jellyfin_version }}
     container_name: jellyfin
+    image: {{ jellyfin_image }}:{{ jellyfin_version }}
+    restart: {{ jellyfin_restart_policy }}
     environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Etc/UTC
-      - JELLYFIN_PublishedServerUrl=http://{{ ansible_default_ipv4.address }}
+      PUID: "{{ jellyfin_puid }}"
+      PGID: "{{ jellyfin_pgid }}"
+      TZ: {{ jellyfin_tz }}
+      JELLYFIN_PublishedServerUrl: {{ jellyfin_published_server_url }}
     volumes:
       - {{ jellyfin_installation_directory }}/config:/config
       - {{ jellyfin_installation_directory }}/cache:/cache
-      - /mnt/media:/data/media
+      - {{ jellyfin_media_host_path }}:{{ jellyfin_media_container_path }}
     ports:
-      - 8096:8096
-      - 8920:8920
-      - 7359:7359/udp
-      - 1900:1900/udp
-    restart: unless-stopped
+      - "{{ jellyfin_http_port }}:8096"
+      - "{{ jellyfin_https_port }}:8920"
+      - "{{ jellyfin_discovery_port }}:7359/udp"
+      - "{{ jellyfin_dlna_port }}:1900/udp"
+{% if jellyfin_devices %}
+    devices:
+{% for device in jellyfin_devices %}
+      - "{{ device }}"
+{% endfor %}
+{% endif %}
+{% if jellyfin_mem_limit %}
+    mem_limit: {{ jellyfin_mem_limit }}
+{% endif %}
+{% if jellyfin_cpus %}
+    cpus: {{ jellyfin_cpus }}
+{% endif %}
+{% if jellyfin_no_new_privileges %}
+    security_opt:
+      - no-new-privileges:true
+{% endif %}
+{% if jellyfin_drop_all_caps %}
+    cap_drop:
+      - ALL
+{% endif %}
+{% if jellyfin_read_only %}
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /run
+{% endif %}
+{% if jellyfin_log_max_size %}
+    logging:
+      driver: json-file
+      options:
+        max-size: "{{ jellyfin_log_max_size }}"
+        max-file: "{{ jellyfin_log_max_file }}"
+{% endif %}
