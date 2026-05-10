@@ -11,7 +11,7 @@
     - docker
     - portainer
     - authentik
-    - netboot
+    - { role: netboot, tags: [netboot] }
     - heimdall
     - { role: rustdesk, tags: [rustdesk] }
     - traccar
