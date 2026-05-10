@@ -1,0 +1,5 @@
+---
+- name: Restart Adminer
+  community.docker.docker_compose_v2:
+    project_src: "{{ adminer_dir }}"
+    state: restarted

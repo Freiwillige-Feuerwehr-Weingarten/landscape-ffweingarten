@@ -1,12 +1,39 @@
-version: '3.1'
-
+#jinja2: lstrip_blocks: True
 services:
-
   adminer:
-    image: adminer:5.4.0
-    restart: always
+    container_name: adminer
+    image: {{ adminer_image }}:{{ adminer_version }}
+    restart: {{ adminer_restart_policy }}
     ports:
-      - 8100:8080
+      - "{{ adminer_port }}:8080"
     environment:
-        ADMINER_DESIGN: pepa-linha
-        ADMINER_DEFAULT_SERVER: psql.prod.ff-weingarten.de
+      ADMINER_DESIGN: {{ adminer_design }}
+{% if adminer_default_server %}
+      ADMINER_DEFAULT_SERVER: {{ adminer_default_server }}
+{% endif %}
+{% if adminer_mem_limit %}
+    mem_limit: {{ adminer_mem_limit }}
+{% endif %}
+{% if adminer_cpus %}
+    cpus: {{ adminer_cpus }}
+{% endif %}
+{% if adminer_no_new_privileges %}
+    security_opt:
+      - no-new-privileges:true
+{% endif %}
+{% if adminer_drop_all_caps %}
+    cap_drop:
+      - ALL
+{% endif %}
+{% if adminer_read_only %}
+    read_only: true
+    tmpfs:
+      - /tmp
+{% endif %}
+{% if adminer_log_max_size %}
+    logging:
+      driver: json-file
+      options:
+        max-size: "{{ adminer_log_max_size }}"
+        max-file: "{{ adminer_log_max_file }}"
+{% endif %}

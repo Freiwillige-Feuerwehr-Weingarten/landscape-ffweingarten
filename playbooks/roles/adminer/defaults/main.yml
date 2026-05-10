@@ -1,0 +1,36 @@
+---
+# Filesystem layout
+adminer_dir: /srv/adminer
+adminer_compose_mode: '0644'
+
+# Image / version
+adminer_image: adminer
+adminer_version: 5.4.0
+
+# Host-side port
+adminer_port: 8100
+
+# UI
+adminer_design: pepa-linha
+
+# Pre-fill the "Server" field on the login form. Override per host in host_vars/.
+# Empty = no default; user types the server hostname in.
+adminer_default_server: ""
+
+# Container runtime
+adminer_restart_policy: unless-stopped
+
+# Log rotation (json-file driver)
+adminer_log_max_size: "10m"
+adminer_log_max_file: "3"
+
+# Resource limits (leave empty to disable)
+adminer_mem_limit: "256m"
+adminer_cpus: "0.5"
+
+# Security hardening — flip off per host if anything breaks.
+adminer_no_new_privileges: true
+adminer_drop_all_caps: true
+# read_only is stricter: adminer is stateless PHP, sessions go to /tmp (tmpfs).
+# Verify before enabling.
+adminer_read_only: false

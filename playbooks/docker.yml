@@ -17,5 +17,5 @@
     - traccar
     - bookstack
     - nextcloud
-    - adminer
+    - { role: adminer, tags: [adminer] }
     - taiga

@@ -224,3 +224,6 @@ authentik_email_password: !vault |
 
 # rustdesk
 rustdesk_host: rustdesk.prod.ff-weingarten.de
+
+# adminer
+adminer_default_server: psql.prod.ff-weingarten.de
