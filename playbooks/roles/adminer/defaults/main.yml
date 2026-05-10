@@ -5,7 +5,7 @@ adminer_compose_mode: '0644'
 
 # Image / version
 adminer_image: adminer
-adminer_version: 5.4.0
+adminer_version: 5.4.2
 
 # Host-side port
 adminer_port: 8100
