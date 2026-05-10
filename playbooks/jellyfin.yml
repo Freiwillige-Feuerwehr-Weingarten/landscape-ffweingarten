@@ -15,4 +15,4 @@
   become: true
   gather_facts: true
   roles:
-    - jellyfin
+    - { role: jellyfin, tags: [jellyfin] }

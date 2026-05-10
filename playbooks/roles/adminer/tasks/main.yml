@@ -4,7 +4,7 @@
     path: "{{ adminer_dir }}"
     state: directory
     mode: '0755'
-  tags: [config]
+  tags: [setup]
 
 - name: Copy docker compose
   ansible.builtin.template:

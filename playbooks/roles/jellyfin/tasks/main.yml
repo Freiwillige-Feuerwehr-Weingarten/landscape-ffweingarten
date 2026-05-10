@@ -8,7 +8,7 @@
     - "{{ jellyfin_installation_directory }}"
     - "{{ jellyfin_installation_directory }}/config"
     - "{{ jellyfin_installation_directory }}/cache"
-  tags: [config]
+  tags: [setup]
 
 - name: Copy docker compose
   ansible.builtin.template:
