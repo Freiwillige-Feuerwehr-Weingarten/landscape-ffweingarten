@@ -1,0 +1,70 @@
+---
+# Production-readiness gate. Allowed values: stable | testing | unstable.
+# The role's first task asserts this matches the target inventory's env:
+# stable runs anywhere; testing only on env=test; unstable on neither.
+docker_status: stable
+
+# Debug
+docker_debug: false
+
+# Apt prerequisites pulled in before the docker repo is registered.
+# apt-transport-https and curl are intentionally absent: apt does HTTPS
+# natively on bullseye+, and deb822_repository handles key fetching.
+docker_apt_prereqs:
+  - ca-certificates
+  - gnupg
+
+# Docker apt repo. Suite defaults to the host's release codename so the role
+# works on bookworm/trixie without per-host overrides; architecture stays
+# explicit because ansible_architecture reports x86_64 (not amd64).
+docker_apt_uri: "https://download.docker.com/linux/debian"
+docker_apt_suite: "{{ ansible_distribution_release | lower }}"
+docker_apt_components:
+  - stable
+docker_apt_arch: amd64
+docker_apt_signing_key: "https://download.docker.com/linux/debian/gpg"
+
+# Docker packages. python3-docker is required by community.docker modules.
+docker_packages:
+  - docker-ce
+  - docker-ce-cli
+  - containerd.io
+  - docker-buildx-plugin
+  - docker-compose-plugin
+  - python3-docker
+
+# Unix group docker-managing users are added to.
+docker_group: docker
+# Local user that should be granted docker access. ansible_user works for
+# most playbooks; override per host if a different account runs containers.
+docker_user: "{{ ansible_user }}"
+
+# Systemd units to enable + start.
+docker_services:
+  - docker.service
+  - containerd.service
+
+# --- daemon.json ------------------------------------------------------------
+# Rendered to /etc/docker/daemon.json. Centralises log rotation so per-service
+# compose files don't each carry their own logging: block, and turns on
+# live-restore so future daemon restarts don't take running containers down.
+# Override the whole dict per host to add storage-driver / registry-mirrors /
+# etc. — anything not set here falls back to dockerd's compiled-in defaults.
+docker_daemon_config:
+  log-driver: json-file
+  log-opts:
+    max-size: 10m
+    max-file: "3"
+  live-restore: true
+
+# --- Backup script ----------------------------------------------------------
+# Renders /etc/cron.daily/docker_backup when docker_install_backup_script is
+# true. The script tars /var/lib/docker/volumes onto an NFS mount.
+docker_install_backup_script: false
+docker_backup_suffix: "{{ inventory_hostname_short }}"
+docker_backup_source_dir: /var/lib/docker/volumes
+docker_backup_target_dir: /mnt/nfs
+docker_backup_retention_days: 10
+# Containers to stop while the tar runs (e.g. live databases). Empty = none.
+# Order matters: containers stop top-to-bottom and start bottom-to-top.
+docker_backup_pre_stop_containers: []
