@@ -1,8 +1,114 @@
 ---
-- name: Include tasks for portainer installation
-  ansible.builtin.include_tasks: install.yml
-  when: portainer_install
+- name: Assert role maturity permits this environment
+  ansible.builtin.assert:
+    that:
+      - portainer_status in ['stable', 'testing', 'unstable']
+      - >-
+        portainer_status == 'stable'
+        or (portainer_status == 'testing' and env | default('') == 'test')
+    fail_msg: >-
+      Role 'portainer' is marked status={{ portainer_status }} and cannot run
+      against env={{ env | default('unset') }}. Promote the role in
+      defaults/main.yml, or override portainer_status per host.
+  tags: always
 
-- name: Include tasks for portainer update_cache
-  ansible.builtin.include_tasks: update.yml
-  when: portainer_update
+- name: Ensure Portainer install directory exists
+  ansible.builtin.file:
+    path: "{{ portainer_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  tags: [setup]
+
+- name: Inspect Portainer data volume to detect first boot
+  community.docker.docker_volume_info:
+    name: "{{ portainer_data_volume }}"
+  register: portainer_volume_check
+  tags: [setup]
+
+- name: Set first-boot fact from volume presence
+  ansible.builtin.set_fact:
+    portainer_first_boot: "{{ not portainer_volume_check.exists }}"
+  tags: [setup]
+
+- name: Bootstrap admin password (first boot only)
+  when: portainer_first_boot
+  tags: [setup]
+  block:
+    - name: Fail fast if no admin password is set for first boot
+      ansible.builtin.assert:
+        that: portainer_admin_password | default('') | length > 0
+        fail_msg: >-
+          Portainer needs an initial admin password on first boot, but
+          portainer_admin_password is unset for this host. Add it as a vault
+          block in host_vars/{{ inventory_hostname }}.yml.
+
+    - name: Create Portainer bootstrap directory
+      ansible.builtin.file:
+        path: "{{ portainer_bootstrap_dir }}"
+        state: directory
+        owner: root
+        group: root
+        mode: '0700'
+
+    - name: Render Portainer admin password file
+      ansible.builtin.template:
+        src: templates/pwd.j2
+        dest: "{{ portainer_bootstrap_dir }}/pwd"
+        owner: root
+        group: root
+        mode: '0600'
+
+    - name: Render compose with admin-password bootstrap mount
+      ansible.builtin.template:
+        src: templates/portainer.docker-compose.j2
+        dest: "{{ portainer_dir }}/docker-compose.yml"
+        owner: root
+        group: root
+        mode: "{{ portainer_compose_mode }}"
+      vars:
+        portainer_render_bootstrap: true
+
+    - name: Bring Portainer up for initial admin bootstrap
+      community.docker.docker_compose_v2:
+        project_src: "{{ portainer_dir }}"
+        pull: policy
+        recreate: auto
+
+    - name: Wait for Portainer HTTP endpoint to be ready
+      ansible.builtin.wait_for:
+        host: 127.0.0.1
+        port: "{{ portainer_http_port }}"
+        timeout: 60
+
+- name: Render Portainer docker compose
+  ansible.builtin.template:
+    src: templates/portainer.docker-compose.j2
+    dest: "{{ portainer_dir }}/docker-compose.yml"
+    owner: root
+    group: root
+    mode: "{{ portainer_compose_mode }}"
+  notify: Restart Portainer
+  tags: [config]
+
+- name: Create and start Portainer
+  community.docker.docker_compose_v2:
+    project_src: "{{ portainer_dir }}"
+    build: policy
+    pull: policy
+    recreate: auto
+  register: portaineroutput
+  tags: [service]
+
+- name: Remove Portainer bootstrap directory
+  ansible.builtin.file:
+    path: "{{ portainer_bootstrap_dir }}"
+    state: absent
+  tags: [setup]
+
+- name: Show results
+  ansible.builtin.debug:
+    var: portaineroutput
+  when: docker_debug
+  tags: [debug]

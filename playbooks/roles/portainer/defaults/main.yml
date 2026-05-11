@@ -1,0 +1,45 @@
+---
+# Production-readiness gate. Allowed values: stable | testing | unstable.
+# The role's first task asserts this matches the target inventory's env:
+# stable runs anywhere; testing only on env=test; unstable on neither.
+# Marked `testing` after the rewrite — promote to `stable` once the new
+# code path has been validated against the test host.
+portainer_status: testing
+
+# Filesystem layout
+portainer_dir: /srv/portainer
+portainer_compose_mode: '0644'
+
+# Image / version
+portainer_image: portainer/portainer-ce
+portainer_version: "2.33.2"
+
+# Host-side ports. Portainer inside the container listens on 9000 (HTTP) and
+# 9443 (HTTPS). 9001 is the historical host-side HTTP mapping for this fleet.
+portainer_http_port: 9001
+portainer_https_port: 9443
+
+# Docker volume holding Portainer state — including the admin user record.
+# Existence of this volume is also what the role uses to detect first boot
+# (and so whether to render the admin-password bootstrap mount).
+portainer_data_volume: portainer_data
+
+# Bootstrap path used ONLY during first install to hand the admin password to
+# Portainer on its first start. The role creates it at mode 0700 (root) and
+# the password file inside at 0600, then removes the directory once Portainer
+# has initialised its DB. The password thereafter lives only in the volume.
+portainer_bootstrap_dir: /var/lib/portainer-bootstrap
+
+# Container runtime
+portainer_restart_policy: unless-stopped
+
+# Resource limits (leave empty to disable)
+portainer_mem_limit: "512m"
+portainer_cpus: "1.0"
+
+# Hardening. cap_drop/read_only stay off by default because Portainer manages
+# other containers via /var/run/docker.sock and is sensitive to tightening;
+# enable per-host if you know the use case tolerates it.
+portainer_no_new_privileges: true
+portainer_drop_all_caps: false
+portainer_read_only: false

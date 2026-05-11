@@ -5,8 +5,12 @@ docker_install_backup_script: true
 docker_backup_pre_stop_containers:
   - taiga-taiga-db-1
 
-portainer_install: false
-portainer_update: true
+# Portainer
+# Set portainer_admin_password as a !vault block before deploying portainer
+# here for the first time. After first boot the password lives in the
+# portainer_data volume and is not consulted again. Generate with e.g.
+#   ansible-vault encrypt_string '<password>' --name 'portainer_admin_password'
+# portainer_admin_password: !vault | ...
 
 # NFS
 nfs_permissions: "644"
