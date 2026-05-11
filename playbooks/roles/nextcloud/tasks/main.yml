@@ -1,41 +1,78 @@
 ---
+- name: Assert role maturity permits this environment
+  ansible.builtin.assert:
+    that:
+      - nextcloud_status in ['stable', 'testing', 'unstable']
+      - >-
+        nextcloud_status == 'stable'
+        or (nextcloud_status == 'testing' and env | default('') == 'test')
+    fail_msg: >-
+      Role 'nextcloud' is marked status={{ nextcloud_status }} and cannot run
+      against env={{ env | default('unset') }}. Promote the role in
+      defaults/main.yml, or override nextcloud_status per host.
+  tags: always
+
 - name: Create a nextcloud directory if it does not exist
   ansible.builtin.file:
-    path: /srv/nextcloud
+    path: "{{ nextcloud_dir }}"
     state: directory
     mode: '0755'
+  tags: [setup]
+
+- name: Mount AD Fuehrungsgruppe NFS share on the host
+  ansible.posix.mount:
+    src: "{{ nextcloud_nfs_server }}:{{ nextcloud_nfs_export }}"
+    path: "{{ nextcloud_nfs_mountpoint }}"
+    fstype: nfs4
+    opts: "{{ nextcloud_nfs_opts }}"
+    state: mounted
+  tags: [setup]
 
 - name: Copy docker compose
   ansible.builtin.template:
     src: templates/nextcloud.j2
-    dest: /srv/nextcloud/docker-compose.yml
-    mode: '0750'
+    dest: "{{ nextcloud_dir }}/docker-compose.yml"
+    mode: "{{ nextcloud_compose_mode }}"
+  tags: [config]
+
+- name: Render Redis cache config snippet
+  ansible.builtin.template:
+    src: templates/redis.config.php.j2
+    dest: "{{ nextcloud_dir }}/redis.config.php"
+    mode: '0644'
+  tags: [config]
 
 - name: Create and start services
   community.docker.docker_compose_v2:
-      project_src: /srv/nextcloud
-      build: always
-      pull: always
-      recreate: auto
+    project_src: "{{ nextcloud_dir }}"
+    build: always
+    pull: always
+    recreate: auto
   register: nextcloudoutput
+  tags: [service]
 
-- name: Run apt update in container
+# smbclient is needed by Nextcloud's "External storages" app to talk to SMB
+# shares. The official image doesn't ship it, so we install it inside the
+# running container. dpkg-query guards both apt invocations so the play stays
+# idempotent.
+- name: Check whether smbclient is already installed in container
   community.docker.docker_container_exec:
     container: nextcloud
-    command: /bin/bash -c "apt update"
-    chdir: /root
-  register: apt_update_result
-  changed_when: apt_update_result.rc != 0
+    command: dpkg-query -W -f='${Status}' smbclient
+  register: nextcloud_smbclient_check
+  failed_when: false
+  changed_when: false
+  tags: [config]
 
-- name: Install smbclient in container
+- name: Install smbclient in nextcloud container
   community.docker.docker_container_exec:
     container: nextcloud
-    command: /bin/bash -c "apt install smbclient -y"
-    chdir: /root
-  register: apt_install_result
-  changed_when: apt_install_result.rc != 0
+    command: /bin/bash -c "apt-get update && apt-get install -y smbclient"
+  when: "'install ok installed' not in (nextcloud_smbclient_check.stdout | default(''))"
+  tags: [config]
 
 - name: Show results
   ansible.builtin.debug:
     var: nextcloudoutput
-  when: docker_debug
+  when: docker_debug | default(false)
+  tags: [debug]

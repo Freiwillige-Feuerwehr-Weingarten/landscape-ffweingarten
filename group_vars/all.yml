@@ -73,3 +73,10 @@ checkmk_agent_host_name: "{{ inventory_hostname }}"
 checkmk_agent_update: 'true'
 checkmk_agent_host_attributes:
   ipaddress: "{{ checkmk_agent_host_ip | default(omit) }}"
+
+# nextcloud
+# Both Nextcloud secrets are defined elsewhere:
+#   - nextcloud_psql_db_password: resolved via hostvars from the inventory's
+#     `psql` host (see roles/nextcloud/defaults/main.yml).
+#   - nextcloud_collabora_password: vaulted in
+#     host_vars/docker.{prod,test}.ff-weingarten.de.yml.

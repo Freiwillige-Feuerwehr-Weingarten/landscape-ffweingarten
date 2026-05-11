@@ -1,0 +1,77 @@
+---
+# Production-readiness gate. Allowed values: stable | testing | unstable.
+# The role's first task asserts this matches the target inventory's env:
+# stable runs anywhere; testing only on env=test; unstable on neither.
+nextcloud_status: testing
+
+# Filesystem layout
+nextcloud_dir: /srv/nextcloud
+nextcloud_compose_mode: '0644'
+
+# Images / versions
+nextcloud_image: nextcloud
+nextcloud_version: "32.0.1"
+# TODO: pin to a specific Collabora CODE release tag. See
+# https://hub.docker.com/r/collabora/code/tags — "latest" floats and has bitten
+# upgrades before. Override per environment in host_vars/ or group_vars/.
+nextcloud_collabora_image: collabora/code
+nextcloud_collabora_version: "latest"
+nextcloud_redis_image: redis
+nextcloud_redis_version: "alpine"
+
+# Host-side ports
+nextcloud_port: 8080
+nextcloud_collabora_port: 9980
+
+# External services
+# Resolve the postgres host and password from whichever host is in the `psql`
+# group of the active inventory — so `-i test.yml` points at the test DB and
+# `-i prod.yml` at prod, without any per-env duplication here. The password
+# itself is vaulted on the psql host as `psql_db_nextcloud_password` (defined
+# in host_vars/psql.{prod,test}.ff-weingarten.de.yml). Override per host if
+# Nextcloud ever needs to talk to a Postgres outside the psql group.
+nextcloud_postgres_host: "{{ groups['psql'][0] }}"
+nextcloud_postgres_db: nextcloud
+nextcloud_postgres_user: nextcloud
+nextcloud_psql_db_password: "{{ hostvars[groups['psql'][0]].psql_db_nextcloud_password }}"
+
+# Reverse proxy / public-facing hostname
+# Override per host in host_vars/ when the test instance has a different proxy IP.
+nextcloud_trusted_proxies: "192.168.10.103"
+nextcloud_overwrite_host: nextcloud.ff-weingarten.de
+nextcloud_overwrite_protocol: https
+
+# Locale
+nextcloud_locale: de_DE.UTF-8
+
+# Collabora
+nextcloud_collabora_username: nextcloud
+nextcloud_collabora_domain: ff-weingarten.de
+
+# AD Fuehrungsgruppe NFS share.
+# Mounted on the docker HOST at nextcloud_nfs_mountpoint, then bind-mounted into
+# the container. This gives the host kernel control of NFS caching, attribute
+# timeouts and connection parallelism — significantly faster than the Docker
+# `driver: local, type: nfs` volume path we used before.
+nextcloud_nfs_server: 192.168.1.6
+nextcloud_nfs_export: /Fuehrungsgruppe
+nextcloud_nfs_mountpoint: /mnt/ad_fuehrungsgruppe
+# Tuned for Nextcloud's mixed metadata + bulk-read workload:
+#   nconnect=4         — 4 parallel TCP connections (kernel >= 5.3, fine on Debian 12)
+#   rsize/wsize=1M     — 1 MB transfer chunks
+#   noatime,nodiratime — no metadata writes on read
+#   hard,timeo=600,retrans=2 — survive brief AD-server blips without EIO
+#   actimeo=60         — cache attributes 60 s. If files change on the AD server
+#                        from outside Nextcloud, stale view for up to 60 s.
+#                        Drop to actimeo=10 if that's a problem.
+#   _netdev,nofail     — boot-resilient: don't block boot if AD server is down.
+nextcloud_nfs_opts: "rw,vers=4.1,rsize=1048576,wsize=1048576,nconnect=4,noatime,nodiratime,hard,timeo=600,retrans=2,actimeo=60,_netdev,nofail"
+
+# Redis cache wiring (rendered into a config snippet, auto-loaded by Nextcloud).
+# Host = the docker-compose service name on the `cloud` network, not psql/etc.
+nextcloud_redis_host: redis
+nextcloud_redis_port: 6379
+nextcloud_redis_timeout: 1.5
+
+# Container runtime
+nextcloud_restart_policy: unless-stopped

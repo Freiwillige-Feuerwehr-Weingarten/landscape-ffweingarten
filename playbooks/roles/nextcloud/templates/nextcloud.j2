@@ -1,69 +1,68 @@
 ---
-version: '3'
-
 services:
   nextcloud:
-    image: nextcloud:32.0.1
+    image: {{ nextcloud_image }}:{{ nextcloud_version }}
     container_name: nextcloud
-    restart: unless-stopped
-    networks: 
+    restart: {{ nextcloud_restart_policy }}
+    networks:
       - cloud
     depends_on:
       - redis
     ports:
-      - 8080:80
+      - {{ nextcloud_port }}:80
     volumes:
-      # - ./html:/var/www/html
       - nextcloud_html:/var/www/html
-      # - ./custom_apps:/var/www/html/custom_apps
       - nextcloud_custom_apps:/var/www/html/custom_apps
-      # - ./config:/var/www/html/config
       - nextcloud_config:/var/www/html/config
-      # - ./data:/var/www/html/data
       - nextcloud_data:/var/www/html/data
-      - ad_fuehrungsgruppe:/mnt/ad_fuehrungsgruppe
+      # AD share is mounted on the host (see roles/nextcloud/tasks/main.yml,
+      # "Mount AD Fuehrungsgruppe NFS share on the host") and bind-mounted in
+      # here. Host-kernel NFS with nconnect+large-rsize is much faster than
+      # the previous `driver: local, type: nfs` named volume.
+      - {{ nextcloud_nfs_mountpoint }}:/mnt/ad_fuehrungsgruppe
+      - {{ nextcloud_dir }}/redis.config.php:/var/www/html/config/redis.config.php:ro
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ=Europe/Berlin
-      - POSTGRES_HOST=psql.prod.ff-weingarten.de
+      - TZ={{ ntp_timezone }}
+      - POSTGRES_HOST={{ nextcloud_postgres_host }}
       - POSTGRES_PASSWORD={{ nextcloud_psql_db_password }}
-      - POSTGRES_DB=nextcloud
-      - POSTGRES_USER=nextcloud
+      - POSTGRES_DB={{ nextcloud_postgres_db }}
+      - POSTGRES_USER={{ nextcloud_postgres_user }}
       - REDIS_HOST=redis
-      - TRUSTED_PROXIES=192.168.10.103
-      - OVERWRITEHOST=nextcloud.ff-weingarten.de
-      - OVERWRITEPROTOCOL=https
-      - LC_ALL=de_DE.UTF-8
-      - LANG=de_DE.UTF-8
-      - LANGUAGE=de_DE.UTF-8
-      
+      - TRUSTED_PROXIES={{ nextcloud_trusted_proxies }}
+      - OVERWRITEHOST={{ nextcloud_overwrite_host }}
+      - OVERWRITEPROTOCOL={{ nextcloud_overwrite_protocol }}
+      - LC_ALL={{ nextcloud_locale }}
+      - LANG={{ nextcloud_locale }}
+      - LANGUAGE={{ nextcloud_locale }}
+
   collabora:
-    image: collabora/code:latest
+    image: {{ nextcloud_collabora_image }}:{{ nextcloud_collabora_version }}
     container_name: collabora
-    restart: unless-stopped
-    networks: 
+    restart: {{ nextcloud_restart_policy }}
+    networks:
       - cloud
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ=Europe/Berlin
+      - TZ={{ ntp_timezone }}
       - password={{ nextcloud_collabora_password }}
-      - username=nextcloud
-      - domain=ff-weingarten.de
+      - username={{ nextcloud_collabora_username }}
+      - domain={{ nextcloud_collabora_domain }}
       - extra_params=--o:ssl.enable=true
     ports:
-      - 9980:9980
+      - {{ nextcloud_collabora_port }}:9980
 
   redis:
-    image: redis:alpine
+    image: {{ nextcloud_redis_image }}:{{ nextcloud_redis_version }}
     container_name: redis
+    restart: {{ nextcloud_restart_policy }}
     volumes:
-      # - ./redis:/data  
       - nextcloud_redis:/data
-    networks: 
+    networks:
       - cloud
-  
+
 networks:
   cloud:
     name: cloud
@@ -75,9 +74,3 @@ volumes:
   nextcloud_custom_apps:
   nextcloud_config:
   nextcloud_data:
-  ad_fuehrungsgruppe:
-    driver: local
-    driver_opts:
-      type: nfs
-      o: addr=192.168.1.6,rw,vers=4.1
-      device: ":/Fuehrungsgruppe"

@@ -16,6 +16,6 @@
     - { role: rustdesk, tags: [rustdesk] }
     - traccar
     - bookstack
-    - nextcloud
+    - { role: nextcloud, tags: [nextcloud] }
     - { role: adminer, tags: [adminer] }
     - taiga

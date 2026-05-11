@@ -1,0 +1,13 @@
+<?php
+// Managed by Ansible — roles/nextcloud/templates/redis.config.php.j2
+// Nextcloud auto-loads any *.config.php in /var/www/html/config/.
+$CONFIG = array(
+  'memcache.local'       => '\OC\Memcache\APCu',
+  'memcache.distributed' => '\OC\Memcache\Redis',
+  'memcache.locking'     => '\OC\Memcache\Redis',
+  'redis' => array(
+    'host'    => '{{ nextcloud_redis_host }}',
+    'port'    => {{ nextcloud_redis_port }},
+    'timeout' => {{ nextcloud_redis_timeout }},
+  ),
+);

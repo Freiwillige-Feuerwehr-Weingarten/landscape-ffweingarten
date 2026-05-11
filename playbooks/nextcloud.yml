@@ -1,59 +1,12 @@
 ---
-- hosts: test_nextcloud
+# Run the Nextcloud stack alone, scoped to whichever `docker` host the
+# selected inventory points at (test.yml -> docker.test.ff-weingarten.de,
+# prod.yml -> docker.prod.ff-weingarten.de). The same role is also pulled in
+# by playbooks/docker.yml as part of the full docker-host run.
+- name: Deploy Nextcloud
+  hosts: docker
   remote_user: ffweingarten
   become: true
   gather_facts: true
   roles:
-    - role: common
-      vars:
-        setup_qemu: false
-    - role: geerlingguy.ntp
-      vars:
-        ntp_timezone: Europe/Berlin
-    - role: geerlingguy.php
-      vars:
-        php_enable_webserver: true
-        php_default_version_debian: "8.0"
-        php_packages:
-          - php
-          - php-cli
-          - php-common
-          - php-curl
-          - php-imap
-          - php-redis
-          - php-snmp
-          - php-xml
-          - php-zip
-          - php-mbstring
-          - php-gd
-          - php-mysql
-        php_memory_limit: "512M"
-        php_upload_max_filesize: "64M"
-        php_post_max_size: "48M"
-    - role: geerlingguy.apache
-      vars:
-        apache_create_vhosts: true
-        apache_vhosts:
-          - servername: "storage-test.ff-weingarten.de"
-            serveralias: "www.storage-test.ff-weingarten.de"
-            documentroot: "/var/www/html/nextcloud"
-            serveradmin: "admin@ff-weingarten.de"
-            options: +Indexes +FollowSymLinks +ExecCGI
-            extra_parameters: |
-                <Directory /var/www/html/nextcloud/>
-                  Options FollowSymlinks
-                  AllowOverride All
-                  Require all granted
-                </Directory>
-                <Directory /var/www/html/nextcloud/>
-                  RewriteEngine on
-                  RewriteBase /
-                  RewriteCond %{REQUEST_FILENAME} !-f
-                  RewriteRule ^(.*) index.php [PT,L]
-                </Directory>
-#    - role: nfs
-#      vars:
-#        permissions: "644"
-#        nfs_src: stark.feuerwehr.weingarten.local:/Nextcloud
-#        options: vers=4,rw,rsize=8192,wsize=8192,timeo=14,intr,user
-#        mountpoint: "/nextcloud"
+    - { role: nextcloud, tags: [nextcloud] }
