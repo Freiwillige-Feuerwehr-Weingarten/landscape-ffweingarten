@@ -30,10 +30,3 @@ services:
     tmpfs:
       - /tmp
 {% endif %}
-{% if adminer_log_max_size %}
-    logging:
-      driver: json-file
-      options:
-        max-size: "{{ adminer_log_max_size }}"
-        max-file: "{{ adminer_log_max_file }}"
-{% endif %}

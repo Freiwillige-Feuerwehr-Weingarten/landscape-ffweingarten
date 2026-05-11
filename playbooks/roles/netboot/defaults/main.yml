@@ -1,4 +1,9 @@
 ---
+# Production-readiness gate. Allowed values: stable | testing | unstable.
+# The role's first task asserts this matches the target inventory's env:
+# stable runs anywhere; testing only on env=test; unstable on neither.
+netboot_status: stable
+
 # Filesystem layout
 netboot_dir: /srv/netboot
 netboot_compose_mode: '0644'
@@ -32,10 +37,6 @@ netboot_assets_volume: assets
 
 # Container runtime
 netboot_restart_policy: unless-stopped
-
-# Log rotation (json-file driver)
-netboot_log_max_size: "10m"
-netboot_log_max_file: "3"
 
 # Resource limits (leave empty to disable)
 netboot_mem_limit: "512m"

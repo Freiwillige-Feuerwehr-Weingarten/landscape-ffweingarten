@@ -1,4 +1,17 @@
 ---
+- name: Assert role maturity permits this environment
+  ansible.builtin.assert:
+    that:
+      - netboot_status in ['stable', 'testing', 'unstable']
+      - >-
+        netboot_status == 'stable'
+        or (netboot_status == 'testing' and env | default('') == 'test')
+    fail_msg: >-
+      Role 'netboot' is marked status={{ netboot_status }} and cannot run
+      against env={{ env | default('unset') }}. Promote the role in
+      defaults/main.yml, or override netboot_status per host.
+  tags: always
+
 - name: Create a netboot directory if it does not exist
   ansible.builtin.file:
     path: "{{ netboot_dir }}"

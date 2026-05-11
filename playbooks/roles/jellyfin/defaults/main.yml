@@ -1,4 +1,9 @@
 ---
+# Production-readiness gate. Allowed values: stable | testing | unstable.
+# The role's first task asserts this matches the target inventory's env:
+# stable runs anywhere; testing only on env=test; unstable on neither.
+jellyfin_status: stable
+
 # Filesystem layout
 # Kept overridable per-host because both inventories already pin
 # jellyfin_installation_directory in host_vars/.
@@ -36,10 +41,6 @@ jellyfin_devices: []
 
 # Container runtime
 jellyfin_restart_policy: unless-stopped
-
-# Log rotation (json-file driver)
-jellyfin_log_max_size: "10m"
-jellyfin_log_max_file: "3"
 
 # Resource limits (leave empty to disable). Transcoding is CPU-heavy, so the
 # defaults are intentionally generous; tighten per-host if needed.

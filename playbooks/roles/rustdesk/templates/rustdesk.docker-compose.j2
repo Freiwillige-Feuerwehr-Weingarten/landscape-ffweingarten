@@ -43,13 +43,6 @@ services:
     tmpfs:
       - /tmp
 {% endif %}
-{% if rustdesk_log_max_size %}
-    logging:
-      driver: json-file
-      options:
-        max-size: "{{ rustdesk_log_max_size }}"
-        max-file: "{{ rustdesk_log_max_file }}"
-{% endif %}
 
   hbbr:
     container_name: hbbr
@@ -85,13 +78,6 @@ services:
     read_only: true
     tmpfs:
       - /tmp
-{% endif %}
-{% if rustdesk_log_max_size %}
-    logging:
-      driver: json-file
-      options:
-        max-size: "{{ rustdesk_log_max_size }}"
-        max-file: "{{ rustdesk_log_max_file }}"
 {% endif %}
 
 volumes:

@@ -1,4 +1,9 @@
 ---
+# Production-readiness gate. Allowed values: stable | testing | unstable.
+# The role's first task asserts this matches the target inventory's env:
+# stable runs anywhere; testing only on env=test; unstable on neither.
+adminer_status: stable
+
 # Filesystem layout
 adminer_dir: /srv/adminer
 adminer_compose_mode: '0644'
@@ -19,10 +24,6 @@ adminer_default_server: ""
 
 # Container runtime
 adminer_restart_policy: unless-stopped
-
-# Log rotation (json-file driver)
-adminer_log_max_size: "10m"
-adminer_log_max_file: "3"
 
 # Resource limits (leave empty to disable)
 adminer_mem_limit: "256m"

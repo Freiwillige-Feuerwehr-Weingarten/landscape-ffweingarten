@@ -42,13 +42,6 @@ services:
       - /tmp
       - /run
 {% endif %}
-{% if netboot_log_max_size %}
-    logging:
-      driver: json-file
-      options:
-        max-size: "{{ netboot_log_max_size }}"
-        max-file: "{{ netboot_log_max_file }}"
-{% endif %}
 
 volumes:
   {{ netboot_config_volume }}:

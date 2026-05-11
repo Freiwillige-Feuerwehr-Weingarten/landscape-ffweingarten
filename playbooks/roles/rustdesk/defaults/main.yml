@@ -1,4 +1,9 @@
 ---
+# Production-readiness gate. Allowed values: stable | testing | unstable.
+# The role's first task asserts this matches the target inventory's env:
+# stable runs anywhere; testing only on env=test; unstable on neither.
+rustdesk_status: stable
+
 # Filesystem layout
 rustdesk_dir: /srv/rustdesk
 rustdesk_compose_mode: '0644'
@@ -25,10 +30,6 @@ rustdesk_expose_web_client: false   # set true to also publish 21118 (hbbs) and 
 rustdesk_restart_policy: unless-stopped
 rustdesk_network_name: rustdesk-net
 rustdesk_data_volume: data
-
-# Log rotation (json-file driver)
-rustdesk_log_max_size: "10m"
-rustdesk_log_max_file: "3"
 
 # Resource limits (leave empty to disable)
 rustdesk_mem_limit: "512m"

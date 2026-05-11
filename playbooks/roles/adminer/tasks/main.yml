@@ -1,4 +1,17 @@
 ---
+- name: Assert role maturity permits this environment
+  ansible.builtin.assert:
+    that:
+      - adminer_status in ['stable', 'testing', 'unstable']
+      - >-
+        adminer_status == 'stable'
+        or (adminer_status == 'testing' and env | default('') == 'test')
+    fail_msg: >-
+      Role 'adminer' is marked status={{ adminer_status }} and cannot run
+      against env={{ env | default('unset') }}. Promote the role in
+      defaults/main.yml, or override adminer_status per host.
+  tags: always
+
 - name: Create a adminer directory if it does not exist
   ansible.builtin.file:
     path: "{{ adminer_dir }}"

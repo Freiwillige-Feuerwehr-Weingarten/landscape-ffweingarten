@@ -1,6 +1,82 @@
 ---
-- name: Include tasks for docker installation
-  ansible.builtin.include_tasks: install_docker.yml
+- name: Assert role maturity permits this environment
+  ansible.builtin.assert:
+    that:
+      - docker_status in ['stable', 'testing', 'unstable']
+      - >-
+        docker_status == 'stable'
+        or (docker_status == 'testing' and env | default('') == 'test')
+    fail_msg: >-
+      Role 'docker' is marked status={{ docker_status }} and cannot run
+      against env={{ env | default('unset') }}. Promote the role in
+      defaults/main.yml, or override docker_status per host.
+  tags: always
+
+- name: Assert the host is Debian-family
+  ansible.builtin.assert:
+    that: ansible_facts['os_family'] == 'Debian'
+    fail_msg: >-
+      docker role only supports Debian-family hosts
+      (got os_family={{ ansible_facts['os_family'] }}).
+  tags: always
+
+- name: Install apt prerequisites for the Docker repository
+  ansible.builtin.apt:
+    pkg: "{{ docker_apt_prereqs }}"
+    update_cache: true
+    cache_valid_time: 3600
+  tags: [setup]
+
+- name: Register Docker apt repository
+  ansible.builtin.deb822_repository:
+    name: docker
+    types: deb
+    uris: "{{ docker_apt_uri }}"
+    suites: "{{ docker_apt_suite }}"
+    components: "{{ docker_apt_components }}"
+    architectures: "{{ docker_apt_arch }}"
+    signed_by: "{{ docker_apt_signing_key }}"
+    state: present
+    enabled: true
+  tags: [setup]
+
+- name: Install Docker and related packages
+  ansible.builtin.apt:
+    state: present
+    update_cache: true
+    pkg: "{{ docker_packages }}"
+  tags: [setup]
+
+- name: Ensure Docker group exists
+  ansible.builtin.group:
+    name: "{{ docker_group }}"
+    state: present
+  tags: [setup]
+
+- name: Add user to Docker group
+  ansible.builtin.user:
+    name: "{{ docker_user }}"
+    groups: "{{ docker_group }}"
+    append: true
+  tags: [setup]
+
+- name: Render /etc/docker/daemon.json
+  ansible.builtin.copy:
+    content: "{{ docker_daemon_config | to_nice_json }}\n"
+    dest: /etc/docker/daemon.json
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Restart docker
+  tags: [config]
+
+- name: Enable and start Docker services
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    enabled: true
+    state: started
+  loop: "{{ docker_services }}"
+  tags: [service]
 
 - name: Copy backup script
   ansible.builtin.template:
@@ -8,3 +84,10 @@
     dest: /etc/cron.daily/docker_backup
     mode: '0750'
   when: docker_install_backup_script
+  tags: [config]
+
+- name: Show resolved architecture and codename
+  ansible.builtin.debug:
+    msg: "Architecture: {{ ansible_architecture }}, Codename: {{ ansible_lsb.codename }}"
+  when: docker_debug
+  tags: [debug]

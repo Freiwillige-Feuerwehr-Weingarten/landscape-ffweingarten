@@ -2,6 +2,8 @@
 docker_debug: true
 docker_backup_suffix: test
 docker_install_backup_script: true
+docker_backup_pre_stop_containers:
+  - taiga-taiga-db-1
 
 portainer_install: false
 portainer_update: true

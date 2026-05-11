@@ -1,38 +1,36 @@
 #!/bin/bash
+# Managed by Ansible — edits here will be overwritten.
+set -euo pipefail
 
-source_dir="/var/lib/docker/volumes"
-backup_dir="/mnt/nfs"
-keep_backups=10
-current_datetime=$(date +"%Y-%m-%d_%H-%M-%S")
+source_dir="{{ docker_backup_source_dir }}"
+backup_dir="{{ docker_backup_target_dir }}"
+retention_days={{ docker_backup_retention_days }}
+current_datetime="$(date +%Y-%m-%d_%H-%M-%S)"
 backup_filename="${current_datetime}-{{ docker_backup_suffix }}-backup.tar"
-# db_backup_filename="${current_datetime}-{{ docker_backup_suffix }}-backup.tar"
-DOCKER=$(command -v docker)
-GZIP=$(command -v gzip)
-TAR=$(command -v tar)
-FIND=$(command -v find)
-
-
-# remote_target="${remote_user}@${remote_server}"
 backup_fullpath="${backup_dir}/${backup_filename}"
-# db_backup_fullpath=${backup_dir}/${db_backup_filename}"
- 
-# Docker-Container herunterfahren
-# docker stop $(docker ps -q)
-${DOCKER} stop taiga-taiga-db-1
-# Erstelle das Backup-Archiv
-${TAR} -cpf "${backup_fullpath}" "${source_dir}"
-# Docker-Container wieder starten
-# docker start $(docker ps -a -q)
-${DOCKER} start taiga-taiga-db-1
-# Komprimiere das Backup-Archiv
-${GZIP} "${backup_fullpath}"
-backup_fullpath="${backup_fullpath}.gz"
 
-# docker exec -it taiga-taiga-db-1 /usr/bin/pg_dumpall -Utaiga  -f ./tmp/backup.sql
-# tar -cpf "${backup_fullpath}" "${source_dir}"
-# gzip "${backup_fullpath}"
-# backup_fullpath="${backup_fullpath}.gz"
+DOCKER="$(command -v docker)"
+GZIP="$(command -v gzip)"
+TAR="$(command -v tar)"
+FIND="$(command -v find)"
 
-# Lösche ältere lokale Backups mit `find`
-${FIND} "$backup_dir" -type f -name "*-backup.tar.gz" -mtime +$keep_backups -exec rm {} \;
- 
+{% if docker_backup_pre_stop_containers %}
+# Stop containers that mustn't be live during the tar (top-to-bottom).
+{% for container in docker_backup_pre_stop_containers %}
+"${DOCKER}" stop {{ container }}
+{% endfor %}
+{% endif %}
+
+"${TAR}" -cpf "${backup_fullpath}" "${source_dir}"
+
+{% if docker_backup_pre_stop_containers %}
+# Restart in reverse order so dependencies come up before dependents.
+{% for container in docker_backup_pre_stop_containers | reverse %}
+"${DOCKER}" start {{ container }}
+{% endfor %}
+{% endif %}
+
+"${GZIP}" "${backup_fullpath}"
+
+# Prune local backups older than retention_days.
+"${FIND}" "${backup_dir}" -type f -name '*-backup.tar.gz' -mtime "+${retention_days}" -delete

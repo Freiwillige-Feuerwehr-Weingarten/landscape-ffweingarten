@@ -1,4 +1,17 @@
 ---
+- name: Assert role maturity permits this environment
+  ansible.builtin.assert:
+    that:
+      - jellyfin_status in ['stable', 'testing', 'unstable']
+      - >-
+        jellyfin_status == 'stable'
+        or (jellyfin_status == 'testing' and env | default('') == 'test')
+    fail_msg: >-
+      Role 'jellyfin' is marked status={{ jellyfin_status }} and cannot run
+      against env={{ env | default('unset') }}. Promote the role in
+      defaults/main.yml, or override jellyfin_status per host.
+  tags: always
+
 - name: Create needed directories
   ansible.builtin.file:
     path: "{{ item }}"

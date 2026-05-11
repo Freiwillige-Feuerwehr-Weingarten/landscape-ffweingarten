@@ -1,10 +1,6 @@
-hosts:
-  web.test.ff-weingarten.de:
-  jump.test.ff-weingarten.de:
-  psql.test.ff-weingarten.de:
-  mysql.test.ff-weingarten.de:
-  netbox.test.ff-weingarten.de:
-  jellyfin.test.ff-weingarten.de:
+all:
+  vars:
+    env: test
   children:
     webserver:
       hosts:

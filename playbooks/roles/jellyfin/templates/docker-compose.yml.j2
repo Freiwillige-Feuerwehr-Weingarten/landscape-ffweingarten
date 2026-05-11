@@ -44,10 +44,3 @@ services:
       - /tmp
       - /run
 {% endif %}
-{% if jellyfin_log_max_size %}
-    logging:
-      driver: json-file
-      options:
-        max-size: "{{ jellyfin_log_max_size }}"
-        max-file: "{{ jellyfin_log_max_file }}"
-{% endif %}

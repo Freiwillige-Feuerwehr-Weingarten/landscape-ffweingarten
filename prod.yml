@@ -1,12 +1,6 @@
-hosts:
-  docker.prod.ff-weingarten.de:
-  jump.prod.ff-weingarten.de:
-  psql.prod.ff-weingarten.de:
-  rproxy.prod.feuerwehr.weingarten.local:
-  mysql.prod.ff-weingarten.de:
-  webserver.prod.ff-weingarten.de:
-  netbox.prod.ff-weingarten.de:
-  jellyfin.prod.ff-weingarten.de:
+all:
+  vars:
+    env: prod
   children:
     docker:
       hosts:
