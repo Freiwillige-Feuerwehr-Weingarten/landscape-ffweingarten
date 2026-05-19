@@ -15,6 +15,6 @@
       vars:
         setup_qemu: true
     - role: geerlingguy.ntp
-    - role: nfs
+    - { role: nfs, tags: [nfs] }
     - role: firebird
     - role: tribe29.checkmk.agent

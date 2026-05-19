@@ -9,5 +9,5 @@
       vars:
         setup_qemu: false
     - role: geerlingguy.ntp
-    - role: nfs
+    - { role: nfs, tags: [nfs] }
     - role: postgres_setup

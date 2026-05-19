@@ -7,5 +7,5 @@
   roles:
     - role: common
     - role: geerlingguy.ntp
-    - role: nfs
+    - { role: nfs, tags: [nfs] }
     - role: fauust.mariadb

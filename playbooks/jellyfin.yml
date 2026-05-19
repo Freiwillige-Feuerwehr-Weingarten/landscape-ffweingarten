@@ -7,7 +7,7 @@
   roles:
     - common
     - docker
-    - nfs
+    - { role: nfs, tags: [nfs] }
 
 - name: Install Jellyfin
   hosts: jellyfin

@@ -7,7 +7,7 @@
   gather_facts: true
   roles:
     - common
-    - nfs
+    - { role: nfs, tags: [nfs] }
     - { role: docker, tags: [docker] }
     - { role: portainer, tags: [portainer] }
     - authentik

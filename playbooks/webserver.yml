@@ -13,7 +13,7 @@
         sftp_enabled: true
     - role: devsec.hardening.os_hardening
     - role: geerlingguy.ntp
-    - role: nfs
+    - { role: nfs, tags: [nfs] }
     - role: geerlingguy.php
     - role: geerlingguy.apache
     - role: fauust.mariadb
