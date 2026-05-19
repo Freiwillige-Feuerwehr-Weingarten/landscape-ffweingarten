@@ -1,3 +1,4 @@
+#jinja2: lstrip_blocks: True
 <?xml version='1.0' encoding='UTF-8'?>
 <!DOCTYPE properties SYSTEM 'http://java.sun.com/dtd/properties.dtd'>
 <properties>
@@ -8,15 +9,18 @@
 <entry key='database.password'>{{ traccar_psql_db_password }}</entry>
 <entry key='logger.level'>{{ traccar_loglevel }}</entry>
 
-<entry key='openid.clientId'>{{ traccar_oidc_clientid }}</entry>
-<entry key='openid.clientSecret'>{{ traccar_oidc_secret }}</entry>
+{% if traccar_oidc_clientid is defined and traccar_oidc_clientid %}
+<entry key='openid.clientId'>{{ traccar_oidc_clientid }}</entry>
+<entry key='openid.clientSecret'>{{ traccar_oidc_secret }}</entry>
 <entry key='openid.issuerUrl'>https://authentik.ff-weingarten.de/application/o/traccar/</entry>
 <entry key='openid.authUrl'>https://authentik.ff-weingarten.de/application/o/authorize/</entry>
 <entry key='openid.tokenUrl'>https://authentik.ff-weingarten.de/application/o/token/</entry>
 <entry key='openid.userInfoUrl'>https://authentik.ff-weingarten.de/application/o/userinfo/</entry>
 <entry key='openid.allowGroup'>Aktive</entry>
 <entry key='openid.adminGroup'>Traccar_Admin</entry>
+{% endif %}
 
+{% if traccar_email_user is defined and traccar_email_user %}
 <entry key='mail.smtp.host'>athena.ff-weingarten.de</entry>
 <entry key='mail.smtp.port'>587</entry>
 <entry key='mail.smtp.starttls.enable'>True</entry>
@@ -25,6 +29,7 @@
 <entry key='mail.smtp.password'>{{ traccar_email_password }}</entry>
 <entry key='mail.smtp.from'>traccar@ff-weingarten.de</entry>
 <entry key='mail.smtp.fromName'>Traccar Feuerwehr Weingarten</entry>
+{% endif %}
 
 <entry key='web.url'>{{ traccar_url }}</entry>
 </properties>

@@ -1,43 +1,58 @@
 ---
-- name: Create a traccar directory if it does not exist
+- name: Assert role maturity permits this environment
+  ansible.builtin.assert:
+    that:
+      - traccar_status in ['stable', 'testing', 'unstable']
+      - >-
+        traccar_status == 'stable'
+        or (traccar_status == 'testing' and env | default('') == 'test')
+    fail_msg: >-
+      Role 'traccar' is marked status={{ traccar_status }} and cannot run
+      against env={{ env | default('unset') }}. Promote the role in
+      defaults/main.yml, or override traccar_status per host.
+  tags: always
+
+- name: Create traccar directory
   ansible.builtin.file:
-    path: /srv/traccar_prod
+    path: "{{ traccar_dir }}"
     state: directory
     mode: '0755'
+  tags: [setup]
 
 - name: Copy traccar docker-compose file
   ansible.builtin.template:
     src: templates/traccar.docker-compose.j2
-    dest: /srv/traccar_prod/docker-compose.yml
-    mode: '0644'
-  register: compose_result
-  changed_when: "compose_result.changed == true"
+    dest: "{{ traccar_dir }}/docker-compose.yml"
+    mode: "{{ traccar_compose_mode }}"
   notify: Restart Traccar
+  tags: [config]
 
-- name: Copy traccar traccar.xml file
+- name: Copy traccar.xml configuration
   ansible.builtin.template:
     src: templates/traccar.xml.j2
-    dest: /srv/traccar_prod/traccar.xml
-    mode: '0644'
-  register: xml_result
-  changed_when: "xml_result.changed == true"
+    dest: "{{ traccar_dir }}/traccar.xml"
+    mode: "{{ traccar_xml_mode }}"
   notify: Restart Traccar
+  tags: [config]
 
 - name: Create and start traccar services
   community.docker.docker_compose_v2:
-    project_src: /srv/traccar_prod
+    project_src: "{{ traccar_dir }}"
     build: policy
-    pull: missing
+    pull: policy
     recreate: auto
   register: traccarprodoutput
+  tags: [service]
 
 - name: Copy log deletion script
   ansible.builtin.template:
     src: templates/traccar-clean.j2
     dest: /etc/cron.daily/traccar_clean
-    mode: '0750'
+    mode: "{{ traccar_clean_mode }}"
+  tags: [config]
 
 - name: Show results
   ansible.builtin.debug:
     var: traccarprodoutput
   when: docker_debug
+  tags: [debug]

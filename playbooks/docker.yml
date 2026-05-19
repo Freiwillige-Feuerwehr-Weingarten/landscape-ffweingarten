@@ -14,7 +14,7 @@
     - { role: netboot, tags: [netboot] }
     - { role: heimdall, tags: [heimdall] }
     - { role: rustdesk, tags: [rustdesk] }
-    - traccar
+    - { role: traccar, tags: [traccar] }
     - bookstack
     - { role: nextcloud, tags: [nextcloud] }
     - { role: adminer, tags: [adminer] }

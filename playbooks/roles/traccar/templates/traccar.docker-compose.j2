@@ -1,18 +1,39 @@
+#jinja2: lstrip_blocks: True
+---
 volumes:
-  traccar_prod_logs:
-  traccar_prod_media:
+  {{ traccar_volume_logs }}:
+  {{ traccar_volume_media }}:
 
 services:
   traccar:
-    container_name: traccarprod
-    image: traccar/traccar:6.10.0-debian
-    hostname: traccarprod
-    restart: unless-stopped
+    container_name: {{ traccar_container_name }}
+    image: {{ traccar_image }}:{{ traccar_version }}
+    hostname: {{ traccar_hostname }}
+    restart: {{ traccar_restart_policy }}
     environment:
-        - "TZ=Europ/Berlin"
+      - TZ={{ traccar_tz }}
     ports:
-      - 8084:8082
+      - "{{ traccar_port }}:{{ traccar_container_port }}"
     volumes:
-      - /srv/traccar_prod/traccar.xml:/opt/traccar/conf/traccar.xml:rw
-      - traccar_prod_media:/opt/traccar/media
-      - traccar_prod_logs:/opt/traccar/logs
+      - {{ traccar_dir }}/traccar.xml:/opt/traccar/conf/traccar.xml:rw
+      - {{ traccar_volume_media }}:/opt/traccar/media
+      - {{ traccar_volume_logs }}:/opt/traccar/logs
+    {% if traccar_mem_limit %}
+    mem_limit: {{ traccar_mem_limit }}
+    {% endif %}
+    {% if traccar_cpus %}
+    cpus: {{ traccar_cpus }}
+    {% endif %}
+    {% if traccar_no_new_privileges %}
+    security_opt:
+      - no-new-privileges:true
+    {% endif %}
+    {% if traccar_drop_all_caps %}
+    cap_drop:
+      - ALL
+    {% endif %}
+    {% if traccar_read_only %}
+    read_only: true
+    tmpfs:
+      - /tmp
+    {% endif %}

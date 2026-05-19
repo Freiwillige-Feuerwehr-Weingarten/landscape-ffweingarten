@@ -1,0 +1,45 @@
+---
+# Production-readiness gate. Allowed values: stable | testing | unstable.
+# The role's first task asserts this matches the target inventory's env:
+# stable runs anywhere; testing only on env=test; unstable on neither.
+traccar_status: stable
+
+# Filesystem layout. The literal `_prod` suffix is preserved (in dir name,
+# volume names, container name) to avoid forcing a one-time docker volume
+# migration. Rename in a follow-up if/when desired.
+traccar_dir: /srv/traccar_prod
+traccar_compose_mode: '0644'
+traccar_xml_mode: '0644'
+traccar_clean_mode: '0750'
+
+# Image / version
+traccar_image: traccar/traccar
+traccar_version: 6.10.0-debian
+
+# Container identity (kept literal — see comment on traccar_dir)
+traccar_container_name: traccarprod
+traccar_hostname: traccarprod
+traccar_volume_logs: traccar_prod_logs
+traccar_volume_media: traccar_prod_media
+
+# Networking
+traccar_port: 8084
+traccar_container_port: 8082
+
+# Container runtime
+traccar_restart_policy: unless-stopped
+traccar_tz: Europe/Berlin
+
+# Resource limits (leave empty to disable — JVM uses its own heap defaults)
+traccar_mem_limit: ""
+traccar_cpus: ""
+
+# Security hardening — traccar runs a JVM that wants to write to /tmp and
+# the log volume, so read_only and cap_drop are off by default. Flip per
+# host once validated.
+traccar_no_new_privileges: true
+traccar_drop_all_caps: false
+traccar_read_only: false
+
+# Log cleanup cron (mtime threshold in days for *.log.* rotation backups)
+traccar_log_keep_days: 5
