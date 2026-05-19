@@ -12,7 +12,7 @@
     - { role: portainer, tags: [portainer] }
     - authentik
     - { role: netboot, tags: [netboot] }
-    - heimdall
+    - { role: heimdall, tags: [heimdall] }
     - { role: rustdesk, tags: [rustdesk] }
     - traccar
     - bookstack

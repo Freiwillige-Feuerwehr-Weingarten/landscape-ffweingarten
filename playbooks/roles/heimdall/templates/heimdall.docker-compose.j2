@@ -1,16 +1,37 @@
+#jinja2: lstrip_blocks: True
 ---
 services:
   heimdall:
-    image: lscr.io/linuxserver/heimdall:2.7.6
     container_name: heimdall
+    image: {{ heimdall_image }}:{{ heimdall_version }}
+    restart: {{ heimdall_restart_policy }}
     environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Europe/Berlin
+      - PUID={{ heimdall_puid }}
+      - PGID={{ heimdall_pgid }}
+      - TZ={{ heimdall_tz }}
     volumes:
       - heimdall_config:/config
     ports:
-      - 8095:80
-    restart: unless-stopped
+      - "{{ heimdall_port }}:80"
+    {% if heimdall_mem_limit %}
+    mem_limit: {{ heimdall_mem_limit }}
+    {% endif %}
+    {% if heimdall_cpus %}
+    cpus: {{ heimdall_cpus }}
+    {% endif %}
+    {% if heimdall_no_new_privileges %}
+    security_opt:
+      - no-new-privileges:true
+    {% endif %}
+    {% if heimdall_drop_all_caps %}
+    cap_drop:
+      - ALL
+    {% endif %}
+    {% if heimdall_read_only %}
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /run
+    {% endif %}
 volumes:
   heimdall_config:

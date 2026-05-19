@@ -1,0 +1,35 @@
+---
+# Production-readiness gate. Allowed values: stable | testing | unstable.
+# The role's first task asserts this matches the target inventory's env:
+# stable runs anywhere; testing only on env=test; unstable on neither.
+heimdall_status: stable
+
+# Filesystem layout
+heimdall_dir: /srv/heimdall
+heimdall_compose_mode: '0644'
+
+# Image / version (linuxserver.io)
+heimdall_image: lscr.io/linuxserver/heimdall
+heimdall_version: 2.7.6
+
+# Host-side port (container listens on 80 internally)
+heimdall_port: 8095
+
+# linuxserver.io image user/group + timezone
+heimdall_puid: 1000
+heimdall_pgid: 1000
+heimdall_tz: Europe/Berlin
+
+# Container runtime
+heimdall_restart_policy: unless-stopped
+
+# Resource limits (leave empty to disable)
+heimdall_mem_limit: "512m"
+heimdall_cpus: "1.0"
+
+# Security hardening — flip on per host once you've verified it doesn't break
+# the s6-overlay / nginx startup. linuxserver/heimdall binds port 80 inside
+# the container (needs CAP_NET_BIND_SERVICE) and writes to /run, /var, etc.
+heimdall_no_new_privileges: true
+heimdall_drop_all_caps: false
+heimdall_read_only: false

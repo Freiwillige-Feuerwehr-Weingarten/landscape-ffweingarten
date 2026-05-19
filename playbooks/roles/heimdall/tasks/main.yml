@@ -1,25 +1,43 @@
 ---
+- name: Assert role maturity permits this environment
+  ansible.builtin.assert:
+    that:
+      - heimdall_status in ['stable', 'testing', 'unstable']
+      - >-
+        heimdall_status == 'stable'
+        or (heimdall_status == 'testing' and env | default('') == 'test')
+    fail_msg: >-
+      Role 'heimdall' is marked status={{ heimdall_status }} and cannot run
+      against env={{ env | default('unset') }}. Promote the role in
+      defaults/main.yml, or override heimdall_status per host.
+  tags: always
+
 - name: Create a heimdall directory if it does not exist
   ansible.builtin.file:
-    path: /srv/heimdall
+    path: "{{ heimdall_dir }}"
     state: directory
     mode: '0755'
+  tags: [setup]
 
 - name: Copy docker compose
   ansible.builtin.template:
     src: templates/heimdall.docker-compose.j2
-    dest: /srv/heimdall/docker-compose.yml
-    mode: '0750'
+    dest: "{{ heimdall_dir }}/docker-compose.yml"
+    mode: "{{ heimdall_compose_mode }}"
+  notify: Restart Heimdall
+  tags: [config]
 
 - name: Create and start services
   community.docker.docker_compose_v2:
-    project_src: /srv/heimdall
-    build: always
-    pull: always
+    project_src: "{{ heimdall_dir }}"
+    build: policy
+    pull: policy
     recreate: auto
   register: heimdalloutput
+  tags: [service]
 
 - name: Show results
   ansible.builtin.debug:
     var: heimdalloutput
   when: docker_debug
+  tags: [debug]

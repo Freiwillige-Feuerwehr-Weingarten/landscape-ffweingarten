@@ -1,0 +1,5 @@
+---
+- name: Restart Heimdall
+  community.docker.docker_compose_v2:
+    project_src: "{{ heimdall_dir }}"
+    state: restarted
