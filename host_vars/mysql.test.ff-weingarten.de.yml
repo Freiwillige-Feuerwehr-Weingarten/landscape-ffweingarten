@@ -2,10 +2,8 @@
 ntp_timezone: Europe/Berlin
 
 # NFS
-nfs_permissions: "644"
 nfs_mountpoint: "/mnt/backup"
 nfs_src: stark.feuerwehr.weingarten.local:/Backup_MySQL_Test
-nfs_options: vers=4,rw,rsize=8192,wsize=8192,timeo=14,intr
 
 # MariaDB
 deny_remote_connections: true

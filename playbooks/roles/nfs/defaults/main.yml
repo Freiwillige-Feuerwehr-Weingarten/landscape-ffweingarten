@@ -1,0 +1,16 @@
+---
+# Production-readiness gate. Allowed values: stable | testing | unstable.
+# The role's first task asserts this matches the target inventory's env:
+# stable runs anywhere; testing only on env=test; unstable on neither.
+nfs_status: stable
+
+# Mountpoint directory mode. 644 is intentional: without the execute bit, the
+# directory is non-traversable when the share is NOT mounted, so any consumer
+# that tries to write through the mountpoint fails fast instead of silently
+# writing to the local disk. The NFS mount overlays this with the remote's
+# perms once it's up.
+nfs_permissions: "644"
+
+# Default mount options. Matches every standard host today; the two firebird
+# backup mounts (draeger, bockermann) override per host_vars to append `,user`.
+nfs_options: "vers=4,rw,rsize=8192,wsize=8192,timeo=14,intr"

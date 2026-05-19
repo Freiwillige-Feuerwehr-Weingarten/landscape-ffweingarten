@@ -1,17 +1,32 @@
 ---
-- name: Install nfs debian package
+- name: Assert role maturity permits this environment
+  ansible.builtin.assert:
+    that:
+      - nfs_status in ['stable', 'testing', 'unstable']
+      - >-
+        nfs_status == 'stable'
+        or (nfs_status == 'testing' and env | default('') == 'test')
+    fail_msg: >-
+      Role 'nfs' is marked status={{ nfs_status }} and cannot run
+      against env={{ env | default('unset') }}. Promote the role in
+      defaults/main.yml, or override nfs_status per host.
+  tags: always
+
+- name: Install nfs-common
   ansible.builtin.apt:
     pkg: nfs-common
     state: present
   when: ansible_os_family == 'Debian'
+  tags: [setup]
 
-- name: Check if the mountpoint exists
+- name: Create NFS mountpoint
   ansible.builtin.file:
     path: "{{ nfs_mountpoint }}"
     state: directory
     mode: "{{ nfs_permissions }}"
     owner: root
     group: root
+  tags: [setup]
 
 - name: Mount nfs share
   ansible.posix.mount:
@@ -20,3 +35,5 @@
     fstype: nfs
     opts: "{{ nfs_options }}"
     state: mounted
+  notify: Remount nfs share
+  tags: [service]

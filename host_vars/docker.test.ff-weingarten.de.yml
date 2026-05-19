@@ -6,10 +6,8 @@ docker_backup_pre_stop_containers:
   - taiga-taiga-db-1
 
 # NFS
-nfs_permissions: "644"
 nfs_mountpoint: "/mnt/nfs"
 nfs_src: stark.feuerwehr.weingarten.local:/Docker
-nfs_options: vers=4,rw,rsize=8192,wsize=8192,timeo=14,intr
 
 # Portainer
 portainer_admin_password: !vault |

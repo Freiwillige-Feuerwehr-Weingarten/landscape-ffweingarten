@@ -14,10 +14,8 @@ webserver_setup_rainloop_backup: false
 webserver_setup_rainloop_backupscript: false
 
 # NFS
-nfs_permissions: "644"
 nfs_mountpoint: "/mnt/backup"
 nfs_src: stark.feuerwehr.weingarten.local:/Web_Backup
-nfs_options: vers=4,rw,rsize=8192,wsize=8192,timeo=14,intr
 
 # Rainloop config
 rainloop_user: rainloop

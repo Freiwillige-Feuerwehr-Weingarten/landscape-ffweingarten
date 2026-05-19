@@ -1,0 +1,5 @@
+---
+- name: Remount nfs share
+  ansible.posix.mount:
+    path: "{{ nfs_mountpoint }}"
+    state: remounted

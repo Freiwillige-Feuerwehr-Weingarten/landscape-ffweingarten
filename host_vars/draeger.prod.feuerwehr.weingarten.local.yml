@@ -24,11 +24,10 @@ firebird_database_user_password: !vault |
           6562643565376464630a336336613433633231316561663961613264386331663834336634303034
           3138
 
-# NFS
-nfs_permissions: "644"
+# NFS (firebird hosts append `,user` to allow non-root mount via fstab)
 nfs_src: stark.feuerwehr.weingarten.local:/Firebird_Backup
-nfs_options: vers=4,rw,rsize=8192,wsize=8192,timeo=14,intr,user
 nfs_mountpoint: "/mnt/firebird_backup"
+nfs_options: "vers=4,rw,rsize=8192,wsize=8192,timeo=14,intr,user"
 
 # NTP
 ntp_timezone: Europe/Berlin
