@@ -1,0 +1,22 @@
+---
+# Production-readiness gate. Allowed values: stable | testing | unstable.
+# The role's first task asserts this matches the target inventory's env:
+# stable runs anywhere; testing only on env=test; unstable on neither.
+webserver_status: stable
+
+# Per-service toggles. Each include_tasks runs only when its flag is true,
+# so the default state is "install Apache/PHP support packages but nothing
+# else". Override per host in host_vars/<fqdn>.yml.
+webserver_setup_hydrant: false
+webserver_setup_rainloop: false
+webserver_setup_ebon: false
+webserver_setup_tdot: false
+webserver_setup_rainloop_backup: false
+webserver_setup_rainloop_backupscript: false
+
+# Apt packages installed for every webserver host in addition to whatever
+# geerlingguy.apache / geerlingguy.php already pull in. rsync is needed by
+# the hydrant restore step (ansible.posix.synchronize).
+webserver_packages:
+  - libapache2-mod-php
+  - rsync

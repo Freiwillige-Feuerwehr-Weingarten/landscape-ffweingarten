@@ -1,0 +1,9 @@
+---
+- name: Create web folder for elw
+  ansible.builtin.file:
+    path: "{{ elw_install_path }}"
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: '0755'
+  tags: [setup]
