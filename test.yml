@@ -4,7 +4,7 @@ all:
   children:
     webserver:
       hosts:
-        web.test.ff-weingarten.de:
+        webserver.test.ff-weingarten.de:
     jump:
       hosts:
         jump.test.ff-weingarten.de:
