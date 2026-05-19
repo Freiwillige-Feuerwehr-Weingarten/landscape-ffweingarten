@@ -6,12 +6,14 @@
     owner: www-data
     group: www-data
     mode: '0755'
+  tags: [setup]
 
 - name: Restore static html files for hydrant
   ansible.posix.synchronize:
     src: "{{ hydrant_backup_path }}"
     dest: "{{ hydrant_install_path }}"
   delegate_to: "{{ inventory_hostname }}"
+  tags: [config]
 
 - name: Change ownership for hydrant
   ansible.builtin.file:
@@ -20,4 +22,5 @@
     group: www-data
     recurse: true
     mode: '0640'
-  notify: restart apache
+  notify: Restart apache
+  tags: [config]

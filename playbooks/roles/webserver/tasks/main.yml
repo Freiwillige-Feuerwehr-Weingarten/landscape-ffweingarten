@@ -1,23 +1,52 @@
 ---
-- name: Install libapache-mod-php and other dependencies
+- name: Assert role maturity permits this environment
+  ansible.builtin.assert:
+    that:
+      - webserver_status in ['stable', 'testing', 'unstable']
+      - >-
+        webserver_status == 'stable'
+        or (webserver_status == 'testing' and env | default('') == 'test')
+    fail_msg: >-
+      Role 'webserver' is marked status={{ webserver_status }} and cannot run
+      against env={{ env | default('unset') }}. Promote the role in
+      defaults/main.yml, or override webserver_status per host.
+  tags: always
+
+- name: Assert the host is Debian-family
+  ansible.builtin.assert:
+    that: ansible_facts['os_family'] == 'Debian'
+    fail_msg: >-
+      webserver role only supports Debian-family hosts
+      (got os_family={{ ansible_facts['os_family'] }}).
+  tags: always
+
+- name: Install Apache/PHP support packages
   ansible.builtin.apt:
-    pkg: libapache2-mod-php, rsync
+    pkg: "{{ webserver_packages }}"
     state: present
+  tags: [setup]
 
 - name: Include tasks for hydrant setup
   ansible.builtin.include_tasks: hydrant.yml
   when: webserver_setup_hydrant
+  tags: [setup, config, hydrant]
 
 - name: Include tasks for rainloop setup
   ansible.builtin.include_tasks: rainloop.yml
   when: webserver_setup_rainloop
+  tags: [setup, config, debug, rainloop]
 
-- name: Include tasks for ordersrpinter ebon
+- name: Include tasks for ordersprinter ebon
   ansible.builtin.include_tasks: ebon.yml
   when: webserver_setup_ebon
+  tags: [setup, ebon]
 
 - name: Include tasks for tdot
   ansible.builtin.include_tasks: tdot.yml
   when: webserver_setup_tdot
+  tags: [setup, tdot]
 
-## post_max_filesize to 100M
+- name: Include tasks for elw
+  ansible.builtin.include_tasks: elw.yml
+  when: webserver_setup_elw
+  tags: [setup, elw]

@@ -3,6 +3,7 @@
   ansible.builtin.stat:
     path: "{{ rainloop_install_path + 'index.php' }}"
   register: rainloop_installed
+  tags: [setup]
 
 - name: Create web folder for rainloop
   ansible.builtin.file:
@@ -12,13 +13,15 @@
     group: www-data
     mode: '0755'
   when: not rainloop_installed.stat.exists
+  tags: [setup]
 
 - name: Download and install rainloop
   ansible.builtin.command:
     chdir: "{{ rainloop_install_path }}"
     cmd: bash -c "curl -sL https://repository.rainloop.net/installer.php | php"
-  notify: restart apache
+  notify: Restart apache
   when: not rainloop_installed.stat.exists
+  tags: [setup]
 
 - name: Fix file permissions in rainloop installation
   ansible.builtin.file:
@@ -27,6 +30,7 @@
     group: www-data
     mode: '0644'
     recurse: true
+  tags: [setup]
 
 - name: Fix directory permissions in rainloop installation
   ansible.builtin.file:
@@ -36,6 +40,7 @@
     mode: '0755'
     state: directory
     recurse: true
+  tags: [setup]
 
 - name: Get files in DB Backup folder
   ansible.builtin.find:
@@ -44,17 +49,20 @@
     patterns: "*.sql"
   register: found_files
   when: webserver_setup_rainloop_backup
+  tags: [config]
 
 - name: Get latest file
   ansible.builtin.set_fact:
     latest_file: "{{ found_files.files | sort(attribute='mtime', reverse=true) | first }}"
   register: db_backup
   when: webserver_setup_rainloop_backup
+  tags: [config]
 
 - name: Debug output
   ansible.builtin.debug:
     msg: "Using DB backup: {{ db_backup.ansible_facts.latest_file.path }}"
   when: webserver_setup_rainloop_backup
+  tags: [debug]
 
 - name: Restore rainloop database
   community.mysql.mysql_db:
@@ -66,6 +74,7 @@
     state: import
     target: "{{ db_backup.ansible_facts.latest_file.path }}"
   when: webserver_setup_rainloop_backup
+  tags: [config]
 
 - name: Create directory for configuration
   ansible.builtin.file:
@@ -74,6 +83,7 @@
     mode: '0755'
     owner: www-data
     group: www-data
+  tags: [config]
 
 - name: Install Rainloop configuration
   ansible.builtin.template:
@@ -82,6 +92,7 @@
     owner: www-data
     group: www-data
     mode: '0640'
+  tags: [config]
 
 - name: Create directory for domains
   ansible.builtin.file:
@@ -90,6 +101,7 @@
     mode: '0755'
     owner: www-data
     group: www-data
+  tags: [config]
 
 - name: Restore rainloop domains
   ansible.builtin.template:
@@ -98,6 +110,7 @@
     owner: www-data
     group: www-data
     mode: '0640'
+  tags: [config]
 
 - name: Copy backup script
   ansible.builtin.template:
@@ -105,3 +118,4 @@
     dest: /etc/cron.daily/rainloop_db_backup
     mode: '0750'
   when: webserver_setup_rainloop_backupscript
+  tags: [config]
