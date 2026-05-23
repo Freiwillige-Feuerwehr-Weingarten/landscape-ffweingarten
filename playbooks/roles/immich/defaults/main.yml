@@ -1,0 +1,44 @@
+---
+# Production-readiness gate. Allowed values: stable | testing | unstable.
+# Starts as `testing` — the prod cutover is a manual one-shot migration from
+# a Portainer-managed stack. Promote to `stable` (via this file, not per-host)
+# once the cutover is verified.
+immich_status: stable
+
+# Filesystem layout
+immich_dir: /srv/immich
+immich_compose_mode: '0644'
+immich_env_mode: '0640'
+
+# Image pins. The postgres image bundles both VectorChord (`vchord`) and
+# pgvector; the legacy pgvecto.rs `vectors` extension migration is done.
+# Redis was swapped for Valkey upstream in v2.7+ (Valkey is the OSS fork
+# of Redis; API-compatible drop-in). Pin SHAs to match upstream's compose.
+immich_version: v2.7.5
+immich_server_image: ghcr.io/immich-app/immich-server
+immich_ml_image: ghcr.io/immich-app/immich-machine-learning
+immich_redis_image: docker.io/valkey/valkey:9@sha256:3b55fbaa0cd93cf0d9d961f405e4dfcc70efe325e2d84da207a0a8e6d8fde4f9
+immich_postgres_image: ghcr.io/immich-app/postgres:14-vectorchord0.4.3-pgvectors0.2.0
+
+# Networking
+immich_port: 2283
+
+# Container runtime
+immich_tz: Europe/Berlin
+immich_restart_policy: always
+
+# Media storage. Single bind-mount of this path into /data (v2.7+ layout).
+# Immich manages its own subdirs (library/, thumbs/, encoded-video/, profile/,
+# backups/, upload/) inside it. NFS-mounted on the docker host at /mnt/photos;
+# the mount itself is managed outside ansible today.
+immich_upload_location: /mnt/photos/Bilder/
+
+# Postgres data dir. `./postgres` resolves relative to immich_dir, i.e.
+# {{ immich_dir }}/postgres. The cutover runbook relocates the existing
+# Portainer-managed data dir here before first ansible run.
+immich_db_data_location: ./postgres
+immich_db_database_name: immich
+
+# DB credentials. NOT defaulted — must be defined per-host (vault the password).
+# immich_db_username: <set in host_vars>
+# immich_db_password: !vault | ... <set in host_vars>

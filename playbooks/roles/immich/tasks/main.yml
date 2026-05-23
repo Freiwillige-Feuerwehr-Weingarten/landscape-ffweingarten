@@ -1,31 +1,61 @@
 ---
-- name: Create a immich directory if it does not exist
+- name: Assert role maturity permits this environment
+  ansible.builtin.assert:
+    that:
+      - immich_status in ['stable', 'testing', 'unstable']
+      - >-
+        immich_status == 'stable'
+        or (immich_status == 'testing' and env | default('') == 'test')
+    fail_msg: >-
+      Role 'immich' is marked status={{ immich_status }} and cannot run
+      against env={{ env | default('unset') }}. Promote the role in
+      defaults/main.yml, or override immich_status per host.
+  tags: always
+
+- name: Assert DB credentials are defined
+  ansible.builtin.assert:
+    that:
+      - immich_db_username is defined and immich_db_username | length > 0
+      - immich_db_password is defined and immich_db_password | length > 0
+    fail_msg: >-
+      immich_db_username and immich_db_password must be defined in host_vars
+      (with the password as a !vault block) before running this role.
+  tags: [setup]
+
+- name: Create immich directory
   ansible.builtin.file:
-    path: /srv/immich
+    path: "{{ immich_dir }}"
     state: directory
     mode: '0755'
+  tags: [setup]
 
 - name: Copy docker compose
   ansible.builtin.template:
     src: templates/immich.docker-compose.j2
-    dest: /srv/immich/docker-compose.yml
-    mode: '0750'
+    dest: "{{ immich_dir }}/docker-compose.yml"
+    mode: "{{ immich_compose_mode }}"
+  notify: Restart Immich
+  tags: [config]
 
-- name: Copy .env file
+- name: Copy .env
   ansible.builtin.template:
     src: templates/env.j2
-    dest: /srv/immich/.env
-    mode: '0750'
+    dest: "{{ immich_dir }}/.env"
+    mode: "{{ immich_env_mode }}"
+  notify: Restart Immich
+  tags: [config]
 
 - name: Create and start services
   community.docker.docker_compose_v2:
-    project_src: /srv/immich
-    build: always
-    pull: always
+    project_src: "{{ immich_dir }}"
+    build: policy
+    pull: policy
     recreate: auto
-  register: immichoutput
+  register: immich_output
+  tags: [service]
 
 - name: Show results
   ansible.builtin.debug:
-    var: immichoutput
+    var: immich_output
   when: docker_debug
+  tags: [debug]
