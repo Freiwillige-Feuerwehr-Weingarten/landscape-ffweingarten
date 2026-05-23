@@ -1,37 +1,70 @@
 ---
-- name: Create a bookstack directory if it does not exist
+- name: Assert role maturity permits this environment
+  ansible.builtin.assert:
+    that:
+      - bookstack_status in ['stable', 'testing', 'unstable']
+      - >-
+        bookstack_status == 'stable'
+        or (bookstack_status == 'testing' and env | default('') == 'test')
+    fail_msg: >-
+      Role 'bookstack' is marked status={{ bookstack_status }} and cannot run
+      against env={{ env | default('unset') }}. Promote the role in
+      defaults/main.yml, or override bookstack_status per host.
+  tags: always
+
+- name: Assert required secrets are defined
+  ansible.builtin.assert:
+    that:
+      - bookstack_app_key is defined and bookstack_app_key | length > 0
+      - bookstack_mysql_password is defined and bookstack_mysql_password | length > 0
+    fail_msg: >-
+      bookstack_app_key and bookstack_mysql_password must be defined in
+      host_vars (as !vault blocks) before running this role. Changing
+      bookstack_app_key against an existing DB will make encrypted columns
+      unreadable.
+  tags: [setup]
+
+- name: Create bookstack directory tree
   ansible.builtin.file:
-    path: /srv/bookstack
+    path: "{{ item }}"
     state: directory
     mode: '0755'
+  loop:
+    - "{{ bookstack_dir }}"
+    - "{{ bookstack_dir }}/config"
+    - "{{ bookstack_dir }}/config/www"
+  tags: [setup]
 
 - name: Copy docker compose
   ansible.builtin.template:
     src: templates/bookstack.docker-compose.j2
-    dest: /srv/bookstack/docker-compose.yml
-    mode: '0750'
-  register: compose_result
-  changed_when: "compose_result.changed == true"
+    dest: "{{ bookstack_dir }}/docker-compose.yml"
+    mode: "{{ bookstack_compose_mode }}"
   notify: Restart Bookstack
-
-- name: Create and start services
-  community.docker.docker_compose_v2:
-    project_src: /srv/bookstack
-    build: always
-    pull: policy
-    recreate: auto
-    remove_orphans: true
-  register: bookstackoutput
+  tags: [config]
 
 - name: Copy .env file
   ansible.builtin.template:
     src: templates/bookstack.env.j2
-    dest: /var/lib/docker/volumes/bookstack_bookstack_app_data/_data/www/.env
-    mode: '0705'
-  register: env_result
-  changed_when: "env_result.changed == true"
+    dest: "{{ bookstack_dir }}/config/www/.env"
+    mode: "{{ bookstack_env_mode }}"
+    owner: "{{ bookstack_puid }}"
+    group: "{{ bookstack_pgid }}"
   notify: Restart Bookstack
+  tags: [config]
+
+- name: Create and start services
+  community.docker.docker_compose_v2:
+    project_src: "{{ bookstack_dir }}"
+    build: policy
+    pull: policy
+    recreate: auto
+    remove_orphans: true
+  register: bookstack_output
+  tags: [service]
 
 - name: Show results
   ansible.builtin.debug:
-    var: bookstackoutput
+    var: bookstack_output
+  when: docker_debug
+  tags: [debug]

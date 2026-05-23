@@ -1,5 +1,5 @@
 ---
 - name: Restart Bookstack
   community.docker.docker_compose_v2:
-    project_src: /srv/bookstack
+    project_src: "{{ bookstack_dir }}"
     state: restarted
