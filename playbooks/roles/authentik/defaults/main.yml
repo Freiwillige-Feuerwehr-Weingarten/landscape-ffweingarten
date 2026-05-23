@@ -1,0 +1,53 @@
+---
+# Production-readiness gate. Allowed values: stable | testing | unstable.
+# The role's first task asserts this matches the target inventory's env:
+# stable runs anywhere; testing only on env=test; unstable on neither.
+authentik_status: stable
+
+# Filesystem layout
+authentik_dir: /srv/authentik
+authentik_compose_mode: '0644'
+authentik_env_mode: '0640'
+
+# Image pins. AUTHENTIK_TAG is what gets bumped for version upgrades; the
+# postgres image is tracked separately so it can be patched independently.
+# Authentik removed Redis entirely in 2025.10 — caching, sessions, queue,
+# and websockets all moved to postgres.
+authentik_image: ghcr.io/goauthentik/server
+authentik_version: 2026.2.3
+authentik_postgres_image: docker.io/library/postgres:16-alpine
+
+# Shared memory for server + worker containers. Upstream's recommended value
+# for 2026.x stacks; helps with the postgres-backed cache/queue throughput.
+authentik_shm_size: 512mb
+
+# Host-published ports. NPM fronts authentik.ff-weingarten.de onto these.
+authentik_port_http: 666
+authentik_port_https: 667
+
+# In-stack postgres (named volume authentik_database). User+db default to
+# 'authentik'; the password must be defined per-host as a !vault block.
+authentik_pg_user: authentik
+authentik_pg_db: authentik
+# authentik_pg_pass: <set in host_vars as !vault>
+# authentik_secret_key: <set in host_vars as !vault>
+
+# Container runtime
+authentik_restart_policy: unless-stopped
+authentik_log_level: info
+
+# SMTP — set to true per-host to render the AUTHENTIK_EMAIL__* env block.
+# When enabled, host_vars must also provide:
+#   - authentik_email_user, authentik_email_password (vaulted)
+# mail_host / mail_smtp_port / mail_use_tls / mail_use_ssl come from
+# group_vars/all.yml.
+authentik_smtp_enabled: false
+
+# From: header on outgoing mails. Defaults to the SMTP auth user — that's
+# the common case (auth identity == sender mailbox). Override per host if
+# your SMTP relay decouples the two (e.g. M365 send-as aliases).
+authentik_email_from: "{{ authentik_email_user }}"
+
+# Kerberos trace destination. /dev/stderr surfaces Kerberos negotiation
+# errors in `docker logs` — useful for AD integration debugging.
+authentik_krb5_trace: /dev/stderr

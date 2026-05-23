@@ -1,38 +1,62 @@
 ---
-- name: Create a authentik directory if it does not exist
+- name: Assert role maturity permits this environment
+  ansible.builtin.assert:
+    that:
+      - authentik_status in ['stable', 'testing', 'unstable']
+      - >-
+        authentik_status == 'stable'
+        or (authentik_status == 'testing' and env | default('') == 'test')
+    fail_msg: >-
+      Role 'authentik' is marked status={{ authentik_status }} and cannot run
+      against env={{ env | default('unset') }}. Promote the role in
+      defaults/main.yml, or override authentik_status per host.
+  tags: always
+
+- name: Assert required secrets are defined
+  ansible.builtin.assert:
+    that:
+      - authentik_pg_pass is defined and authentik_pg_pass | length > 0
+      - authentik_secret_key is defined and authentik_secret_key | length > 0
+    fail_msg: >-
+      authentik_pg_pass and authentik_secret_key must be defined in host_vars
+      (as !vault blocks) before running this role.
+  tags: [setup]
+
+- name: Create authentik directory
   ansible.builtin.file:
-    path: /srv/authentik
+    path: "{{ authentik_dir }}"
     state: directory
     mode: '0755'
+  tags: [setup]
 
 - name: Copy docker compose
   ansible.builtin.template:
     src: templates/docker-compose.j2
-    dest: /srv/authentik/docker-compose.yml
-    mode: '0750'
-  register: compose_result
-  changed_when: "compose_result.changed == true"
-  # notify: Restart Authentik
+    dest: "{{ authentik_dir }}/docker-compose.yml"
+    mode: "{{ authentik_compose_mode }}"
+  notify: Restart Authentik
+  tags: [config]
 
 - name: Copy .env file
   ansible.builtin.template:
     src: templates/env.j2
-    dest: /srv/authentik/.env
-    mode: '0705'
-  register: env_result
-  changed_when: "env_result.changed == true"
-  # notify: Restart Authentik
+    dest: "{{ authentik_dir }}/.env"
+    mode: "{{ authentik_env_mode }}"
+  notify: Restart Authentik
+  tags: [config]
 
 - name: Create and start services
   community.docker.docker_compose_v2:
-    project_src: /srv/authentik
-    build: always
+    project_src: "{{ authentik_dir }}"
+    build: policy
     pull: policy
     recreate: auto
     remove_orphans: true
-  register: authentikoutput
-
+  register: authentik_output
+  tags: [service]
 
 - name: Show results
   ansible.builtin.debug:
-    var: authentikoutput
+    var: authentik_output
+  when: docker_debug
+  tags: [debug]
