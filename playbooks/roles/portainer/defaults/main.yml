@@ -4,7 +4,7 @@
 # stable runs anywhere; testing only on env=test; unstable on neither.
 # Marked `testing` after the rewrite — promote to `stable` once the new
 # code path has been validated against the test host.
-portainer_status: testing
+portainer_status: stable
 
 # Filesystem layout
 portainer_dir: /srv/portainer
@@ -12,7 +12,7 @@ portainer_compose_mode: '0644'
 
 # Image / version
 portainer_image: portainer/portainer-ce
-portainer_version: "2.33.2"
+portainer_version: "2.39.2"
 
 # Host-side ports. Portainer inside the container listens on 9000 (HTTP) and
 # 9443 (HTTPS). 9001 is the historical host-side HTTP mapping for this fleet.

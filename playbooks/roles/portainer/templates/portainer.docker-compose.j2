@@ -38,3 +38,6 @@ services:
 volumes:
   {{ portainer_data_volume }}:
     name: {{ portainer_data_volume }}
+{% if not portainer_first_boot | default(false) %}
+    external: true
+{% endif %}
