@@ -1,0 +1,97 @@
+# Tenzu internal reverse proxy — replaces the dev-env Caddy with the same
+# upstream routing. NPM terminates HTTPS in front of this and proxies to
+# the docker host on tenzu_gateway_port (default 9100).
+#
+# Routing matches BIRU-Scop's Caddyfile:
+#   /static/*       -> back
+#   /api/*          -> back
+#   /_allauth/*     -> back
+#   /admin/*        -> back
+#   /events/        -> back (server-sent events / websockets)
+#   /collaboration/* -> back (real-time collab)
+#   /               -> front (SPA)
+
+upstream tenzu_back  { server tenzu-back:8000; }
+upstream tenzu_front { server tenzu-front:80; }
+
+server {
+    listen 80 default_server;
+    server_name _;
+
+    client_max_body_size 100M;
+    charset utf-8;
+
+    # Static (served by back; back also serves media via S3 signed URLs
+    # so we don't proxy /media/* here)
+    location /static/ {
+        proxy_pass http://tenzu_back;
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # API
+    location /api/ {
+        proxy_pass http://tenzu_back;
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # django-allauth endpoints
+    location /_allauth/ {
+        proxy_pass http://tenzu_back;
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # Django admin
+    location /admin/ {
+        proxy_pass http://tenzu_back;
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # SSE / events
+    location /events/ {
+        proxy_pass http://tenzu_back;
+        proxy_http_version 1.1;
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Connection "";
+        proxy_buffering off;
+        proxy_read_timeout 7d;
+        proxy_send_timeout 7d;
+    }
+
+    # Real-time collab (websocket-ish)
+    location /collaboration/ {
+        proxy_pass http://tenzu_back;
+        proxy_http_version 1.1;
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_read_timeout 7d;
+        proxy_send_timeout 7d;
+    }
+
+    # Default: SPA
+    location / {
+        proxy_pass http://tenzu_front;
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}

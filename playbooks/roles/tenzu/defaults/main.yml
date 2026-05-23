@@ -1,0 +1,113 @@
+---
+# Production-readiness gate. Allowed values: stable | testing | unstable.
+# Tenzu (BIRU-Scop) is self-declared NOT production-ready upstream as of
+# 2026-05-22 — see project-tenzu-status in memory. Role status is
+# 'testing' so it can run on env=test for evaluation but is blocked
+# from prod by the role-maturity assert.
+tenzu_status: testing
+
+# Filesystem layout
+tenzu_dir: /srv/tenzu
+tenzu_compose_mode: '0644'
+tenzu_env_mode: '0640'
+
+# Image pins. The ghcr.io public packages don't enumerate tags
+# anonymously via the registry API, so the discovery is a separate step
+# (anon token + /v2/biru-scop/tenzu-back/tags/list). Until then we ride
+# :latest as a deliberate sketch state — flag in the maturity comment.
+# After first deploy, pin to the actual digest's matching tag exactly
+# the same way we did for Taiga (see project-taiga-rework, validate-
+# before-pinning in memory).
+tenzu_back_image: ghcr.io/biru-scop/tenzu-back
+tenzu_back_version: "latest"           # TODO: pin after first apply
+tenzu_front_image: ghcr.io/biru-scop/tenzu-front
+tenzu_front_version: "latest"          # TODO: pin after first apply
+
+# Side-services
+tenzu_db_image: docker.io/library/postgres
+tenzu_db_version: "17"
+tenzu_redis_image: docker.io/library/redis
+tenzu_redis_version: "7.2"
+tenzu_minio_image: docker.io/minio/minio
+tenzu_minio_version: "RELEASE.2025-02-07T23-21-09Z"   # last LTS-ish; bump as needed
+tenzu_mc_image: docker.io/minio/mc
+tenzu_mc_version: "RELEASE.2025-02-08T19-14-21Z"
+tenzu_gateway_image: docker.io/library/nginx
+tenzu_gateway_version: "1.27-alpine"
+
+# Container restart policy
+tenzu_restart_policy: unless-stopped
+
+# gunicorn worker count for tenzu-back
+tenzu_back_workers: "4"
+
+# Networking. NPM at https://tenzu.test.ff-weingarten.de terminates
+# TLS and reverse-proxies to the docker host on tenzu_gateway_port.
+# tenzu_backend_url and tenzu_frontend_url drive how Tenzu generates
+# absolute URLs (emails, links). Same as Taiga: keep the public URL
+# here, not the internal IP.
+tenzu_gateway_port: 9100
+tenzu_scheme: https
+tenzu_domain: "tenzu.test.ff-weingarten.de"
+tenzu_backend_url: "{{ tenzu_scheme }}://{{ tenzu_domain }}"
+tenzu_frontend_url: "{{ tenzu_scheme }}://{{ tenzu_domain }}"
+
+# Database
+tenzu_db_name: tenzu
+tenzu_db_user: tenzu
+
+# Application
+tenzu_debug: "False"
+tenzu_required_terms: "True"
+tenzu_max_page_size: "100"
+tenzu_extra_cors: "[]"     # JSON list, e.g. '["https://other-origin.example"]'
+
+# Auth tokens (ISO 8601 durations — P5D = 5 days)
+tenzu_access_token_lifetime: P5D
+tenzu_refresh_token_lifetime: P10D
+
+# Support email displayed in Tenzu UI / sent from
+tenzu_support_email: "{{ email_user | default('intranet@ff-weingarten.de') }}"
+
+# LDAP / Active Directory. Default OFF until we figure out the correct
+# JSON shape for Tenzu's Pydantic LDAPSettings model — in particular
+# USER_SEARCH is typed `list[LDAPUserSearchParams]` and expects a JSON
+# list of structured dicts, not the `LDAPSearch(...)` Python literal
+# the upstream dev.env uses. Flip tenzu_ldap_enabled to true once the
+# env block is correct; the role's `.env` template only emits LDAP keys
+# when this is true.
+tenzu_ldap_enabled: false
+tenzu_ldap_activation: lax  # only used when tenzu_ldap_enabled = true
+
+# AD-specific shape (unused while LDAP is disabled). Will need to move
+# to a JSON-list shape before re-enabling.
+tenzu_ldap_user_filter: "(sAMAccountName=%(user)s)"
+tenzu_ldap_user_attr_map: '{"first_name": "givenName", "last_name": "sn", "email": "mail"}'
+tenzu_ldap_user_query_field: username
+
+# S3 / MinIO. The role spins up a local MinIO and creates the bucket
+# during first apply via a one-shot minio/mc init container.
+tenzu_minio_bucket: tenzu
+tenzu_minio_root_user: tenzu
+# tenzu_minio_root_password is a required secret (see assertions below)
+# tenzu_minio_access_key  — created equal to root_user for simplicity
+# tenzu_minio_secret_key  — created equal to root_password for simplicity
+
+# Redis — no auth in dev-env, keep that for now (internal network only)
+tenzu_redis_password: ""
+
+# Logging. Tenzu's Pydantic LogsSettings.LOG_HANDLER is a Literal of
+# 'stream' (plain stdout JSON-ish) or 'rich' (pretty-formatted, dev-y).
+tenzu_log_handler: "stream"
+tenzu_log_level: "INFO"
+
+# Required secrets — must be defined per-host in host_vars (vault them):
+#   tenzu_secret_key            — Django SECRET_KEY (DO NOT rotate against
+#                                  an existing DB; breaks encrypted columns)
+#   tenzu_tokens_signing_key    — JWT signing key (rotating invalidates
+#                                  all sessions but doesn't corrupt data)
+#   tenzu_db_password           — Postgres password
+#   tenzu_minio_root_password   — MinIO admin password (>= 8 chars)
+# Required group_vars/all.yml: email_user, email_password, mail_host,
+#   mail_smtp_port, mail_use_tls, mail_use_ssl, ldap_server, ldap_bind_dn,
+#   ldap_bind_password, ldap_search_base

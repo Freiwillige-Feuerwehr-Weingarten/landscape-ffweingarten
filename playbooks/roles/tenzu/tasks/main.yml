@@ -1,0 +1,79 @@
+---
+- name: Assert role maturity permits this environment
+  ansible.builtin.assert:
+    that:
+      - tenzu_status in ['stable', 'testing', 'unstable']
+      - >-
+        tenzu_status == 'stable'
+        or (tenzu_status == 'testing' and env | default('') == 'test')
+    fail_msg: >-
+      Role 'tenzu' is marked status={{ tenzu_status }} and cannot run
+      against env={{ env | default('unset') }}. Promote the role in
+      defaults/main.yml, or override tenzu_status per host. Tenzu is
+      not production-ready upstream as of 2026-05-22 — proceed with
+      that in mind.
+  tags: always
+
+- name: Assert required secrets are defined
+  ansible.builtin.assert:
+    that:
+      - tenzu_secret_key is defined and tenzu_secret_key | length > 0
+      - tenzu_tokens_signing_key is defined and tenzu_tokens_signing_key | length > 0
+      - tenzu_db_password is defined and tenzu_db_password | length > 0
+      - tenzu_minio_root_password is defined and tenzu_minio_root_password | length >= 8
+    fail_msg: >-
+      tenzu_secret_key, tenzu_tokens_signing_key, tenzu_db_password and
+      tenzu_minio_root_password (>= 8 chars) must be defined in host_vars
+      as !vault blocks before running this role. tenzu_secret_key MUST
+      NOT be rotated against an existing DB.
+  tags: [setup]
+
+- name: Create tenzu directory tree
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+  loop:
+    - "{{ tenzu_dir }}"
+    - "{{ tenzu_dir }}/gateway"
+  tags: [setup]
+
+- name: Render docker-compose.yml
+  ansible.builtin.template:
+    src: templates/tenzu.docker-compose.j2
+    dest: "{{ tenzu_dir }}/docker-compose.yml"
+    mode: "{{ tenzu_compose_mode }}"
+  notify: Restart Tenzu
+  tags: [config]
+
+- name: Render .env
+  ansible.builtin.template:
+    src: templates/tenzu.env.j2
+    dest: "{{ tenzu_dir }}/.env"
+    mode: "{{ tenzu_env_mode }}"
+  notify: Restart Tenzu
+  tags: [config]
+
+- name: Render internal nginx gateway config
+  ansible.builtin.template:
+    src: templates/tenzu.gateway.conf.j2
+    dest: "{{ tenzu_dir }}/gateway/default.conf"
+    mode: '0644'
+  notify: Restart Tenzu
+  tags: [config]
+
+- name: Create and start Tenzu services
+  community.docker.docker_compose_v2:
+    project_src: "{{ tenzu_dir }}"
+    build: policy
+    pull: policy
+    recreate: auto
+    remove_orphans: true
+  register: tenzu_output
+  tags: [service]
+
+- name: Show results
+  ansible.builtin.debug:
+    var: tenzu_output
+  when: docker_debug | default(false)
+  tags: [debug]

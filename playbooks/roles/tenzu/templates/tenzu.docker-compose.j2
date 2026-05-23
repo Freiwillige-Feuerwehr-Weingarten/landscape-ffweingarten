@@ -1,0 +1,191 @@
+#jinja2: lstrip_blocks: True
+---
+# Tenzu (BIRU-Scop) — evaluation deployment. NOT production-ready upstream
+# as of 2026-05-22; role's maturity gate restricts to env=test.
+
+x-back-image: &back-image {{ tenzu_back_image }}:{{ tenzu_back_version }}
+
+services:
+  tenzu-db:
+    image: {{ tenzu_db_image }}:{{ tenzu_db_version }}
+    container_name: tenzu-db
+    restart: {{ tenzu_restart_policy }}
+    environment:
+      POSTGRES_DB: "{{ tenzu_db_name }}"
+      POSTGRES_USER: "{{ tenzu_db_user }}"
+      POSTGRES_PASSWORD: "${TENZU_DB_PASSWORD}"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U {{ tenzu_db_user }}"]
+      interval: 5s
+      timeout: 10s
+      retries: 10
+    volumes:
+      - tenzu-db-data:/var/lib/postgresql/data
+    networks:
+      - tenzu
+
+  tenzu-redis:
+    image: {{ tenzu_redis_image }}:{{ tenzu_redis_version }}
+    container_name: tenzu-redis
+    restart: {{ tenzu_restart_policy }}
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - tenzu
+
+  tenzu-minio:
+    image: {{ tenzu_minio_image }}:{{ tenzu_minio_version }}
+    container_name: tenzu-minio
+    restart: {{ tenzu_restart_policy }}
+    command: ["server", "/data", "--console-address", ":9001"]
+    environment:
+      MINIO_ROOT_USER: "{{ tenzu_minio_root_user }}"
+      MINIO_ROOT_PASSWORD: "${TENZU_MINIO_ROOT_PASSWORD}"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - tenzu-minio-data:/data
+    networks:
+      - tenzu
+
+  # One-shot: wait for MinIO healthy, configure mc alias, create bucket if
+  # missing. Idempotent — exits 0 once bucket exists, never recreates data.
+  tenzu-minio-init:
+    image: {{ tenzu_mc_image }}:{{ tenzu_mc_version }}
+    container_name: tenzu-minio-init
+    depends_on:
+      tenzu-minio:
+        condition: service_healthy
+    # Retry the alias-set until minio is reachable. The depends_on healthcheck
+    # usually catches this, but on container recreate cycles we've seen the
+    # init fire before minio has re-registered with the embedded DNS.
+    # NB: shell `$var` and `$((…))` are doubled to `$$` so compose passes
+    # them through to /bin/sh instead of trying to interpolate them itself.
+    # `${TENZU_MINIO_ROOT_PASSWORD}` stays single-`$` so compose does expand
+    # it from the .env file.
+    entrypoint: >-
+      /bin/sh -c "
+      i=0;
+      until mc alias set local http://tenzu-minio:9000 {{ tenzu_minio_root_user }} ${TENZU_MINIO_ROOT_PASSWORD} >/dev/null 2>&1; do
+        i=$$((i+1));
+        if [ $$i -gt 30 ]; then
+          echo 'tenzu-minio-init: timed out waiting for tenzu-minio'; exit 1;
+        fi;
+        echo 'tenzu-minio-init: waiting for tenzu-minio...'; sleep 2;
+      done &&
+      mc mb --ignore-existing local/{{ tenzu_minio_bucket }} &&
+      echo 'tenzu-minio-init: bucket {{ tenzu_minio_bucket }} ready'
+      "
+    networks:
+      - tenzu
+    restart: "no"
+
+  # One-shot: run Django migrations (and procrastinate's stored procs)
+  # before back/worker start. Idempotent — `migrate` is a no-op on a
+  # fully-migrated DB. The helm chart handles this via a separate Job;
+  # this is the docker-compose equivalent.
+  tenzu-migrate:
+    image: *back-image
+    container_name: tenzu-migrate
+    command: ["python", "manage.py", "migrate", "--noinput"]
+    env_file:
+      - .env
+    depends_on:
+      tenzu-db:
+        condition: service_healthy
+    networks:
+      - tenzu
+    restart: "no"
+
+  tenzu-back:
+    image: *back-image
+    container_name: tenzu-back
+    restart: {{ tenzu_restart_policy }}
+    # Match the helm chart's prod command: gunicorn with uvicorn ASGI workers.
+    # The base image's default CMD is just `python3` (REPL) which exits
+    # immediately, so this must be set explicitly.
+    command:
+      - gunicorn
+      - configurations.asgi:application
+      - -k
+      - uvicorn.workers.UvicornWorker
+      - -w
+      - "{{ tenzu_back_workers }}"
+      - --bind
+      - "0.0.0.0:8000"
+    env_file:
+      - .env
+    volumes:
+      - tenzu-static:/public/static
+      - tenzu-media:/public/media
+    depends_on:
+      tenzu-migrate:
+        condition: service_completed_successfully
+      tenzu-db:
+        condition: service_healthy
+      tenzu-redis:
+        condition: service_healthy
+      tenzu-minio:
+        condition: service_healthy
+    networks:
+      - tenzu
+
+  tenzu-worker:
+    image: *back-image
+    container_name: tenzu-worker
+    restart: {{ tenzu_restart_policy }}
+    command: ["python", "manage.py", "procrastinate", "worker"]
+    env_file:
+      - .env
+    volumes:
+      - tenzu-static:/public/static
+      - tenzu-media:/public/media
+    depends_on:
+      tenzu-migrate:
+        condition: service_completed_successfully
+      tenzu-db:
+        condition: service_healthy
+      tenzu-redis:
+        condition: service_healthy
+    networks:
+      - tenzu
+
+  tenzu-front:
+    image: {{ tenzu_front_image }}:{{ tenzu_front_version }}
+    container_name: tenzu-front
+    restart: {{ tenzu_restart_policy }}
+    networks:
+      - tenzu
+
+  # Internal reverse proxy. Replaces the dev-env's Caddy. NPM sits in front
+  # of this on tenzu_gateway_port and terminates TLS for the public domain.
+  tenzu-gateway:
+    image: {{ tenzu_gateway_image }}:{{ tenzu_gateway_version }}
+    container_name: tenzu-gateway
+    restart: {{ tenzu_restart_policy }}
+    ports:
+      - "{{ tenzu_gateway_port }}:80"
+    volumes:
+      - ./gateway/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - tenzu-static:/public/static:ro
+      - tenzu-media:/public/media:ro
+    depends_on:
+      - tenzu-back
+      - tenzu-front
+    networks:
+      - tenzu
+
+volumes:
+  tenzu-db-data:
+  tenzu-minio-data:
+  tenzu-static:
+  tenzu-media:
+
+networks:
+  tenzu:
