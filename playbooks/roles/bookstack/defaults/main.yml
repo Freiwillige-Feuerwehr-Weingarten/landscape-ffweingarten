@@ -1,0 +1,76 @@
+---
+# Production-readiness gate. Allowed values: stable | testing | unstable.
+# The role's first task asserts this matches the target inventory's env:
+# stable runs anywhere; testing only on env=test; unstable on neither.
+bookstack_status: stable
+
+# Filesystem layout. The /config bind mount holds everything BookStack
+# persists (uploads, www/.env, www/storage, etc.) — replaces the legacy
+# `bookstack_app_data` named volume from the Portainer-managed days.
+bookstack_dir: /srv/bookstack
+bookstack_compose_mode: '0644'
+bookstack_env_mode: '0640'
+
+# Image pin — linuxserver.io build of BookStack. Pulling via docker.io because
+# the lscr.io CDN lags behind Hub on fresh releases. Functionally identical,
+# can flip back to lscr.io later in a separate commit if desired.
+bookstack_image: docker.io/linuxserver/bookstack
+bookstack_version: 26.03.5
+
+# Container identity (kept literal for parity with the existing deployment)
+bookstack_container_name: bookstack
+
+# Host-published port. NPM fronts https://bookstack.ff-weingarten.de onto this.
+bookstack_port: 6875
+
+# linuxserver.io image user/group + timezone
+bookstack_puid: 1000
+bookstack_pgid: 1000
+bookstack_tz: Europe/Berlin
+
+# Container runtime
+bookstack_restart_policy: unless-stopped
+
+# Required secrets — must be defined per-host in host_vars (vault the values).
+# CRITICAL: bookstack_app_key MUST match the value BookStack used when the
+# encrypted columns in the DB were written. Changing it makes 2FA secrets,
+# OIDC session keys, and other encrypted DB columns unreadable.
+# bookstack_app_key: <set in host_vars as !vault>
+# bookstack_mysql_password: <set in host_vars as !vault>
+# bookstack_oidc_client_id: <set in host_vars as !vault>
+# bookstack_oidc_secret: <set in host_vars as !vault>
+
+# Mail — the From header on outgoing BookStack mail. Defaults to the shared
+# SMTP auth user (email_user from group_vars). Override per host if BookStack
+# should send under a different address than other services.
+bookstack_mail_from: "{{ email_user }}"
+bookstack_mail_from_name: "Intranet Feuerwehr Weingarten"
+bookstack_mail_verify_ssl: false
+
+# Authentication. BookStack supports 'standard', 'ldap', 'saml2', or 'oidc'.
+bookstack_auth_method: oidc
+bookstack_auth_auto_initiate: false
+
+# OIDC (Authentik). Issuer URL is org-specific; rest are bookstack-local
+# behavior knobs.
+bookstack_oidc_issuer: "https://authentik.ff-weingarten.de/application/o/bookstack/"
+bookstack_oidc_name: AuthentikSSO
+bookstack_oidc_display_name_claims: name
+bookstack_oidc_issuer_discover: true
+bookstack_oidc_end_session_endpoint: true
+bookstack_oidc_user_to_groups: true
+bookstack_oidc_groups_claim: groups
+bookstack_oidc_additional_scopes: groups
+bookstack_oidc_remove_from_groups: true
+
+# LDAP (Active Directory). Schema details encode "we run AD".
+bookstack_ldap_user_filter: '(&(sAMAccountName=${user}))'
+bookstack_ldap_version: 3
+bookstack_ldap_id_attribute: sAMAccountName
+bookstack_ldap_email_attribute: mail
+bookstack_ldap_display_name_attribute: displayName
+bookstack_ldap_thumbnail_attribute: jpegPhoto
+bookstack_ldap_group_attribute: memberOf
+bookstack_ldap_start_tls: false
+bookstack_ldap_user_to_groups: true
+bookstack_ldap_remove_from_groups: true
