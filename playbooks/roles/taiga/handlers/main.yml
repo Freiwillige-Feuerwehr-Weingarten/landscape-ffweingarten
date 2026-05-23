@@ -1,0 +1,5 @@
+---
+- name: Restart Taiga
+  community.docker.docker_compose_v2:
+    project_src: "{{ taiga_dir }}"
+    state: restarted

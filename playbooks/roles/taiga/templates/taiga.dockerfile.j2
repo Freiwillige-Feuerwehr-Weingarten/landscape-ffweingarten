@@ -1,7 +1,11 @@
-FROM taigaio/taiga-back:latest
+FROM {{ taiga_back_image }}:{{ taiga_back_version }}
 
-# Insert custom configuration into the taiga configuration file
+# Append our custom Django settings (LDAP plugin config) onto the
+# upstream settings module, then drop the temp file.
 COPY config.append.py /taiga-back/settings
-RUN cat /taiga-back/settings/config.append.py >> /taiga-back/settings/config.py && rm /taiga-back/settings/config.append.py
+RUN cat /taiga-back/settings/config.append.py >> /taiga-back/settings/config.py \
+    && rm /taiga-back/settings/config.append.py
 
-RUN pip install taiga-contrib-ldap-auth-ext
+# LDAP auth via Monogramm/taiga-contrib-ldap-auth-ext. Pinned because the
+# upstream plugin is stale and a floating "latest" would be unpredictable.
+RUN pip install taiga-contrib-ldap-auth-ext=={{ taiga_ldap_plugin_version }}

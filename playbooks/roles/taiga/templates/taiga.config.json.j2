@@ -1,20 +1,20 @@
 {
-    "api": "http://192.168.10.130:9000/api/v1/",
-    "eventsUrl": "ws://192.168.10.130:9000/events",
+    "api": "{{ taiga_scheme }}://{{ taiga_domain }}/api/v1/",
+    "eventsUrl": "{{ taiga_websockets_scheme }}://{{ taiga_domain }}/events",
     "baseHref": "/",
-    "loginFormType": "ldap",
+    "loginFormType": "{{ taiga_login_form_type }}",
     "eventsMaxMissedHeartbeats": 5,
     "eventsHeartbeatIntervalTime": 60000,
     "eventsReconnectTryInterval": 10000,
     "debug": true,
     "debugInfo": true,
-    "defaultLanguage": "en",
+    "defaultLanguage": "{{ taiga_default_language }}",
     "themes": ["taiga"],
-    "defaultTheme": "taiga",
+    "defaultTheme": "{{ taiga_default_theme }}",
     "defaultLoginEnabled": true,
-    "publicRegisterEnabled": false,
-    "feedbackEnabled": true,
-    "supportUrl": "https://community.taiga.io/",
+    "publicRegisterEnabled": {{ taiga_public_register_enabled | lower }},
+    "feedbackEnabled": {{ taiga_feedback_enabled | lower }},
+    "supportUrl": "{{ taiga_support_url }}",
     "privacyPolicyUrl": null,
     "termsOfServiceUrl": null,
     "maxUploadFileSize": null,
@@ -28,10 +28,10 @@
     "enableGithubImporter": false,
     "enableJiraImporter": false,
     "enableTrelloImporter": false,
-    "gravatar": false,                  
-    "rtlLanguages": [                   
-        "ar",                     
-        "fa",                     
-        "he"                      
-    ]                             
-} 
+    "gravatar": false,
+    "rtlLanguages": [
+        "ar",
+        "fa",
+        "he"
+    ]
+}

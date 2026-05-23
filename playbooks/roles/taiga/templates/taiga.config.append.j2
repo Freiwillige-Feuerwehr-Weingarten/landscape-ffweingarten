@@ -1,18 +1,20 @@
 INSTALLED_APPS += ["taiga_contrib_ldap_auth_ext"]
 
-# Multiple LDAP servers are currently not supported, see
-# https://github.com/Monogramm/taiga-contrib-ldap-auth-ext/issues/16
-LDAP_SERVER = "ldap://192.168.10.110"
-LDAP_PORT = 389
+# LDAP / Active Directory. Bind credentials, server, and search base
+# come from group_vars/all.yml (ldap_*). ldap_server is "<host>:<port>";
+# split into LDAP_SERVER (URL) and LDAP_PORT.
+{% set _ldap_parts = ldap_server.split(':') %}
+LDAP_SERVER = "ldap://{{ _ldap_parts[0] }}"
+LDAP_PORT = {{ _ldap_parts[1] if _ldap_parts | length > 1 else 389 }}
 
-LDAP_BIND_DN = "{{ ldap_bind_dn }}"
+LDAP_BIND_DN = "{{ ldap_bind_dn }}"
 LDAP_BIND_PASSWORD = "{{ ldap_bind_password }}"
 
 LDAP_SEARCH_BASE = '{{ ldap_search_base }}'
 
-LDAP_USERNAME_ATTRIBUTE = "sAMAccountName"
-LDAP_EMAIL_ATTRIBUTE = "mail"
-LDAP_FULL_NAME_ATTRIBUTE = "displayName"
+LDAP_USERNAME_ATTRIBUTE = "{{ taiga_ldap_username_attribute }}"
+LDAP_EMAIL_ATTRIBUTE = "{{ taiga_ldap_email_attribute }}"
+LDAP_FULL_NAME_ATTRIBUTE = "{{ taiga_ldap_full_name_attribute }}"
 
 LDAP_SAVE_LOGIN_PASSWORD = False
 

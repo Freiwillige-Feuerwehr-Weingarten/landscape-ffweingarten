@@ -1,88 +1,109 @@
 ---
-- name: Create a taiga directory if it does not exist
+- name: Assert role maturity permits this environment
+  ansible.builtin.assert:
+    that:
+      - taiga_status in ['stable', 'testing', 'unstable']
+      - >-
+        taiga_status == 'stable'
+        or (taiga_status == 'testing' and env | default('') == 'test')
+    fail_msg: >-
+      Role 'taiga' is marked status={{ taiga_status }} and cannot run
+      against env={{ env | default('unset') }}. Promote the role in
+      defaults/main.yml, or override taiga_status per host.
+  tags: always
+
+- name: Assert required secrets are defined
+  ansible.builtin.assert:
+    that:
+      - taiga_secret_key is defined and taiga_secret_key | length > 0
+      - taiga_postgres_password is defined and taiga_postgres_password | length > 0
+      - taiga_rabbitmq_password is defined and taiga_rabbitmq_password | length > 0
+      - taiga_rlang_cookie is defined and taiga_rlang_cookie | length > 0
+    fail_msg: >-
+      taiga_secret_key, taiga_postgres_password, taiga_rabbitmq_password
+      and taiga_rlang_cookie must be defined in host_vars (as !vault blocks)
+      before running this role. Changing taiga_secret_key against an
+      existing DB will make encrypted columns unreadable.
+  tags: [setup]
+
+- name: Create taiga base directory
   ansible.builtin.file:
-    path: /srv/taiga
+    path: "{{ taiga_dir }}"
     state: directory
     mode: '0755'
+  tags: [setup]
 
-- name: Git checkout
+- name: Clone upstream taiga-docker (pinned) for the gateway nginx config
   ansible.builtin.git:
-    repo: 'https://github.com/kaleidos-ventures/taiga-docker.git'
-    dest: /srv/taiga
+    repo: "{{ taiga_docker_repo }}"
+    dest: "{{ taiga_dir }}"
     depth: 1
     force: true
-    version: stable
+    version: "{{ taiga_docker_version }}"
+  tags: [setup]
 
-- name: Copy taiga .env filename
-  ansible.builtin.template:
-    src: templates/taiga.prod.env.j2
-    dest: /srv/taiga/.env
-    mode: '0644'
-
-- name: Change to local build
-  # ansible.builtin.lineinfile:
-  #  path: /srv/taiga/docker-compose.yml
-  #  search_string: 'image: taigaio/taiga-back:latest'
-  #  line: '    build: ./custom-back'
-  ansible.builtin.replace:
-    path: /srv/taiga/docker-compose.yml
-    after: '  taiga-back:'
-    before: '  taiga-async:'
-    regexp: '^(    image: taigaio/taiga-back:latest)$'
-    replace: '    build: ./custom-back'
-
-- name: Create custom-back directory
+- name: Create custom-back and custom-front directories
   ansible.builtin.file:
-    path: /srv/taiga/custom-back
+    path: "{{ item }}"
     state: directory
     mode: '0755'
+  loop:
+    - "{{ taiga_dir }}/custom-back"
+    - "{{ taiga_dir }}/custom-front"
+  tags: [setup]
 
-- name: Copy config.append.py file
+- name: Render docker-compose.yml (overrides upstream clone)
   ansible.builtin.template:
-    src: templates/taiga.config.append.j2
-    dest: /srv/taiga/custom-back/config.append.py
-    mode: '0644'
+    src: templates/taiga.docker-compose.j2
+    dest: "{{ taiga_dir }}/docker-compose.yml"
+    mode: "{{ taiga_compose_mode }}"
+  notify: Restart Taiga
+  tags: [config]
 
-- name: Copy Dockerfile
+- name: Render .env
+  ansible.builtin.template:
+    src: templates/taiga.env.j2
+    dest: "{{ taiga_dir }}/.env"
+    mode: "{{ taiga_env_mode }}"
+  notify: Restart Taiga
+  tags: [config]
+
+- name: Render custom-back Dockerfile
   ansible.builtin.template:
     src: templates/taiga.dockerfile.j2
-    dest: /srv/taiga/custom-back/Dockerfile
-    mode: '0754'
+    dest: "{{ taiga_dir }}/custom-back/Dockerfile"
+    mode: '0644'
+  notify: Restart Taiga
+  tags: [config]
 
-- name: Recomment volume
-  ansible.builtin.lineinfile:
-    path: /srv/taiga/docker-compose.yml
-    search_string: '# volumes:'
-    line: '    volumes:'
+- name: Render custom-back config.append.py
+  ansible.builtin.template:
+    src: templates/taiga.config.append.j2
+    dest: "{{ taiga_dir }}/custom-back/config.append.py"
+    mode: '0644'
+  notify: Restart Taiga
+  tags: [config]
 
-- name: Set taiga-front volume
-  ansible.builtin.lineinfile:
-    path: /srv/taiga/docker-compose.yml
-    search_string: '#   - ./conf.json:/usr/share/nginx/html/conf.json'
-    line: '      - ./custom-front/conf.override.json:/usr/share/nginx/html/conf.json'
-
-# TODO Add to taiga-gateway:
-# restart: on-failure
-
-- name: Create custom-front directory
-  ansible.builtin.file:
-    path: /srv/taiga/custom-front
-    state: directory
-    mode: '0755'
-
-- name: Create config.json
+- name: Render custom-front conf.override.json
   ansible.builtin.template:
     src: templates/taiga.config.json.j2
-    dest: /srv/taiga/custom-front/conf.override.json
+    dest: "{{ taiga_dir }}/custom-front/conf.override.json"
     mode: '0644'
+  notify: Restart Taiga
+  tags: [config]
 
-- name: Create and start taiga.io services
+- name: Create and start Taiga services
   community.docker.docker_compose_v2:
-    project_src: /srv/taiga
-    build: always
-    env_files: .env
-  register: taigaoutput
+    project_src: "{{ taiga_dir }}"
+    build: policy
+    pull: policy
+    recreate: auto
+    remove_orphans: true
+  register: taiga_output
+  tags: [service]
 
 - name: Show results
   ansible.builtin.debug:
-    var: taigaoutput
+    var: taiga_output
+  when: docker_debug | default(false)
+  tags: [debug]

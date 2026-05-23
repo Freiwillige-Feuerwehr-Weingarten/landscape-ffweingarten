@@ -1,0 +1,102 @@
+---
+# Production-readiness gate. Allowed values: stable | testing | unstable.
+# The role's first task asserts this matches the target inventory's env:
+# stable runs anywhere; testing only on env=test; unstable on neither.
+taiga_status: stable
+
+# Filesystem layout. /srv/taiga is the docker-compose project dir; the
+# subdirectories hold our customizations (LDAP plugin Dockerfile + front
+# config override) that the cloned upstream repo doesn't ship with.
+taiga_dir: /srv/taiga
+taiga_compose_mode: '0644'
+taiga_env_mode: '0640'
+
+# Upstream taiga-docker repo. Kept (pinned) to inherit taiga-gateway/taiga.conf
+# without having to re-vendor every minor nginx change. The repo's own
+# docker-compose.yml gets overwritten by our template — we don't rely on it.
+# Tag scheme on this repo is sparser than the image repos (it tags only when
+# the deployment shape itself changes); 6.7.2 is the closest tag to our
+# 6.7.x image versions. There is no 6.7.3-6.7.7.
+taiga_docker_repo: https://github.com/kaleidos-ventures/taiga-docker.git
+taiga_docker_version: "6.7.2"
+
+# Image pins. The four taiga services do NOT move together in lockstep on
+# Docker Hub — taiga-front gets independent patch releases (6.7.7 vs back's
+# 6.7.3 from the same week), and taiga-events / taiga-protected appear to
+# have stopped getting releases after 6.7.0. The defaults below match what
+# was cached as :latest on docker.prod.ff-weingarten.de when this role was
+# reworked (2026-05-22) — verified by cross-referencing image creation
+# timestamps against Docker Hub tag dates. Bump per-service when upgrading.
+taiga_back_image: docker.io/taigaio/taiga-back
+taiga_back_version: "6.7.3"
+taiga_front_image: docker.io/taigaio/taiga-front
+taiga_front_version: "6.7.7"
+taiga_events_image: docker.io/taigaio/taiga-events
+taiga_events_version: "6.7.0"
+taiga_protected_image: docker.io/taigaio/taiga-protected
+taiga_protected_version: "6.7.0"
+
+# Side-services. Versions were already pinned in upstream compose; preserved
+# here for explicitness and to break the dependency on the cloned file's
+# choices.
+taiga_db_image: docker.io/library/postgres
+taiga_db_version: "12.3"
+taiga_rabbitmq_image: docker.io/library/rabbitmq
+taiga_rabbitmq_version: "3.8-management-alpine"
+taiga_gateway_image: docker.io/library/nginx
+taiga_gateway_version: "1.19-alpine"
+
+# LDAP plugin (Monogramm/taiga-contrib-ldap-auth-ext). Stale upstream
+# (last release Feb 2023) but functional against 6.x. Pinned to "0.5"
+# because that's the exact string `pip show` reports inside the currently
+# running custom-back image — PEP 440 normalizes "0.5" and "0.5.0" the
+# same, but matching pip's reported string avoids any resolution drift.
+taiga_ldap_plugin_version: "0.5"
+
+# Networking — Taiga's self-perception. NPM at taiga.ff-weingarten.de
+# terminates HTTPS and reverse-proxies onto taiga_gateway_port (9000) on
+# this docker host. taiga_domain/taiga_scheme drive how Taiga generates
+# absolute URLs (emails, attachment links, SPA-to-API calls). The role
+# matches the deployed values, which were hand-edited at some point to
+# use the public URL (the old internal-IP defaults in the original
+# template never matched what was actually running on prod).
+taiga_scheme: https
+taiga_domain: "taiga.ff-weingarten.de"
+taiga_subpath: ""
+taiga_websockets_scheme: wss
+taiga_gateway_port: 9000
+
+# Application knobs
+taiga_postgres_user: taiga
+taiga_postgres_db: taiga
+taiga_rabbitmq_user: taiga
+taiga_rabbitmq_vhost: taiga
+taiga_attachments_max_age: 360
+taiga_email_backend: smtp
+taiga_telemetry: "True"
+
+# LDAP / Active Directory. Schema details encode "we run AD". Bind
+# credentials (ldap_bind_dn, ldap_bind_password) and search base
+# (ldap_search_base) come from group_vars/all.yml; ldap_server there
+# is "<host>:<port>" — the template splits it.
+taiga_ldap_username_attribute: sAMAccountName
+taiga_ldap_email_attribute: mail
+taiga_ldap_full_name_attribute: displayName
+
+# Frontend config
+taiga_login_form_type: ldap
+taiga_default_language: en
+taiga_default_theme: taiga
+taiga_public_register_enabled: false
+taiga_feedback_enabled: true
+taiga_support_url: "https://community.taiga.io/"
+
+# Required secrets — must be defined per-host in host_vars as !vault blocks:
+#   taiga_secret_key          — Django SECRET_KEY (DO NOT rotate against an
+#                               existing DB, breaks encrypted columns)
+#   taiga_postgres_password   — DB password
+#   taiga_rabbitmq_password   — RabbitMQ user password
+#   taiga_rlang_cookie        — RabbitMQ Erlang cookie (cluster identity)
+# Required group_vars/all.yml: email_user, email_password, mail_host,
+#   mail_smtp_port, mail_use_tls, mail_use_ssl, ldap_server,
+#   ldap_bind_dn, ldap_bind_password, ldap_search_base
