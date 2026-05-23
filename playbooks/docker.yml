@@ -10,12 +10,14 @@
     - { role: nfs, tags: [nfs] }
     - { role: docker, tags: [docker] }
     - { role: portainer, tags: [portainer] }
-    - authentik
+    - { role: authentik, tags: [authentik] }
     - { role: netboot, tags: [netboot] }
     - { role: heimdall, tags: [heimdall] }
     - { role: rustdesk, tags: [rustdesk] }
     - { role: traccar, tags: [traccar] }
-    - bookstack
+    - { role: immich, tags: [immich] }
+    - { role: bookstack, tags: [bookstack] }
     - { role: nextcloud, tags: [nextcloud] }
     - { role: adminer, tags: [adminer] }
-    - taiga
+    - { role: taiga, tags: [taiga] }
+    - { role: tenzu, tags: [tenzu] }
