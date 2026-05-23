@@ -80,3 +80,33 @@ checkmk_agent_host_attributes:
 #     `psql` host (see roles/nextcloud/defaults/main.yml).
 #   - nextcloud_collabora_password: vaulted in
 #     host_vars/docker.{prod,test}.ff-weingarten.de.yml.
+
+# SMTP — shared across every service that sends mail (authentik, bookstack,
+# nextcloud, traccar, …). mail.ff-weingarten.de is a DNS alias for athena.
+mail_host: athena.ff-weingarten.de
+mail_smtp_port: 587
+mail_use_tls: true
+mail_use_ssl: false
+email_user: intranet@ff-weingarten.de
+email_password: !vault |
+          $ANSIBLE_VAULT;1.1;AES256
+          33656565363534326133396562616135323638616637653462616132323161396337393939626636
+          3064313962353734626130393330373365356336663830370a313337386561343661393633373064
+          62653334623732646130376362653061333564353337623163653736373834346537333932663763
+          3238323763326338340a616333303336386237633833313239316662343265383166383832303364
+          3766
+
+# LDAP / Active Directory — shared bind credentials and the AD endpoint
+# used by every service that pulls users/groups from AD (bookstack,
+# nextcloud, taiga, …). Schema details (filter syntax, attribute names)
+# stay in the consuming role's template since they encode "we run AD".
+ldap_server: 192.168.10.110:389
+ldap_bind_dn: CN=Telefon Buch,CN=Users,DC=feuerwehr,DC=weingarten,DC=local
+ldap_bind_password: !vault |
+          $ANSIBLE_VAULT;1.1;AES256
+          36636633373739646266376631613634633239323330613832393838353936616163656139643838
+          3632343135356138336530626537333563336533363162340a323534353539313433373430656264
+          34666630303662636662383862323865326266303664396664363332653361623630643132343162
+          3831616564653934320a393538616335396138643762636233663463656566396437333164343833
+          3732
+ldap_search_base: OU=Aktive,OU=Feuerwehr,DC=feuerwehr,DC=weingarten,DC=local
