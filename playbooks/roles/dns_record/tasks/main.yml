@@ -1,0 +1,46 @@
+---
+# Tiny role: ensure one DNS record exists (or doesn't) in AD-integrated
+# DNS. Designed to be `include_role`-d from any service role that needs
+# to register itself in DNS.
+#
+# Required caller-supplied vars:
+#   dns_record_zone   — the DNS zone (e.g. "ff-weingarten.de")
+#   dns_record_name   — record name relative to the zone (e.g. "tenzu.test")
+#   dns_record_type   — A | AAAA | CNAME | PTR | TXT  (per win_dns_record)
+#   dns_record_value  — the record's value (IP for A, hostname for CNAME, …).
+#                       May be omitted only when dns_record_state == 'absent'.
+#
+# Optional:
+#   dns_record_state  — 'present' (default) or 'absent'
+#   dns_record_ttl    — TTL in seconds (omitted → server default)
+#
+# Writes via `delegate_to` against the first host in the `dns` inventory
+# group (currently lannister). AD-integrated zones replicate to the
+# other DC (tully) automatically — no need to push twice.
+#
+# Because of delegate_to, the *calling* play's target host does not
+# need WinRM access to the DC. Only Ansible on the controller does.
+- name: Assert required dns_record vars
+  ansible.builtin.assert:
+    that:
+      - dns_record_zone is defined and dns_record_zone | length > 0
+      - dns_record_name is defined and dns_record_name | length > 0
+      - dns_record_type is defined and dns_record_type | length > 0
+      - >-
+        (dns_record_value is defined and dns_record_value | length > 0)
+        or (dns_record_state | default('present') == 'absent')
+    fail_msg: >-
+      dns_record_zone, dns_record_name, dns_record_type, and
+      dns_record_value must all be defined when including the dns_record
+      role. dns_record_value may be omitted only when
+      dns_record_state == 'absent'.
+
+- name: "Ensure DNS record {{ dns_record_name }}.{{ dns_record_zone }} ({{ dns_record_type }}) is {{ dns_record_state | default('present') }}"
+  community.windows.win_dns_record:
+    name: "{{ dns_record_name }}"
+    type: "{{ dns_record_type }}"
+    value: "{{ dns_record_value | default(omit) }}"
+    zone: "{{ dns_record_zone }}"
+    state: "{{ dns_record_state | default('present') }}"
+    ttl: "{{ dns_record_ttl | default(omit) }}"
+  delegate_to: "{{ groups['dns'] | first }}"

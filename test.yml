@@ -25,6 +25,14 @@ all:
     jellyfin:
       hosts:
         jellyfin.test.ff-weingarten.de:
+    jitsi:
+      hosts:
+    dns:
+      hosts:
+        lannister.feuerwehr.weingarten.local:
+          ansible_host: 192.168.10.110
+        tully.feuerwehr.weingarten.local:
+          ansible_host: 192.168.10.111
 
     windows:
       hosts:

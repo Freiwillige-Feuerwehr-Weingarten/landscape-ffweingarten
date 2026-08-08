@@ -1,0 +1,20 @@
+# Connection settings for the Active Directory / DNS servers
+# (lannister + tully). Kept as a separate group (NOT a child of
+# `windows`) so the DCs don't get pulled into windows_update.yml or
+# windows_install_software.yml — those are for Chocolatey-managed
+# workstations, not domain controllers.
+#
+# Auth mirrors group_vars/windows.yml because the DCs accept the same
+# `administrator@feuerwehr` NTLM credentials.
+ansible_user: administrator@feuerwehr
+ansible_password: !vault |
+          $ANSIBLE_VAULT;1.1;AES256
+          35656661653861653263633737613132363332356534656231613766303232333463306662626433
+          3532393530643534326136336361653930653133376130650a316337323539326431616264613534
+          30363266626337643163376636306661396165373333393562316562323238393361346633333135
+          3733323963326234650a633536636131323635633462636663306332333233343334343535643831
+          3538
+ansible_connection: winrm
+ansible_port: 5985
+ansible_winrm_transport: ntlm
+ansible_winrm_server_cert_validation: ignore
