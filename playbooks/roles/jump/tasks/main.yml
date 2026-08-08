@@ -1,39 +1,72 @@
 ---
-# This will setup SSH
-#
+- name: Assert role maturity permits this environment
+  ansible.builtin.assert:
+    that:
+      - jump_status in ['stable', 'testing', 'unstable']
+      - >-
+        jump_status == 'stable'
+        or (jump_status == 'testing' and env | default('') == 'test')
+    fail_msg: >-
+      Role 'jump' is marked status={{ jump_status }} and cannot run
+      against env={{ env | default('unset') }}. Promote the role in
+      defaults/main.yml, or override jump_status per host.
+  tags: always
 
-- name: Install SSH public Key
+- name: Install operator SSH public keys into authorized_keys
   ansible.posix.authorized_key:
     user: ffweingarten
     state: present
-    key: '{{ item }}'
-  with_file:
-    - 'files/id_rsa_1.pub'
+    key: "{{ lookup('file', item) }}"
+  loop:
+    - arne.pub
+  tags: [config]
 
-- name: Install SSH private Key
+- name: Install onward-SSH private key
   ansible.builtin.copy:
-    src: ~/.ssh/id_rsa_feuerwehr
+    src: id_rsa_feuerwehr
     dest: /home/ffweingarten/.ssh/id_rsa
     owner: ffweingarten
     group: ffweingarten
     mode: "0600"
+  tags: [config]
 
-- name: Create known_hosts if needed
-  ansible.builtin.file:
-    path: "~/.ssh/known_hosts"
-    mode: "0600"
-    state: touch
-
-- name: For each host, scan for its ssh public key
-  ansible.builtin.shell: "ssh-keyscan {{ item }}, `dig +short {{ item }}`"
-  with_items: "{{ ssh_known_hosts }}"
+# Scan host keys for each entry in ssh_known_hosts. We also scan the
+# resolved IPs (via getent — glibc, no dnsutils dependency) so that
+# `ssh user@host` and `ssh user@<ip>` both find a match. Each
+# `|| true` keeps the script going if a particular target is offline;
+# offline hosts simply produce no lines for the block below.
+- name: Scan SSH host keys (hostname + resolved IPs)
+  ansible.builtin.shell:
+    cmd: |
+      set -u
+      ssh-keyscan -T 5 {{ item | quote }} 2>/dev/null || true
+      for ip in $(getent ahosts {{ item | quote }} | awk '{print $1}' | sort -u); do
+        ssh-keyscan -T 5 "$ip" 2>/dev/null || true
+      done
+  loop: "{{ ssh_known_hosts }}"
   register: ssh_known_host_results
-  ignore_errors: true
-  changed_when: true
+  changed_when: false
+  check_mode: false
+  tags: [setup]
 
-- name: Add Servers to know_hosts
-  ansible.builtin.known_hosts:
-    name: "{{ item.item }}"
-    key: "{{ item.stdout }}"
+# Write all scanned keys into a single marker-fenced block. More
+# reliable than `ansible.builtin.known_hosts` per-item, which expects
+# one key line per call — ssh-keyscan emits multiple lines per host
+# (one per key type: rsa/ecdsa/ed25519, plus extra lines per resolved
+# IP). blockinfile lands every line deterministically and leaves
+# operator-added entries OUTSIDE the marker block untouched. The
+# `create: true` also handles initial file creation, replacing the
+# standalone touch task.
+- name: Render scanned host keys block in known_hosts
+  ansible.builtin.blockinfile:
     path: "{{ ssh_known_hosts_file }}"
-  with_items: "{{ ssh_known_host_results.results }}"
+    marker: "# {mark} ANSIBLE MANAGED: ssh_known_hosts"
+    block: |
+      {% for r in ssh_known_host_results.results | default([]) -%}
+      {{ r.stdout }}
+      {% endfor %}
+    create: true
+    owner: ffweingarten
+    group: ffweingarten
+    mode: "0600"
+  tags: [setup]

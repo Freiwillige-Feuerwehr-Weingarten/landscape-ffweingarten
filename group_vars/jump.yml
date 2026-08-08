@@ -1,0 +1,14 @@
+---
+# Pre-seed the jump host's known_hosts with every Linux server in the
+# active inventory minus Windows endpoints, the AD DCs (which we don't
+# SSH to from jump), and the jump host itself. Resolves dynamically:
+# `-i prod.yml` picks up prod's hosts; `-i test.yml` picks up test's.
+ssh_known_hosts: >-
+  {{
+    groups['all']
+    | difference(groups['windows'] | default([]))
+    | difference(groups['dns']     | default([]))
+    | difference([inventory_hostname])
+  }}
+
+ssh_known_hosts_file: "/home/ffweingarten/.ssh/known_hosts"

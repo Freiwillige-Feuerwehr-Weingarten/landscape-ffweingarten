@@ -3,12 +3,6 @@
   hosts: jump
   remote_user: ffweingarten
   gather_facts: true
-  pre_tasks:
-    - name: Install dnsutils as dependency
-      become: true
-      ansible.builtin.apt:
-        name: dnsutils
-        state: present
   roles:
     - role: common
       become: true
@@ -22,4 +16,4 @@
     - role: devsec.hardening.os_hardening
       become: true
     - role: jump
-    - role: tribe29.checkmk.agent
+    # - role: tribe29.checkmk.agent

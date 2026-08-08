@@ -1,0 +1,16 @@
+---
+# Production-readiness gate. Allowed values: stable | testing | unstable.
+# The role's first task asserts this matches the target inventory's env:
+# stable runs anywhere; testing only on env=test; unstable on neither.
+jump_status: stable
+
+# List of FQDNs/IPs whose SSH host keys should be pre-populated in the
+# jump box's known_hosts so onward SSH attempts don't trip on the
+# interactive yes/no host-key prompt. Override per host in host_vars.
+ssh_known_hosts: []
+
+# Path to the known_hosts file the role manages on the jump box.
+# Defaults to ffweingarten's personal file because the jump host's only
+# user is ffweingarten; flip to /etc/ssh/ssh_known_hosts if a system-wide
+# file ever makes sense.
+ssh_known_hosts_file: /home/ffweingarten/.ssh/known_hosts
