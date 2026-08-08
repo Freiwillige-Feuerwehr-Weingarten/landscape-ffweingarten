@@ -2,7 +2,10 @@
 # Main playbook for common configuration
 - name: Upgrade OS
   ansible.builtin.include_tasks: upgrade.yml
+  tags: [upgrade]
 - name: Install Software
   ansible.builtin.include_tasks: install.yml
+  tags: [install]
 - name: Install Qemu guest agents
   ansible.builtin.include_tasks: qemu-guest-agent.yml
+  tags: [qemu]
